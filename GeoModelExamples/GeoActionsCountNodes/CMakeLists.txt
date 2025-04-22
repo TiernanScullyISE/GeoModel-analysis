@@ -5,7 +5,6 @@
 # author: Riccardo Maria BIANCHI @ CERN - Jan, 2023
 ################################################################################
 
-cmake_minimum_required(VERSION 3.1.0)
 
 project(GeoActionsCountingNodes)
 

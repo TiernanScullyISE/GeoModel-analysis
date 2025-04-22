@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 # CMake settings
-cmake_minimum_required(VERSION 3.16...3.26)
 
 # Dummy call to 'project()', needed to set 'PROJECT_SOURCE_DIR'
 project( "Plugins" )

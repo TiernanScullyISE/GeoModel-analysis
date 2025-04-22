@@ -4,7 +4,6 @@
 # Package: GeoModel2G4
 ################################################################################
 
-cmake_minimum_required(VERSION 3.16...3.26)
 
 # Declare the package name
 project(GeoModel2G4 VERSION ${GeoModel_VERSION}  LANGUAGES CXX)

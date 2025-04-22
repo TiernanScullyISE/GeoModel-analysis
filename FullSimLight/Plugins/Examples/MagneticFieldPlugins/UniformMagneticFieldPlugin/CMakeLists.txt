@@ -1,5 +1,4 @@
 # Set up the project.
-cmake_minimum_required(VERSION 3.16...3.26)
 
 
 project( "UniformMagneticFieldPlugin" )

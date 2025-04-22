@@ -6,7 +6,6 @@
 # update: Riccardo Maria BIANCHI @ CERN - Jul, 2023
 ################################################################################
 
-cmake_minimum_required(VERSION 3.16...3.26)
 
 project(HelloGeoRead2G4)
 

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 # CMake settings
-cmake_minimum_required(VERSION 3.16...3.26)
+cmake_minimum_required(VERSION 3.16...4.0)
 
 #Set up the project. Check if we build it with GeoModel or individually
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR) 

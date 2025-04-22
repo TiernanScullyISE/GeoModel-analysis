@@ -3,7 +3,6 @@
 ################################################################################
 # Package: GeoMaterial2G4
 ################################################################################
-cmake_minimum_required(VERSION 3.16...3.26)
 project(GeoMaterial2G4 VERSION ${GeoModel_VERSION} LANGUAGES CXX)
 
 # Use the GNU install directory names.

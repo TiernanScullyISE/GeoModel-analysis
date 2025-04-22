@@ -5,7 +5,6 @@
 # author: Riccardo Maria BIANCHI @ CERN - May, 2022
 ################################################################################
 
-cmake_minimum_required(VERSION 3.16...3.26)
 
 #project(HelloGeoRead)
 

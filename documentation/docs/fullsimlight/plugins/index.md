@@ -85,7 +85,6 @@ Opening up the CMakeLists.txt file, we call our project GenerateHitsPlugin and c
 
 ```cmake
 # Set up the project.
-cmake_minimum_required( VERSION 3.1 )
 set(CMAKE_CXX_STANDARD 17)
 project( "GenerateHitsPlugin" )
 

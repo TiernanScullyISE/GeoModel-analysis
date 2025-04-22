@@ -1,7 +1,6 @@
 # (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
-cmake_minimum_required(VERSION 3.16...3.26)
 project( "UserActionsPlugins" )
 
 #Set up the project. Check if we build it with GeoModel or individually

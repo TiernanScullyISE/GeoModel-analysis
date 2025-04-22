@@ -1,8 +1,7 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 # CMake settings
-cmake_minimum_required(VERSION 3.16...3.26)
-
+cmake_minimum_required(VERSION 3.16...4.0)
 
 file( GLOB MANPAGES man/man1/* )
 

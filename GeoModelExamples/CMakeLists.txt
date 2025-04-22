@@ -6,7 +6,6 @@
 ################################################################################
 
 # Set up the project.
-cmake_minimum_required(VERSION 3.16...3.26)
 project( "GeoModelExamples" VERSION 4.1.0 LANGUAGES CXX )
 
 # Getting-started examples

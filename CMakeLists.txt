@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # === Preamble ===
-cmake_minimum_required(VERSION 3.16...3.26)
+cmake_minimum_required(VERSION 3.16...4.0)
 
 # === Project's settings ===
 include( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GeoModel-version.cmake )
