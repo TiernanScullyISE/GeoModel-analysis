@@ -6,14 +6,14 @@
  * @class RCBase
  *
  * @brief This is a base class for objects whose memory is managed
- *	through reference counting.  Reference-counted objects
- *	should only be created using
- *	operator new, they should not be created on the stack.
+ *  through reference counting.  Reference-counted objects
+ *  should only be created using
+ *  operator new, they should not be created on the stack.
  *
- *	The methods ref() and unref() can be called to increase
- *	and decrease the reference count of an object.  When
- *	the reference count decreases to zero, the object deletes
- *	itself
+ *  The methods ref() and unref() can be called to increase
+ *  and decrease the reference count of an object.  When
+ *  the reference count decreases to zero, the object deletes
+ *  itself
  */
 
 #ifndef GEOMODELKERNEL_RCBASE_H
@@ -25,20 +25,20 @@ class RCBase {
  public:
   RCBase() = default;
 
-  //	Increase the reference count
+  //  Increase the reference count
   void ref() const noexcept {
      ++m_count; 
   }
 
-  //	Decreases the reference count.  When the reference count
-  //	falls to zero, the object deletes itself.
+  //  Decreases the reference count.  When the reference count
+  //  falls to zero, the object deletes itself.
   void unref () const noexcept{
      if (--m_count == 0) {
        delete this;
      }
   }
 
-  //	Return the reference count.
+  //  Return the reference count.
   unsigned int refCount () const noexcept {
      return m_count.load();
   }
@@ -51,7 +51,7 @@ class RCBase {
     RCBase & operator=(const RCBase &right) = delete;
     
 
-    //	The reference count
+    //  The reference count
     mutable std::atomic<unsigned> m_count{0};
 
 };
