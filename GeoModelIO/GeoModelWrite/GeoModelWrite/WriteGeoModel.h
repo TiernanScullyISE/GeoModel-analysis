@@ -58,8 +58,11 @@
 #include <variant>
 #include <vector>
 
+
+
 // FWD declarations
 class GeoPublisher;
+
 
 typedef std::unordered_map<
     std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>
@@ -69,7 +72,7 @@ typedef std::unordered_map<
                      std::variant<int, long, float, double, std::string>>>>
     AuxTableData;
 namespace GeoModelIO {
-
+  class WriteGeoModelTest;
 /**
  * \class WriteGeoModel
  *
@@ -77,6 +80,7 @@ namespace GeoModelIO {
  * persitifying them offline.
  */
 class WriteGeoModel : public GeoNodeAction {
+   friend class WriteGeoModelTest;
    public:
     /**
      * @brief Constructor
