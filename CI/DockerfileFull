@@ -1,6 +1,8 @@
 # Setup the most basic image
 ARG BASEIMAGE=gitlab-registry.cern.ch/geomodeldev/ubuntu-geant4-image:main-base
 FROM ${BASEIMAGE}
+RUN apt-get update && apt-get install -y libegl-dev
+
 
 
 ### Compile GeoModel

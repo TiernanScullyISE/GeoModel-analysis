@@ -58,13 +58,47 @@
 #include <map>
 #include <iostream>
 #include <typeinfo>
-
 //TODO: Statustips.
 //TODO: windows menu button should launch the menu (in correct mode?).
 //TODO: detectorviewbuttons (+others) in menu so hidden control modes has access to everything!
 //TODO: preserve spinning when going to next event (or when tour returns).
 
 //____________________________________________________________________
+
+#ifndef __APPLE__
+#include "EGL/egl.h"
+#include "EGL/eglext.h"
+inline bool hasDoubleBuffer() {
+  bool retval=false;
+  {
+    EGLDisplay display = eglGetPlatformDisplay(EGL_PLATFORM_X11_KHR, EGL_DEFAULT_DISPLAY, NULL);
+    
+    if (!eglInitialize(display, NULL, NULL)) {
+      fprintf(stderr, "eglInitialize failed\n");
+      return false;
+    }
+    const char *vendor=eglQueryString(display, EGL_VENDOR);
+    std::string vendorString(vendor);
+    if (vendorString.find("NVIDIA")!=std::string::npos) {
+      std::cout << "Vendor: "<< vendorString << std::endl;
+      std::cout << "Vendor is NVIDIA.  Double buffering ON" << std::endl;
+      retval=true;
+    }
+    else {
+      std::cout << "Vendor: "<< vendorString << std::endl;
+      std::cout << "Vendor is not NVIDIA.  Double buffering OFF" << std::endl;
+      retval=false;
+    }
+    eglTerminate(display);
+  }
+  return retval;
+}
+#else
+inline bool hasDoubleBuffer() {
+  return true;
+}
+#endif
+
 class VP1ExaminerViewer::Imp {
 
 public:
@@ -527,7 +561,11 @@ VP1ExaminerViewer::VP1ExaminerViewer(QWidget * parent,
 : SoQtExaminerViewer(parent,(name?name:"VP1ExaminerViewer"),embed,flag,type,false/*delay createViewerButtons call*/),
   m_d(new Imp(this,detectorViewButtons))
 {
-	VP1Msg::messageDebug("VP1ExaminerViewer::VP1ExaminerViewer()");
+  // 
+  setDoubleBuffer(hasDoubleBuffer());
+
+  
+  VP1Msg::messageDebug("VP1ExaminerViewer::VP1ExaminerViewer()");
 	// Explicitly trigger the construction of viewer decorations.
 	QWidget * widget = buildWidget(getParentWidget());
 	if (rightWheelLabel)

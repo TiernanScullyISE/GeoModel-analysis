@@ -12,6 +12,9 @@ project( "GeoModelVisualization" )
 
 # Set the OpenGL flag requested by CMake
 set( OpenGL_GL_PREFERENCE GLVND )
+if (UNIX)
+    find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL GLX)
+endif()
 
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # I am top-level project.
