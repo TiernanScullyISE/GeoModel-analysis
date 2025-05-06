@@ -12,7 +12,7 @@ project( "GeoModelVisualization" )
 
 # Set the OpenGL flag requested by CMake
 set( OpenGL_GL_PREFERENCE GLVND )
-if (UNIX)
+if (UNIX AND NOT APPLE)
     find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL GLX)
 endif()
 

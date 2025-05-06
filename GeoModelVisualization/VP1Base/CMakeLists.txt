@@ -8,14 +8,17 @@ file( GLOB RCS src/*.qrc )
 
 # Add the library.
 add_library( GXBase SHARED ${SOURCES} ${HEADERS} ${UIS} ${RCS} )
+if(UNIX AND NOT APPLE)
+   set(OPENGL_EGL "OpenGL::EGL")
+endif()
 if (GEOMODEL_USE_QT6)
   target_link_libraries( GXBase
      PUBLIC Coin::Coin Qt${QT_VERSION}::Core Qt${QT_VERSION}::Gui Qt${QT_VERSION}::Widgets Qt${QT_VERSION}::Core5Compat SoQt::SoQt
-     PRIVATE Qt${QT_VERSION}::PrintSupport Qt${QT_VERSION}::OpenGL OpenGL::EGL GXHepVis )
+     PRIVATE Qt${QT_VERSION}::PrintSupport Qt${QT_VERSION}::OpenGL GXHepVis ${OPENGL_EGL})
 else()
   target_link_libraries( GXBase
      PUBLIC Coin::Coin Qt${QT_VERSION}::Core Qt${QT_VERSION}::Gui Qt${QT_VERSION}::Widgets SoQt::SoQt
-     PRIVATE Qt${QT_VERSION}::PrintSupport Qt${QT_VERSION}::OpenGL OpenGL::EGL GXHepVis )
+     PRIVATE Qt${QT_VERSION}::PrintSupport Qt${QT_VERSION}::OpenGL GXHepVis ${OPENGL_EGL} )
 endif()
 
 target_include_directories( GXBase PUBLIC
