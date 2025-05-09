@@ -8,18 +8,27 @@ Here below, you will find instructions on how to compile all the GeoModel librar
 
 In the following, you will find basic strategies to effectively build the GeoModel software stack, based on different use cases.
 
+!!! warning
+
+    Before building the GeoModel libraries from source, please check if you have old versions of them installed on your system and remove them.
+    Also, you should remove all GeoModel packages previously installed through `brew`, because they could be picked up by the build system while building the sources, affecting the compilation.
+
+    Please remove **all** the `geomodel`-packages before trying to build the packages from source.
+
+    See the [Troubleshooting](troubleshooting.md) page for additional details and instructions.
+
 
 ## System Dependencies
 
 ### Compilers
 
-In the GeoModel packages, we use **modern C++** constructs (C++ 14 and sometimes C++17). Thus, before trying to compile the GeoModel libraries, be sure your compiler supports **C++17**.
+In the GeoModel packages, we use **modern C++** constructs (C++ 20). Thus, before trying to compile the GeoModel libraries, be sure your compiler supports **C++20**.
 
 !!! note
 
-    If you use GCC, we successfully tested the build of GeoModel packages on GCC 6.2 and beyond (GCC 7, GCC 8, GCC 9). 
+    If you use GCC, we successfully tested the build of GeoModel packages with GCC 13.X and 14.X
 
-    If you use Clang (mainly on macOS), we successfully tested the GeoModel build on Clang/Xcode 10 and Clang/Xcode 11.
+    If you use Clang, we successfully tested the GeoModel build with Clang 17 and 19
 
 
 ### Third-party libraries - macOS
@@ -28,10 +37,11 @@ On macOS, you can install all the needed third-party dependencies by using the [
 
 ```bash
 # install external dependencies
-brew install cmake eigen doxygen wget boost xerces-c nlohmann-json sqlite
+brew install cmake eigen doxygen wget boost xerces-c nlohmann-json sqlite googletest hdf5
 
-# if you want to build the visualization tools as well, please install and configure Qt6
-brew install qt
+# if you want to build the visualization tools as well, please install and configure Qt6, Coin3D and SoQt
+# all of them can be installed by one command
+brew install coin3d
 ```
 Then, add the path to your shell, by running the command below, depending on your macOS machine:
 
@@ -48,17 +58,6 @@ echo 'export PATH="/opt/homebrew/opt/qt/bin:$PATH"' >> ~/.zshrc
 !!! note 
 
     After having installed `qt` with brew, and having run the `echo` command stated above, you should either open a new shell or run `source ~/.zshrc` in order to get the `qt` in the `PATH`.
-     
-
-!!! warning
-
-    Before building the GeoModel libraries from source, please check if you have old versions of them installed on your system and remove them.
-    Also, you should remove all GeoModel packages previously installed through `brew`, because they could be picked up by the build system while building the sources, affecting the compilation.
-    
-    Please remove **all** the `geomodel`-packages before trying to build the packages from source.
-
-    See the [Troubleshooting](troubleshooting.md) page for additional details and instructions.
-
 
 
 ### Linux/Ubuntu
@@ -123,27 +122,6 @@ After that, you can build the `GeoModel` without any extra options.
 
 
 ## Visualization 3D graphics dependencies
-
-### 3D graphics dependencies - macOS
-
-On macOS, you can install the needed graphics dependencies with `brew`.
-
-If you have not installed the `atlas/geomodel` Tap already, please install it now, by running the command below; otherwise, skip this and jump to the next point.
-
-```
-brew tap atlas/geomodel https://gitlab.cern.ch/GeoModelDev/packaging/homebrew-geomodel.git 
-```
-
-Now, update your `atlas/geomodel` Tap to the latest version and install the graphics libraries:
-
-
-```
-brew update
-brew install geomodel-thirdparty-soqt 
-```
-
-The second command will install all the latest graphics libraries needed by the visualization tools of GeoModel:  `geomodel-thirdparty-simage`, `geomodel-thirdparty-coin`, and `geomodel-thirdparty-soqt`.
-
 
 ### 3D graphics dependencies - Linux
 
