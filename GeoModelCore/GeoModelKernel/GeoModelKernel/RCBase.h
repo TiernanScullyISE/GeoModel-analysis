@@ -25,13 +25,13 @@ class RCBase {
  public:
   RCBase() = default;
 
-  //  Increase the reference count
+  //Increase the reference count
   void ref() const noexcept {
      ++m_count; 
   }
 
-  //  Decreases the reference count.  When the reference count
-  //  falls to zero, the object deletes itself.
+  //Decreases the reference count.  When the reference count
+  //falls to zero, the object deletes itself.
   void unref () const noexcept{
      if (--m_count == 0) {
        delete this;

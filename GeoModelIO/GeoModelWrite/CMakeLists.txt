@@ -2,7 +2,7 @@
 
 # Find the header and source files.
 file( GLOB SOURCES src/*.cpp )
-file( GLOB HEADERS GeoModelWrite/*.h )
+file( GLOB HEADERS GeoModelWrite/*.h)
 
 # Set up the library.
 add_library( GeoModelWrite SHARED ${HEADERS} ${SOURCES} )
@@ -39,5 +39,6 @@ target_link_libraries( testWriteGeoModel GeoModelWrite GTest::GTest GTest::Main)
 add_test(NAME testWriteGeoModel 
   COMMAND testWriteGeoModel
 )
+
 include(GoogleTest)
 gtest_discover_tests(testWriteGeoModel)

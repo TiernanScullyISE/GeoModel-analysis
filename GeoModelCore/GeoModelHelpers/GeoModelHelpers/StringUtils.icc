@@ -5,6 +5,7 @@
 #define GeoModelHelpers_STRINGUTILS_ICC
 
 #include <sstream>
+#include <format>
 namespace GeoStrUtils {
 
 
@@ -24,6 +25,10 @@ namespace GeoStrUtils {
             if (k + 1 < numEles)chain<<glue;
         }
         return chain.str();
+    }
+    std::string 
+    getAddressStringFromPointer(const auto *ptr){
+      return std::format("{:p}",reinterpret_cast<const void *>(ptr));
     }
 }
 #endif

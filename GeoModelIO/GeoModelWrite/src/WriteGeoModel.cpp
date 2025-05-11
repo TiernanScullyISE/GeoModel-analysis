@@ -36,7 +36,6 @@
 
 // local includes
 #include "GeoModelWrite/WriteGeoModel.h"
-
 // TFPersistification includes
 #include "TFPersistification/TransFunctionPersistifier.h"
 
@@ -78,29 +77,11 @@
 
 
 // C++ includes
-#include <sstream>
 #include <utility>
 
+using GeoStrUtils::getAddressStringFromPointer;
+
 namespace GeoModelIO {
-
-// TODO: should go to an utility class
-// FIXME: should go to an utility class
-std::string joinVectorStrings(const std::vector<std::string>& vec,
-                              const std::string& sep = "") {
-    std::string s;
-    unsigned int ii = 0;
-    for (const auto& piece : vec) {
-        ++ii;
-        if (ii == vec.size()) {
-            s += (piece);
-        } else {
-            s += (piece + sep);
-        }
-    }
-    return s;
-}
-
-
 
 /// Get next child position available, given the parent type, id and copy number
 unsigned int WriteGeoModel::getChildPosition(const unsigned int& parentId,
@@ -869,7 +850,6 @@ unsigned int WriteGeoModel::storeMaterial(const GeoMaterial* mat) {
         // to the list of all elements for the given material
         matData_List.push_back(matData_ElementFraction);
     }
-    // matElements = joinVectorStrings(matElementsList, ";");
 
     // store the material in the DB and returns the ID
     return storeObj(mat, matName, matDensity, matData_List);
@@ -1452,7 +1432,7 @@ std::string WriteGeoModel::getShapeParameters(const GeoShape* shape) {
         THROW_EXCEPTION(errMsg);
     }
 
-    shapePars = joinVectorStrings(pars, ";");
+    shapePars = GeoStrUtils::chainUp(pars,";");
 
     return shapePars;
 }
@@ -2640,111 +2620,5 @@ unsigned int WriteGeoModel::getStoredIdFromAddress(const std::string& address) {
     return m_memMap.at(address);
 }
 
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoMaterial* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoElement* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoShape* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoLogVol* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoPhysVol* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoVPhysVol* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoVSurface* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoVSurfaceShape* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-// get pointer string
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoSerialDenominator* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoSerialIdentifier* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoIdentifierTag* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoSerialTransformer* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoXF::Function* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoTransform* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getAddressStringFromPointer(
-    const GeoNameTag* pointer) {
-    std::ostringstream oss;
-    oss << pointer;
-    return getQStringFromOss(oss);
-}
-
-std::string WriteGeoModel::getQStringFromOss(std::ostringstream& oss) {
-    std::string addr = oss.str();
-    return addr;
-}
 
 } /* namespace GeoModelIO */

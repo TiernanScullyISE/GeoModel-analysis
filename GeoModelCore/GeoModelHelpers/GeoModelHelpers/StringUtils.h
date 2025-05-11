@@ -67,6 +67,9 @@ namespace GeoStrUtils{
     std::string to_string_with_precision(const double a_value, const unsigned n = 16);
 
     void printStdVectorStrings(const std::vector<std::string>& vec);
+    /// @brief Converts the numerical address value of a bare pointer to a hex 
+    /// string representation. Used in GeoModelIO/GeoModelWrite
+    std::string getAddressStringFromPointer(const auto *ptr);
 }
 #include "GeoModelHelpers/StringUtils.icc"
 #endif

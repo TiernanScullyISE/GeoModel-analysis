@@ -52,7 +52,7 @@ foreach(_exeFile ${files})
   endif() 
   
   add_executable(${_theExec} ${_exeFile})
-  target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel)
+  target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GTest::GTest GTest::Main)
   add_test(NAME ${_theExec}
            COMMAND ${_theExec})
 

@@ -80,7 +80,6 @@ namespace GeoModelIO {
  * persitifying them offline.
  */
 class WriteGeoModel : public GeoNodeAction {
-   friend class WriteGeoModelTest;
    public:
     /**
      * @brief Constructor
@@ -333,25 +332,6 @@ class WriteGeoModel : public GeoNodeAction {
 
     unsigned int getStoredIdFromAddress(const std::string &address);
 
-    std::string getAddressStringFromPointer(const GeoMaterial *pointer);
-    std::string getAddressStringFromPointer(const GeoElement *pointer);
-    std::string getAddressStringFromPointer(const GeoShape *pointer);
-    std::string getAddressStringFromPointer(const GeoLogVol *pointer);
-    std::string getAddressStringFromPointer(const GeoPhysVol *pointer);
-    std::string getAddressStringFromPointer(const GeoVPhysVol *pointer);
-    std::string getAddressStringFromPointer(const GeoVSurface *pointer);
-    std::string getAddressStringFromPointer(const GeoVSurfaceShape *pointer);
-    std::string getAddressStringFromPointer(
-        const GeoSerialDenominator *pointer);
-    std::string getAddressStringFromPointer(const GeoSerialIdentifier *pointer);
-    std::string getAddressStringFromPointer(const GeoIdentifierTag *pointer);
-    std::string getAddressStringFromPointer(
-        const GeoSerialTransformer *pointer);
-    std::string getAddressStringFromPointer(const GeoXF::Function *pointer);
-    std::string getAddressStringFromPointer(const GeoTransform *pointer);
-    std::string getAddressStringFromPointer(const GeoNameTag *pointer);
-
-    std::string getQStringFromOss(std::ostringstream &oss);
 
     std::vector<double> getTransformParameters(
         GeoTrf::Transform3D);  // TODO: to be moved to Eigen (GeoTrf) and to be
