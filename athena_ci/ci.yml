@@ -136,9 +136,22 @@ simulation_tests_run3:
   extends: .run_base
   script:
     - cd run
-    - RunWorkflowTests_Run3.py --CI -s -w FullSim --threads 4 -e '--maxEvents 20' --run-only 
+    - RunWorkflowTests_Run3.py --CI -s -w FullSim --threads 4 -e '--maxEvents 50' --detailed-comparison
     - mv run_s4006/log.EVNTtoHITS ./
     - mv run_s4006/myHITS.pool.root ./
+  artifacts:
+    paths:
+      - Run3Tests.log
+      - myHITS.pool.root
+      - log.EVNTtoHITS
+
+simulation_tests_run3_sqlite:
+  extends: .run_base
+  script:
+    - cd run
+    - RunWorkflowTests_Run3.py --CI -s -w FullSim -a s4454 --threads 4 -e '--maxEvents 50 --geometrySQLiteFullPath /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV02.db' --detailed-comparison
+    - mv run_s4454/log.EVNTtoHITS ./
+    - mv run_s4454/myHITS.pool.root ./
   artifacts:
     paths:
       - Run3Tests.log
