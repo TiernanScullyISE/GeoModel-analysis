@@ -46,6 +46,9 @@ class GeoAccessVolAndSTAction final : public GeoNodeAction {
   std::optional<unsigned int> getId() const;
 
  private:
+  GeoAccessVolAndSTAction(const GeoAccessVolAndSTAction &right);
+  const GeoAccessVolAndSTAction & operator=(const GeoAccessVolAndSTAction &right);
+
   /// A pointer to the ith physical volume under this one.
   PVConstLink m_volume{};
 

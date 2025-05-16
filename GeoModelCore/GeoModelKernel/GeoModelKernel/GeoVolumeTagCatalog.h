@@ -4,20 +4,21 @@
 #include <map>
 #include "GeoModelKernel/GeoVPhysVol.h"
 
-#define volumeTags std::map<std::string, PVLink >
+#define volumeTags std::map<std::string, GeoVPhysVol* >
 #define tagCatalog std::map<std::string, volumeTags >
 
 class GeoVolumeTagCatalog {
 public:
-	void addTaggedVolume(const std::string& category, const std::string& tag, PVLink v) {
+	void addTaggedVolume(std::string category, std::string tag, GeoVPhysVol* v)
+	{
 		theTags[category][tag]=v;	
 	} 
-	GeoVPhysVol* getTaggedVolume(const std::string& category, const std::string& tag) 
+	GeoVPhysVol* getTaggedVolume(std::string category, std::string tag)
 	{
 		return theTags[category][tag];
 	}
 
-	GeoVolumeTagCatalog() = default;
+	GeoVolumeTagCatalog() {}
 	static GeoVolumeTagCatalog* VolumeTagCatalog() {
 		static GeoVolumeTagCatalog* theCatalog=new GeoVolumeTagCatalog;
 		return theCatalog;

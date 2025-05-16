@@ -9,6 +9,8 @@ GeoCountSurfaceAction::GeoCountSurfaceAction ()
   setDepthLimit (1);
 }
 
+GeoCountSurfaceAction::~GeoCountSurfaceAction() = default;
+
 void GeoCountSurfaceAction::handleVSurface (const GeoVSurface *)
 {
   // count the number of all virtual surfaces.    

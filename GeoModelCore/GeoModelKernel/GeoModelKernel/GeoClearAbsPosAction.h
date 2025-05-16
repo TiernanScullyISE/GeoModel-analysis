@@ -16,15 +16,18 @@
 
 #include "GeoModelKernel/GeoNodeAction.h"
 
-class GeoClearAbsPosAction : public GeoNodeAction {
+class GeoClearAbsPosAction : public GeoNodeAction
+{
  public:
-  GeoClearAbsPosAction() = default;
-  virtual ~GeoClearAbsPosAction() = default;
+  GeoClearAbsPosAction();
+  virtual ~GeoClearAbsPosAction();
 
   //	Handles a physical volume.
-  virtual void handleFullPhysVol (const GeoFullPhysVol *vol) override;
+  virtual void handleFullPhysVol (const GeoFullPhysVol *vol);
 
  private:
+  GeoClearAbsPosAction(const GeoClearAbsPosAction &right);
+  GeoClearAbsPosAction & operator=(const GeoClearAbsPosAction &right);
 
 };
 

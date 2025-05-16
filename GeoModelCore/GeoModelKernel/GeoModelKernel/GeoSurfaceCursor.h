@@ -48,21 +48,21 @@ class GeoSurfaceCursor final : public GeoNodeAction
   
   /// Ressucitate (undo terminate)
   void resuscitate();
- 
-  PVConstLink                           m_parent{nullptr};
-  PVConstLink                           m_volume{nullptr};
-  VSConstLink                           m_surface{nullptr};
-  GeoTrf::Transform3D                   m_transform{GeoTrf::Transform3D::Identity()};
-  GeoTrf::Transform3D                   m_defTransform{GeoTrf::Transform3D::Identity()};
+  
+  PVConstLink                           m_parent;
+  PVConstLink                           m_volume;
+  VSConstLink                           m_surface;
+  GeoTrf::Transform3D                   m_transform;
+  GeoTrf::Transform3D                   m_defTransform;
       
-  unsigned int                          m_majorIndex{0};
-  unsigned int                          m_volCount{0};
-  unsigned int                          m_surfCount{0};
+  unsigned int                          m_majorIndex;
+  unsigned int                          m_volCount;
+  unsigned int                          m_surfCount;
    
-  std::vector<const GeoTransform *>     m_pendingTransformList{};
+  std::vector<const GeoTransform *>     m_pendingTransformList;
   
   bool                                  m_hasAlignTrans{};  
-  GeoVAlignmentStore                   *m_alignStore{nullptr};
+  GeoVAlignmentStore                   *m_alignStore;
 };
 
 #endif

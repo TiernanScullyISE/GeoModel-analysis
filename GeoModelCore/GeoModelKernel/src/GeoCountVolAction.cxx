@@ -5,10 +5,14 @@
 #include "GeoModelKernel/GeoCountVolAction.h"
 
 GeoCountVolAction::GeoCountVolAction ()
+ : m_count (0)
 {
   setDepthLimit (1);
 }
 
+GeoCountVolAction::~GeoCountVolAction()
+{
+}
 
 void GeoCountVolAction::handlePhysVol (const GeoPhysVol *)
 {
@@ -16,7 +20,7 @@ void GeoCountVolAction::handlePhysVol (const GeoPhysVol *)
   // Do not count the top volume, this action counts only children!   
   //   
   if (getPath ()->getLength () > 1)
-    ++m_count;
+    m_count++;
 }
 
 void GeoCountVolAction::handleFullPhysVol (const GeoFullPhysVol *)
@@ -25,13 +29,13 @@ void GeoCountVolAction::handleFullPhysVol (const GeoFullPhysVol *)
   // Do not count the top volume, this action counts only children!   
   //   
   if (getPath ()->getLength () > 1)
-    ++m_count;
+    m_count++;
 }
 
 void GeoCountVolAction::handleVSurface (const GeoVSurface *)
 {
   // Virtual Surface is always child of Physical Volume  
-  ++m_count;
+  m_count++;
 }
 
 

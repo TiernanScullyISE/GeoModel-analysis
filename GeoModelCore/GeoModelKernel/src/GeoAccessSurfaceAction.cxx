@@ -16,6 +16,8 @@ GeoAccessSurfaceAction::GeoAccessSurfaceAction(unsigned int Index, const GeoVAli
   m_pendingTransformList.reserve(1);
 }
 
+GeoAccessSurfaceAction::~GeoAccessSurfaceAction() = default;
+
 void GeoAccessSurfaceAction::handleTransform (const GeoTransform *xform)
 {
   m_pendingTransformList.push_back (xform);

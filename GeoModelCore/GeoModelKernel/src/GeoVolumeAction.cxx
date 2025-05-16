@@ -5,8 +5,14 @@
 #include "GeoModelKernel/GeoVolumeAction.h"
 
 GeoVolumeAction::GeoVolumeAction (Type type)
-  : m_type(type) {}
+  : m_type(type)
+  , m_terminate(false)
+{
+}
 
+GeoVolumeAction::~GeoVolumeAction()
+{
+}
 
 void GeoVolumeAction::handleVPhysVol (const GeoVPhysVol *)
 {

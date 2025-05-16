@@ -11,7 +11,7 @@ class GeoCountVolAction : public GeoNodeAction
 {
  public:
   GeoCountVolAction ();
-  virtual ~GeoCountVolAction() = default;
+  virtual ~GeoCountVolAction();
 
   //	Handles a physical volume.
   virtual void handlePhysVol (const GeoPhysVol *) override;
@@ -29,8 +29,10 @@ class GeoCountVolAction : public GeoNodeAction
   unsigned int getCount () const;
 
  private:
+  GeoCountVolAction(const GeoCountVolAction &right);
+  GeoCountVolAction & operator=(const GeoCountVolAction &right);
 
-  unsigned int m_count{0};
+  unsigned int m_count;
 };
 
 inline unsigned int GeoCountVolAction::getCount () const

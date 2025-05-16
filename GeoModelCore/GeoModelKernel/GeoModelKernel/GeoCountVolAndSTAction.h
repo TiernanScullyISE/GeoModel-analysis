@@ -18,7 +18,7 @@ class GeoCountVolAndSTAction : public GeoNodeAction
 {
  public:
   GeoCountVolAndSTAction();
-  virtual ~GeoCountVolAndSTAction() = default;
+  virtual ~GeoCountVolAndSTAction();
 
   virtual void handlePhysVol(const GeoPhysVol*);
   virtual void handleFullPhysVol(const GeoFullPhysVol*);
@@ -27,7 +27,10 @@ class GeoCountVolAndSTAction : public GeoNodeAction
   unsigned int getCount() const;
 
  private:
-  unsigned int m_count{0};
+  GeoCountVolAndSTAction(const GeoCountVolAndSTAction &right);
+  const GeoCountVolAndSTAction & operator=(const GeoCountVolAndSTAction &right);
+
+  unsigned int m_count;
 };
 
 inline unsigned int GeoCountVolAndSTAction::getCount() const

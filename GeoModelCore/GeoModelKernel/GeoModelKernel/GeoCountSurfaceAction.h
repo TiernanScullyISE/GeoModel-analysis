@@ -11,7 +11,7 @@ class GeoCountSurfaceAction final: public GeoNodeAction
 {
  public:
   GeoCountSurfaceAction ();
-  virtual ~GeoCountSurfaceAction() = default;
+  virtual ~GeoCountSurfaceAction();
 
   //	Handles a virtual surface.
   virtual void handleVSurface (const GeoVSurface *) override;

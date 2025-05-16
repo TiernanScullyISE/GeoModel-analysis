@@ -24,7 +24,7 @@ class GeoAccessSurfaceAction final : public GeoNodeAction
 {
  public:
   GeoAccessSurfaceAction (unsigned int Index, const GeoVAlignmentStore* store);
-  virtual ~GeoAccessSurfaceAction() = default;
+  virtual ~GeoAccessSurfaceAction() override;
 
   /// Handles a Transform.
   virtual void handleTransform (const GeoTransform *xform) override;
@@ -48,6 +48,10 @@ class GeoAccessSurfaceAction final : public GeoNodeAction
   const GeoTrf::Transform3D & getDefTransform () const;
 
  private:
+
+  GeoAccessSurfaceAction(const GeoAccessSurfaceAction &right);
+  GeoAccessSurfaceAction & operator=(const GeoAccessSurfaceAction &right);
+
   /// Returns a pointer to the ith virtual surface under this one.
   VSConstLink m_surface{};
 

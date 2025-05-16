@@ -4,7 +4,15 @@
 
 #include "GeoModelKernel/GeoClearAbsPosAction.h"
 
+GeoClearAbsPosAction::GeoClearAbsPosAction()
+{
+}
 
-void GeoClearAbsPosAction::handleFullPhysVol (const GeoFullPhysVol *vol) {
-  vol->clearPositionInfo();
+GeoClearAbsPosAction::~GeoClearAbsPosAction()
+{
+}
+
+void GeoClearAbsPosAction::handleFullPhysVol (const GeoFullPhysVol *vol)
+{
+  vol->clearPositionInfo ();
 }
