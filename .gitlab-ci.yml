@@ -527,6 +527,13 @@ tests-ubuntu:
     - mv build ../
     - cd ../build
     - ctest
+    - pwd
+    - ls -l
+    - cp -r Testing ../GeoModel/TestsOutput #move the test output folder to the main project folder, otherwise 'artifacts' cannot pick it
+  artifacts:
+    paths:
+      - TestsOutput
+    expire_in: 1 month
   
 include:
   - athena_ci/ci.yml
