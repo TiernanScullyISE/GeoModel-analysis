@@ -32,7 +32,7 @@ class GeoCountVolAction : public GeoNodeAction
   GeoCountVolAction(const GeoCountVolAction &right);
   GeoCountVolAction & operator=(const GeoCountVolAction &right);
 
-  unsigned int m_count;
+  unsigned int m_count{};
 };
 
 inline unsigned int GeoCountVolAction::getCount () const

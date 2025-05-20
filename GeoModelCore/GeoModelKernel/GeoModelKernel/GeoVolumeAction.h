@@ -55,10 +55,10 @@ class GeoVolumeAction
   
   //	This type specifies that the action should be carried
   //	out from the bottom up or from the top down.
-  Type m_type;
+  Type m_type{TOP_DOWN};
 
   //	Termination flag; causes an abortion of action execution.
-  bool m_terminate;
+  bool m_terminate{};
 
   GeoTraversalState m_traversalState;
   

@@ -4,14 +4,16 @@
 #include "GeoModelKernel/GeoNodeAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoVSurface.h"
+#include "GeoModelKernel/GeoVPhysVol.h"//PVConstLink
 #include <vector>
 
 class GeoVAlignmentStore;
+class GeoSurfaceCursorTest;
 
 class GeoSurfaceCursor final : public GeoNodeAction
 {
  public:
- 
+  friend GeoSurfaceCursorTest;
   using VSConstLink = GeoIntrusivePtr<const GeoVSurface>;
   
   GeoSurfaceCursor (PVConstLink parent, GeoVAlignmentStore* store=nullptr);
@@ -27,7 +29,7 @@ class GeoSurfaceCursor final : public GeoNodeAction
   /// Returns the transformation to the surface or volume.
   GeoTrf::Transform3D getTransform () const;
   
-  /// Returns the default ransformation to the surface or volume.
+  /// Returns the default transformation to the surface or volume.
   GeoTrf::Transform3D getDefTransform () const;
 /*
   /// Returns the name of the surface. All are called VSurface for now.
@@ -46,23 +48,23 @@ class GeoSurfaceCursor final : public GeoNodeAction
   /// Handles a rectangular virtual surface.
   virtual void handleVSurface (const GeoVSurface *surf) override;
   
-  /// Ressucitate (undo terminate)
+  /// Resuscitate (undo terminate)
   void resuscitate();
   
-  PVConstLink                           m_parent;
-  PVConstLink                           m_volume;
-  VSConstLink                           m_surface;
-  GeoTrf::Transform3D                   m_transform;
-  GeoTrf::Transform3D                   m_defTransform;
+  PVConstLink                           m_parent{};
+  PVConstLink                           m_volume{};
+  VSConstLink                           m_surface{};
+  GeoTrf::Transform3D                   m_transform{GeoTrf::Transform3D::Identity()};
+  GeoTrf::Transform3D                   m_defTransform{GeoTrf::Transform3D::Identity()};
       
-  unsigned int                          m_majorIndex;
-  unsigned int                          m_volCount;
-  unsigned int                          m_surfCount;
+  unsigned int                          m_majorIndex{};
+  unsigned int                          m_volCount{};
+  unsigned int                          m_surfCount{};
    
   std::vector<const GeoTransform *>     m_pendingTransformList;
   
   bool                                  m_hasAlignTrans{};  
-  GeoVAlignmentStore                   *m_alignStore;
+  GeoVAlignmentStore                   *m_alignStore{};
 };
 
 #endif

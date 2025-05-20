@@ -11,10 +11,12 @@
 #include <vector>
 
 class GeoVAlignmentStore;
+class GeoVolumeCursorTest;
 
 class GeoVolumeCursor final : public GeoNodeAction
 {
  public:
+  friend GeoVolumeCursorTest;
   using VSConstLink = GeoVSurface::VSConstLink;
   GeoVolumeCursor (PVConstLink parent, GeoVAlignmentStore* store=nullptr);
   virtual ~GeoVolumeCursor() override;
@@ -80,28 +82,28 @@ class GeoVolumeCursor final : public GeoNodeAction
   void resuscitate();
 
 
-  PVConstLink                           m_parent;
-  PVConstLink                           m_volume;
-  VSConstLink                           m_surface;
-  GeoTrf::Transform3D                           m_transform;
-  GeoTrf::Transform3D                           m_defTransform;
+  PVConstLink                           m_parent{};
+  PVConstLink                           m_volume{};
+  VSConstLink                           m_surface{};
+  GeoTrf::Transform3D                   m_transform{GeoTrf::Transform3D::Identity()};
+  GeoTrf::Transform3D                   m_defTransform{GeoTrf::Transform3D::Identity()};
   
-  unsigned int                          m_majorIndex;
-  unsigned int                          m_minorIndex;
-  unsigned int                          m_minorLimit;
-  const GeoSerialTransformer           *m_serialTransformer;
+  unsigned int                          m_majorIndex{};
+  unsigned int                          m_minorIndex{};
+  unsigned int                          m_minorLimit{};
+  const GeoSerialTransformer           *m_serialTransformer{};
   
-  const GeoNameTag                     *m_nameTag;
-  const GeoSerialDenominator           *m_serialDenominator;
-  const GeoIdentifierTag               *m_idTag;
+  const GeoNameTag                     *m_nameTag{};
+  const GeoSerialDenominator           *m_serialDenominator{};
+  const GeoIdentifierTag               *m_idTag{};
   std::vector<const GeoTransform *>     m_pendingTransformList;
-  unsigned int                          m_serialDenomPosition;
-  const GeoSerialIdentifier            *m_serialIdentifier;
-  unsigned int                          m_serialIdentPosition;
-  unsigned int                          m_volCount;
-  bool                                  m_hasAlignTrans;
+  unsigned int                          m_serialDenomPosition{};
+  const GeoSerialIdentifier            *m_serialIdentifier{};
+  unsigned int                          m_serialIdentPosition{};
+  unsigned int                          m_volCount{};
+  bool                                  m_hasAlignTrans{};
 
-  GeoVAlignmentStore                   *m_alignStore;
+  GeoVAlignmentStore                   *m_alignStore{};
 };
 
 #endif

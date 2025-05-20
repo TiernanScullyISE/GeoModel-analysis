@@ -5,11 +5,6 @@
 
 GeoSurfaceCursor::GeoSurfaceCursor (PVConstLink parent, GeoVAlignmentStore* store)
   : m_parent(std::move(parent))
-  , m_transform(GeoTrf::Transform3D::Identity())
-  , m_defTransform(GeoTrf::Transform3D::Identity())  
-  , m_majorIndex(0)
-  , m_volCount(0)
-  , m_surfCount(0)
   , m_alignStore(store)  
 {
   // depth is set to be 0, with next(), go to the child node

@@ -31,7 +31,6 @@
 #include "GeoModelKernel/GeoUnidentifiedShape.h"
 
 GeoShapeAction::GeoShapeAction()
-  : m_terminate(false)
 {
 }
 

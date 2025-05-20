@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeoVolumeAction.h"
 
 GeoVolumeAction::GeoVolumeAction (Type type)
   : m_type(type)
-  , m_terminate(false)
 {
 }
 

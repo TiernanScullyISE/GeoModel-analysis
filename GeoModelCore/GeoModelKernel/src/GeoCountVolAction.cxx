@@ -4,18 +4,14 @@
 
 #include "GeoModelKernel/GeoCountVolAction.h"
 
-GeoCountVolAction::GeoCountVolAction ()
- : m_count (0)
-{
+GeoCountVolAction::GeoCountVolAction (){
   setDepthLimit (1);
 }
 
-GeoCountVolAction::~GeoCountVolAction()
-{
+GeoCountVolAction::~GeoCountVolAction(){
 }
 
-void GeoCountVolAction::handlePhysVol (const GeoPhysVol *)
-{
+void GeoCountVolAction::handlePhysVol (const GeoPhysVol *){
   //    
   // Do not count the top volume, this action counts only children!   
   //   
@@ -23,8 +19,7 @@ void GeoCountVolAction::handlePhysVol (const GeoPhysVol *)
     m_count++;
 }
 
-void GeoCountVolAction::handleFullPhysVol (const GeoFullPhysVol *)
-{
+void GeoCountVolAction::handleFullPhysVol (const GeoFullPhysVol *){
   //   
   // Do not count the top volume, this action counts only children!   
   //   
@@ -32,14 +27,12 @@ void GeoCountVolAction::handleFullPhysVol (const GeoFullPhysVol *)
     m_count++;
 }
 
-void GeoCountVolAction::handleVSurface (const GeoVSurface *)
-{
+void GeoCountVolAction::handleVSurface (const GeoVSurface *){
   // Virtual Surface is always child of Physical Volume  
   m_count++;
 }
 
 
-void GeoCountVolAction::handleSerialTransformer (const GeoSerialTransformer  *st)
-{
+void GeoCountVolAction::handleSerialTransformer (const GeoSerialTransformer  *st){
   m_count += st->getNCopies ();
 }

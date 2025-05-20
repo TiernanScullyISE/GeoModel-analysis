@@ -12,20 +12,6 @@
 
 GeoVolumeCursor::GeoVolumeCursor (PVConstLink parent, GeoVAlignmentStore* store)
   : m_parent(std::move(parent))
-  , m_transform(GeoTrf::Transform3D::Identity())
-  , m_defTransform(GeoTrf::Transform3D::Identity())
-  , m_majorIndex(0)
-  , m_minorIndex(0)
-  , m_minorLimit(0)
-  , m_serialTransformer(nullptr)
-  , m_nameTag(nullptr)
-  , m_serialDenominator(nullptr)
-  , m_idTag(nullptr)
-  , m_serialDenomPosition(0)
-  , m_serialIdentifier(nullptr)
-  , m_serialIdentPosition(0)
-  , m_volCount(0)
-  , m_hasAlignTrans(false)
   , m_alignStore(store)
 {
   setDepthLimit(0);

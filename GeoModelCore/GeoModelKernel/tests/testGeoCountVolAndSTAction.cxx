@@ -14,3 +14,8 @@ TEST(GeoCountVolAndSTAction, CannotBeMoveOrCopyAssigned) {
   EXPECT_FALSE(std::is_copy_assignable_v<GeoCountVolAndSTAction>);
   EXPECT_FALSE(std::is_move_assignable_v<GeoCountVolAndSTAction>);
 }
+
+TEST(GeoCountVolAndSTAction, DefaultConstructedHAsExpectedProperties) {
+  GeoCountVolAndSTAction g;
+  EXPECT_EQ(g.getCount(), 0);
+}

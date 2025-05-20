@@ -13,3 +13,9 @@ TEST(GeoShapeAction, CannotBeMoveOrCopyAssigned) {
   EXPECT_FALSE(std::is_copy_assignable_v<GeoShapeAction>);
   EXPECT_FALSE(std::is_move_assignable_v<GeoShapeAction>);
 }
+
+TEST(GeoShapeAction, DefaultConstructedHasExpectedProperties) {
+  GeoShapeAction g;
+  EXPECT_FALSE(g.shouldTerminate());
+  EXPECT_FALSE(g.getDepthLimit());//optional; no value by default
+}
