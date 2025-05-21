@@ -31,6 +31,9 @@ class GeoVDetectorManager
   GeoVDetectorManager();
   virtual ~GeoVDetectorManager();
 
+  GeoVDetectorManager(const GeoVDetectorManager &right) = delete;
+  GeoVDetectorManager & operator=(const GeoVDetectorManager &right) = delete;
+
   //	Returns the number of Tree Tops (Top Level Physicsl
   //	Volumes)
   virtual unsigned int getNumTreeTops () const = 0;
@@ -42,10 +45,8 @@ class GeoVDetectorManager
   void                setName(const std::string & name);
 
  private:
-  GeoVDetectorManager(const GeoVDetectorManager &right);
-  GeoVDetectorManager & operator=(const GeoVDetectorManager &right);
 
-  std::string m_name;
+  std::string m_name{};
 
 };
 

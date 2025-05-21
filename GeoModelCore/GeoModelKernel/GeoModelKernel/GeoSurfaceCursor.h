@@ -61,7 +61,7 @@ class GeoSurfaceCursor final : public GeoNodeAction
   unsigned int                          m_volCount{};
   unsigned int                          m_surfCount{};
    
-  std::vector<const GeoTransform *>     m_pendingTransformList;
+  std::vector<const GeoTransform *>     m_pendingTransformList{};
   
   bool                                  m_hasAlignTrans{};  
   GeoVAlignmentStore                   *m_alignStore{};

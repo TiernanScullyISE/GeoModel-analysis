@@ -19,10 +19,7 @@ class GeoVolumeCursor final : public GeoNodeAction
   friend GeoVolumeCursorTest;
   using VSConstLink = GeoVSurface::VSConstLink;
   GeoVolumeCursor (PVConstLink parent, GeoVAlignmentStore* store=nullptr);
-  virtual ~GeoVolumeCursor() override;
- 
-  GeoVolumeCursor(const GeoVolumeCursor &right) = delete;
-  GeoVolumeCursor & operator=(const GeoVolumeCursor &right) = delete;
+  virtual ~GeoVolumeCursor() = default;
 
   /// Advance
   void next();

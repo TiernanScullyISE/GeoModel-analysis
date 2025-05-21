@@ -22,8 +22,11 @@ class GeoVDetectorManager;
 class GeoVDetectorFactory 
 {
  public:
-  GeoVDetectorFactory();
-  virtual ~GeoVDetectorFactory();
+  GeoVDetectorFactory() = default;
+  virtual ~GeoVDetectorFactory() = default;
+
+  GeoVDetectorFactory(const GeoVDetectorFactory &right) = delete;
+  GeoVDetectorFactory & operator=(const GeoVDetectorFactory &right) = delete;
 
   //	Create the system.
   virtual void create (GeoPhysVol* world) = 0;
@@ -33,8 +36,6 @@ class GeoVDetectorFactory
   virtual const GeoVDetectorManager* getDetectorManager () const = 0;
 
  private:
-  GeoVDetectorFactory(const GeoVDetectorFactory &right);
-  GeoVDetectorFactory & operator=(const GeoVDetectorFactory &right);
 
 };
 

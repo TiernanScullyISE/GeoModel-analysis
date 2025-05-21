@@ -19,9 +19,9 @@ class GeoVG4ExtensionSolid
  public:
 
    //! Default constructor.
-   GeoVG4ExtensionSolid() {}
+   GeoVG4ExtensionSolid()  = default;
      
-   virtual ~GeoVG4ExtensionSolid() {}
+   virtual ~GeoVG4ExtensionSolid() = default;
 
    //! Create the specified solid. .
    virtual G4VSolid *newG4Solid(const GeoUnidentifiedShape *shape) const=0;

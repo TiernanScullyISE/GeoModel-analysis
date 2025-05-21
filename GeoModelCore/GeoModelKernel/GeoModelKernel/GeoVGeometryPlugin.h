@@ -29,6 +29,9 @@ class GeoVGeometryPlugin
     GeoVGeometryPlugin(const std::string& name) : 
         m_pluginName{name} {  m_publisher->setName(m_pluginName); } 
     
+    /// We prohibit copy constructor, and assignment operator
+    GeoVGeometryPlugin(const GeoVGeometryPlugin &right)=delete;
+    GeoVGeometryPlugin & operator=(const GeoVGeometryPlugin &right)=delete;
 
     virtual ~GeoVGeometryPlugin()  = default;
 
@@ -48,14 +51,8 @@ class GeoVGeometryPlugin
   std::unique_ptr<GeoPublisher> m_publisher{std::make_unique<GeoPublisher>()};
   
  private:
-
-  /// We prohibit copy constructor, and assignment operator
-  GeoVGeometryPlugin(const GeoVGeometryPlugin &right)=delete;
-  GeoVGeometryPlugin & operator=(const GeoVGeometryPlugin &right)=delete;
-
-
   //! The name of the plugin, used to store plugin's published nodes. 
-  std::string m_pluginName;
+  std::string m_pluginName{};
 
 };
 

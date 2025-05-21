@@ -18,10 +18,6 @@ GeoVolumeCursor::GeoVolumeCursor (PVConstLink parent, GeoVAlignmentStore* store)
   next();
 }
 
-GeoVolumeCursor::~GeoVolumeCursor()
-{
-}
-
 void GeoVolumeCursor::next() {
   resuscitate();
   

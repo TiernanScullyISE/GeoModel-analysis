@@ -4,14 +4,12 @@
 
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include "GeoModelKernel/GeoVDetectorElement.h"
+#include "GeoModelKernel/GeoVDetectorFactory.h"
 
-GeoVDetectorManager::GeoVDetectorManager()
-{
-}
 
-GeoVDetectorManager::~GeoVDetectorManager()
-{
-}
+GeoVDetectorManager::GeoVDetectorManager() = default;
+GeoVDetectorManager::~GeoVDetectorManager() = default;
+
 
 void GeoVDetectorManager::setName(const std::string & name) 
 {

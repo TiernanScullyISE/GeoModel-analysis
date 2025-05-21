@@ -26,7 +26,7 @@ class GeoVolumeAction
 
  public:
   GeoVolumeAction (Type type = TOP_DOWN);
-  virtual ~GeoVolumeAction();
+  virtual ~GeoVolumeAction() = default;
 
   //	Callback method. Overriden by users.
   virtual void handleVPhysVol (const GeoVPhysVol *);
@@ -50,8 +50,6 @@ class GeoVolumeAction
   GeoVolumeAction::Type getType () const;
   
  private:
-  GeoVolumeAction(const GeoVolumeAction &right);
-  GeoVolumeAction & operator=(const GeoVolumeAction &right);
   
   //	This type specifies that the action should be carried
   //	out from the bottom up or from the top down.
@@ -60,7 +58,7 @@ class GeoVolumeAction
   //	Termination flag; causes an abortion of action execution.
   bool m_terminate{};
 
-  GeoTraversalState m_traversalState;
+  GeoTraversalState m_traversalState{};
   
 };
 
