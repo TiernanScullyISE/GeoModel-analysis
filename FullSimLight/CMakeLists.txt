@@ -42,8 +42,8 @@ endif()
 
 ## External dependencies.
 #----------------------------------------------------------------------------
-# Find Geant4 package, batch mode only executable (i.e. no need ui and vis).
-find_package(Geant4 REQUIRED)
+# Find Geant4 package
+find_package(Geant4 REQUIRED ui_all vis_all)
 message( STATUS "Found Geant4: ${Geant4_INCLUDE_DIR}")
 
 # Support for the HepMC3 exchange format
@@ -157,6 +157,7 @@ set(FULLSIMLIGHT_SCRIPTS
   geantino_Tile.g4
   geantino_Muon.g4
   macro.g4
+  initVis.g4
   pythia.g4
   drawMagField.C
   drawGeantinoMaps.C
