@@ -32,13 +32,15 @@ install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelWrite
    COMPONENT Development )
 
-add_executable(testWriteGeoModel 
-  tests/testWriteGeoModel.cxx 
-)
-target_link_libraries( testWriteGeoModel GeoModelWrite GTest::GTest GTest::Main)
-add_test(NAME testWriteGeoModel 
-  COMMAND testWriteGeoModel
-)
+if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING)
+    add_executable(testWriteGeoModel 
+    	tests/testWriteGeoModel.cxx 
+    )
+    target_link_libraries( testWriteGeoModel GeoModelWrite GTest::GTest GTest::Main)
+    add_test(NAME testWriteGeoModel 
+    	COMMAND testWriteGeoModel
+    )
 
-include(GoogleTest)
-gtest_discover_tests(testWriteGeoModel)
+    include(GoogleTest)
+    gtest_discover_tests(testWriteGeoModel)
+endif()

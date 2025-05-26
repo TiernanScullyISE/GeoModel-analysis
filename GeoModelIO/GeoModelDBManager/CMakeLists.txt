@@ -42,30 +42,30 @@ install( FILES ${HEADERS}
 
 
 ### --- Add Tests ---
+if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    #++ Create a 'simple' unit test
+    add_executable(test_create_db_file tests/test_create_db_file.cpp)
+    target_link_libraries( test_create_db_file GeoModelIO::GeoModelDBManager)
+    add_test(NAME testCreateDBFile
+    	     COMMAND test_create_db_file)
 
-#++ Create a 'simple' unit test
-add_executable(test_create_db_file tests/test_create_db_file.cpp)
-target_link_libraries( test_create_db_file GeoModelIO::GeoModelDBManager)
-add_test(NAME testCreateDBFile
-         COMMAND test_create_db_file)
-
-#++ Create a GoogleTest test, 
-#   and let CTest run all the sub-tests defined in it separately.
-#   NOTE: You can still use the standard CMake `add_test` function
-#         to declare the test; however, in that case, CTest will 
-#         run it as a whole and you will only get one line of output
-#         for all the tests in it togetehr. 
-#         While with the GTest method here below, you will get 
-#         one line of output for each actual test defined in the 
-#         'container' test program. 
-#         Therefore, for GTest tests it is advisable to use the
-#         approach below. 
-#
-# Create test executable
-add_executable(test_db_functions tests/test_db_functions.cpp)
-target_link_libraries(test_db_functions GeoModelDBManager GTest::GTest GTest::Main)
-# Register the test and let CTest discover 
-# all tests contained in it and run them separately
-include(GoogleTest)
-gtest_discover_tests(test_db_functions)
-
+    #++ Create a GoogleTest test, 
+    #   and let CTest run all the sub-tests defined in it separately.
+    #   NOTE: You can still use the standard CMake `add_test` function
+    #         to declare the test; however, in that case, CTest will 
+    #         run it as a whole and you will only get one line of output
+    #         for all the tests in it togetehr. 
+    #         While with the GTest method here below, you will get 
+    #         one line of output for each actual test defined in the 
+    #         'container' test program. 
+    #         Therefore, for GTest tests it is advisable to use the
+    #         approach below. 
+    #
+    # Create test executable
+    add_executable(test_db_functions tests/test_db_functions.cpp)
+    target_link_libraries(test_db_functions GeoModelDBManager GTest::GTest GTest::Main)
+    # Register the test and let CTest discover 
+    # all tests contained in it and run them separately
+    include(GoogleTest)
+    gtest_discover_tests(test_db_functions)
+endif()

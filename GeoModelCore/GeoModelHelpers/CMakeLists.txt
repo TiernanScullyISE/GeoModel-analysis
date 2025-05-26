@@ -42,18 +42,20 @@ install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelHelpers
    COMPONENT Development )
 
-file(GLOB_RECURSE files "tests/*.cxx")
-foreach(_exeFile ${files})
-  get_filename_component(_theExec ${_exeFile} NAME_WE)
-  get_filename_component(_theLoc ${_exeFile} DIRECTORY)
+if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    file(GLOB_RECURSE files "tests/*.cxx")
+    foreach(_exeFile ${files})
+      get_filename_component(_theExec ${_exeFile} NAME_WE)
+      get_filename_component(_theLoc ${_exeFile} DIRECTORY)
   
-  if(${_theLoc} MATCHES "DoNotBuild")
-    continue()
-  endif() 
+    if(${_theLoc} MATCHES "DoNotBuild")
+      continue()
+    endif() 
   
-  add_executable(${_theExec} ${_exeFile})
-  target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GTest::GTest GTest::Main)
-  add_test(NAME ${_theExec}
-           COMMAND ${_theExec})
+    add_executable(${_theExec} ${_exeFile})
+    target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GTest::GTest GTest::Main)
+    add_test(NAME ${_theExec}
+             COMMAND ${_theExec})
 
-endforeach()
+    endforeach()
+endif()

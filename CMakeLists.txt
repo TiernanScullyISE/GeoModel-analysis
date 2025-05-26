@@ -36,19 +36,9 @@ endif()
 include( SetupEigen3 )
 include( SetupXercesC )
 include( SetupJSON )
-# Add the GoogleTest framework, for tests
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
 
 # Find the dependencies that the project always picks up from its environment.
 find_package( SQLite3 3.7.17 )
-
-# === Enable testing functionality
-# NOTE: this must be in the root CMakeLists.txt file
-#       even if the tests are defined in CMake files
-#       located in sub-directories.
-enable_testing()
-
 
 # === Main targets built by this project ===
 
@@ -63,7 +53,16 @@ option(GEOMODEL_BUILD_FULLSIMLIGHT "Enable the build of FullSimLight" OFF)
 option(GEOMODEL_BUILD_FULLSIMLIGHT_PROFILING "Enable FullSimLight profiling targets" OFF)
 option(GEOMODEL_BUILD_FSL "Enable the build of FSL and FullSimLight" OFF)
 option(GEOMODEL_BUILD_ATLASEXTENSIONS "Build the Custom ATLAS Extensions" OFF)
+option(GEOMODEL_BUILD_TESTING "Build the unit tests of GeoModel" OFF )
 option(GEOMODEL_USE_QT6 "Use QT6 for Visualization and FSL" OFF)
+
+include(CTest) # needs to be included at the top level
+if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    # Add the GoogleTest framework, for tests
+    find_package(GTest REQUIRED)
+    include_directories(${GTEST_INCLUDE_DIRS})
+endif()
+
 
 if(GEOMODEL_BUILD_FSL AND GEOMODEL_BUILD_FULLSIMLIGHT)
   message(STATUS "==> NOTE: You enabled both BUILD_FSL and BUILD_FULLSIMLIGHT. Since BUILD_FSL triggers the build of the FullSimLight package as well, I set BUILD_FULLSIMLIGHT to FALSE to avoid errors of 'double inclusion'")
@@ -78,7 +77,6 @@ endif()
 
 if(GEOMODEL_BUILD_FULLSIMLIGHT_PROFILING)
   set(GEOMODEL_BUILD_FULLSIMLIGHT ON CACHE BOOL "Enable the build of FullSimLight" FORCE)
-  include(CTest) # needs to be included at the top level
 endif()
 
 # a list to keep track of the packages we build
@@ -93,6 +91,7 @@ if(GEOMODEL_BUILD_ALL)
   set(GEOMODEL_BUILD_TOOLS         TRUE)
   set(GEOMODEL_BUILD_VISUALIZATION TRUE)
   set(GEOMODEL_BUILD_FSL           TRUE)
+  set(GEOMODEL_BUILD_TESTING       TRUE)
 endif()
 
 if(GEOMODEL_BUILD_TOOLS)

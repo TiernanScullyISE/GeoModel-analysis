@@ -47,20 +47,21 @@ install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelIOHelpers
    COMPONENT Development )
 
+if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    # global I/O tests
+    add_executable(test_io_shared_serialtransformers tests/test_io_shared_serialtransformers.cpp)
+    target_link_libraries( test_io_shared_serialtransformers GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
+    add_test(NAME test_IO_SharedSerialTransformers
+    	     COMMAND test_io_shared_serialtransformers)
 
-# global I/O tests
-add_executable(test_io_shared_serialtransformers tests/test_io_shared_serialtransformers.cpp)
-target_link_libraries( test_io_shared_serialtransformers GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-add_test(NAME test_IO_SharedSerialTransformers
-         COMMAND test_io_shared_serialtransformers)
+    # I/O Unit tests
+    add_executable(test_io_shapes_unidentifiedshape tests/test_io_UnidentifiedShape.cpp)
+    target_link_libraries( test_io_shapes_unidentifiedshape GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
+    add_test(NAME test_IO_Shapes_UnidentifiedShape
+             COMMAND test_io_shapes_unidentifiedshape)
 
-# I/O Unit tests
-add_executable(test_io_shapes_unidentifiedshape tests/test_io_UnidentifiedShape.cpp)
-target_link_libraries( test_io_shapes_unidentifiedshape GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-add_test(NAME test_IO_Shapes_UnidentifiedShape
-         COMMAND test_io_shapes_unidentifiedshape)
-
-add_executable(test_io_shapes_ellipticaltube tests/test_io_shape_EllipticalTube.cpp)
-target_link_libraries( test_io_shapes_ellipticaltube GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-add_test(NAME test_IO_Shapes_EllipticalTube
-         COMMAND test_io_shapes_ellipticaltube)
+    add_executable(test_io_shapes_ellipticaltube tests/test_io_shape_EllipticalTube.cpp)
+    target_link_libraries( test_io_shapes_ellipticaltube GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
+    add_test(NAME test_IO_Shapes_EllipticalTube
+             COMMAND test_io_shapes_ellipticaltube)
+endif()
