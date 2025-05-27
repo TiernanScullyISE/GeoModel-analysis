@@ -1863,9 +1863,8 @@ GeoShape *ReadGeoModel::buildShapeOperator(const std::string_view shapeType, con
             // TODO: ==> Perhaps we could keep a table for bare
             // GeoTrf::Transform3D transforms used in GeoShift nodes.
             GeoTrf::Transform3D transfX = transf->getTransform();
-            transf->unref(); // delete the transf from the heap, because we
-                             // don't need the node, only the bare
-                             // transformation matrix
+            //transf->unref(); this doesnt delete the object, and (if it were to do so)
+            // causes problems later
             GeoShapeShift *shapeNew = new GeoShapeShift(shapeOp, transfX);
             // storeBuiltShape(shapeId, shapeNew);
             shape = shapeNew;
@@ -1901,10 +1900,7 @@ GeoShape *ReadGeoModel::buildShapeOperator(const std::string_view shapeType, con
             // TODO: ==> Perhaps we could keep a table for bare
             // GeoTrf::Transform3D transforms used in GeoShift nodes.
             transfX = transf->getTransform();
-            transf->unref(); // delete the transf from the heap, because we
-                             // don't need the GeoGraph node, only the bare
-                             // transformation matrix
-
+            //transf->unref(); tries to unref when ref count is zero
             // then, check the type of the operand shape
             bool isOperatorShape = isShapeOperator(shapeOpType);
 
@@ -2525,9 +2521,7 @@ void ReadGeoModel::createBooleanShapeOperands(
                 shiftTransf = buildTransform(idB);
             }
             shiftX = shiftTransf->getTransform();
-            shiftTransf->unref();  // delete from heap, we only needed to get
-                                   // the bare transform // TODO: remove that
-                                   // need, store the bare transforms as well...
+            //shiftTransf->unref();  refcount is zero already
 
             if (dynamic_cast<GeoShapeShift*>(boolShPtr)) {
                 GeoShapeShift* ptr = dynamic_cast<GeoShapeShift*>(boolShPtr);
@@ -2644,9 +2638,7 @@ void ReadGeoModel::createBooleanShapeOperands(boolean_shapes_operands_info* shap
                 shiftTransf = buildTransform(idB);
             }
             shiftX = shiftTransf->getTransform();
-            shiftTransf->unref();  // delete from heap, we only needed to get
-                                   // the bare transform // TODO: remove that
-                                   // need, store the bare transforms as well...
+            //shiftTransf->unref();  refcount is zero already
 
             if (dynamic_cast<GeoShapeShift*>(boolShPtr)) {
                 GeoShapeShift* ptr = dynamic_cast<GeoShapeShift*>(boolShPtr);

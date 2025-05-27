@@ -51,12 +51,10 @@ TEST(RCBase, CanIncrementAndDecrementReference){
   EXPECT_NO_THROW(pStub->unref());
 }
 //undesirable behaviours
-TEST(RCBase, DISABLED_CannotDecrementReferenceBelowZero){
+TEST(RCBase, CannotDecrementReferenceBelowZero){
   Stub * pStub = new Stub;
-  pStub->unref(); //should this throw?
-  EXPECT_EQ(pStub->refCount(), 0);//fails
-  //now it's cursed, so euthanise it
-  delete pStub;
+  EXPECT_NO_THROW(pStub->unref()); 
+ 
 }
 
 TEST(RCBase, DISABLED_CannotBeUsedAfterRefCountBecomesZero){

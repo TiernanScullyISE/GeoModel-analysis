@@ -24,8 +24,7 @@ class CellBinning
   /**
    * @brief Constructor
    */
-  CellBinning (double startVal, double endVal, unsigned int nBins, unsigned int firstDivisionNumber = 0);
-
+  CellBinning (double startVal, double endVal, int nBins, int firstDivisionNumber = 0);
 
   /**
    *     @brief Gets the ith bin lower edge
@@ -70,11 +69,11 @@ class CellBinning
   
  private: 
   
-  double m_start;
-  double m_end;
-  unsigned int m_numDivisions;
-  double m_delta;
-  unsigned int m_firstDivisionNumber;
+  double m_start{};
+  double m_end{};
+  int m_numDivisions{};
+  double m_delta{};
+  int m_firstDivisionNumber{};
 };
 
 inline double CellBinning::binLower (unsigned int i) const

@@ -13,6 +13,10 @@ class CellBinningFixture : public ::testing::Test {
 protected:
     CellBinning cb{1., 10., 10, 1};
 };
+class InvertedCellBinning : public ::testing::Test {
+protected:
+    CellBinning cb{10., 1., 10, 1};
+};
 
 TEST(CellBinning, CanBeConstructed) {
   EXPECT_NO_THROW(CellBinning cb(1.,10.,10,1.));
@@ -29,16 +33,16 @@ TEST(CellBinning, CanBeMoveAndCopyAssigned) {
   EXPECT_TRUE(std::is_move_assignable_v<CellBinning>);
 }
 
-TEST(CellBinning, DISABLED_EndValMustBeGreaterThanStartVal) {
-  EXPECT_THROW(CellBinning cb(10., 1., 10, 1), std::exception);
+TEST(CellBinning, EndValCanBeSmallerThanStartVal) {
+  EXPECT_NO_THROW(CellBinning cb(10., 1., 10, 1));
 }
 
-TEST(CellBinning, DISABLED_NumBinsCannotBeZero) {
-  EXPECT_THROW(CellBinning cb(10., 1., 0, 1), std::exception);
+TEST(CellBinning, NumBinsCannotBeZero) {
+  EXPECT_THROW(CellBinning cb(10., 1., 0, 1), std::range_error);
 }
 
-TEST(CellBinning, DISABLED_NumBinsMustBePositive) {
-  EXPECT_THROW(CellBinning cb(10., 1., -3, 1), std::exception);
+TEST(CellBinning, NumBinsMustBePositive) {
+  EXPECT_THROW(CellBinning cb(10., 1., -20, 1), std::range_error);
 }
 
 TEST_F(CellBinningFixture, lowerBinIsOk){
@@ -68,4 +72,16 @@ TEST_F(CellBinningFixture, getDeltaIsOk){
 TEST_F(CellBinningFixture, firstDivisionNumberIsOk){
   EXPECT_EQ(cb.getFirstDivisionNumber(), 1);
 }
-
+//inverted start and end vals; is it still ok?
+TEST_F(InvertedCellBinning, lowerBinIsOk){
+  EXPECT_EQ(cb.binLower(2), 9.1);
+}
+TEST_F(InvertedCellBinning, upperBinIsOk){
+  EXPECT_EQ(cb.binUpper(2), 8.2);
+}
+TEST_F(InvertedCellBinning, centreBinIsOk){
+  EXPECT_EQ(cb.binCenter(2), 8.65);
+}
+TEST_F(InvertedCellBinning, getDeltaIsOk){
+  EXPECT_EQ(cb.getDelta(), -0.9);
+}
