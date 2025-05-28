@@ -94,13 +94,13 @@ The GeoModel Toolkit offers C++ classes that provide geometrical primitives for 
 
 Additional external dependencies:
 
-- The lighweight [SQLite](https://www.sqlite.org/) file-based database for I/O, when the `I/O` module is used
+- The lightweight [SQLite](https://www.sqlite.org/) file-based database for I/O, when the `I/O` module is used
 - The [`nlohmann_json`](https://github.com/nlohmann/json) JSON parser library to import external data, when the `Visualization` and `Tools` modules are used
 - The Apache [`Xerces-C`](https://xerces.apache.org/xerces-c/) XML parser library, when the XML interface of the `Tools` module is used
 - The open-source ("Community") version of the [Qt graphics framework](https://www.qt.io/) for the GUI, when the `Visualization` module is used
 - The [Coin](https://github.com/coin3d/coin) and [SoQt](https://github.com/coin3d/soqt) libraries for 3D graphics, when the `Visualization` module is used
 - The [Geant4](https://geant4.web.cern.ch/) detector simulation toolkit, when the standalone detector simulation module `FullSimLight` is used
-
+- The [GoogleTest](https://github.com/google/googletest) - Google Testing and Mocking framework, when the building of unit tests is requested
 ----
 
 <i>Last update:</i> 
