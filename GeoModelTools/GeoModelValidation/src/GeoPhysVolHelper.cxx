@@ -47,14 +47,14 @@
 
 void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::string dbtest_path, std::string branch_ref, std::string branch_test, bool printFullInfo, float tolerance) {
 
-  const GeoVPhysVol* db_ref = this->retrieveFromDb(dbref_path);
-  const GeoVPhysVol* db_test = this->retrieveFromDb(dbtest_path);
+  const PVConstLink db_ref = retrieveFromDb(dbref_path);
+  const PVConstLink db_test = retrieveFromDb(dbtest_path);
 
   if (!db_ref) std::cout << "invalid input file "<<dbref_path<<", reference db not retrieved, exiting" << std::endl;  
   if (!db_test) std::cout << "invalid input file "<<dbtest_path<<",  test db not retrieved, exiting" << std::endl;  
 
-  const GeoVPhysVol* top_ref = branch_ref!="" ?  findBranch(db_ref, branch_ref) : db_ref;  
-  const GeoVPhysVol* top_test = db_test;
+  PVConstLink top_ref = branch_ref!="" ?  findBranch(db_ref, branch_ref) : db_ref;  
+  PVConstLink top_test = db_test;
   if ( branch_test!="" )   top_test = findBranch(db_test, branch_test); 
   else if ( branch_ref!="" )   top_test = findBranch(db_test, branch_ref); 
 
@@ -123,20 +123,20 @@ void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::st
     
     // TODO: match alignables with nearest AND resolve identification 
 
-    mcode.valid_position = this->compareTransforms(tr_test,tr_ref, tolerance);  
+    mcode.valid_position = compareTransforms(tr_test,tr_ref, tolerance);  
 
     if (mcode.valid_position==6 && printFullInfo)  {
       std::cout <<ic<<":"<<cv->getLogVol()->getName()<<" position differs:translation:"<<std::endl;
-      this->printTranslationDiff( tr_test, tr_ref, tolerance);
+      printTranslationDiff( tr_test, tr_ref, tolerance);
     }
 
     if (mcode.valid_position==7 && printFullInfo)   {
       std::cout <<ic<<":"<<cv->getLogVol()->getName()<<" position differs:rotation:"<<std::endl;
-      this->printRotationDiff( tr_test, tr_ref, tolerance);
+      printRotationDiff( tr_test, tr_ref, tolerance);
     }
  
     mcode.ref_branch = cvref;
-    mcode.valid_branch = this->compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
+    mcode.valid_branch = compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
  
     // short printout if no difference found
     if (mcode.valid_branch<2 && mcode.valid_position==0)
@@ -188,19 +188,19 @@ void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::st
 
   for (unsigned int ic = 0; ic < nctest; ic++) {
     if (m_test2db[ic].ref_branch) continue;
-    const GeoVPhysVol* cv = &(*(top_test->getChildVol(ic)));
+    const GeoVPhysVol* cv = top_test->getChildVol(ic);
     const GeoVFullPhysVol* cvf = dynamic_cast<const GeoVFullPhysVol*> (cv);
     if (!cvf) continue;
     cname = cv->getLogVol()->getName();
     GeoTrf::Transform3D tr_test = cvf->getAbsoluteTransform();
     const GeoVPhysVol* cvref = 0;
     for (auto nonres : ref_nonresolved) {
-      cvref = this->findAlignableBranch(nonres,cname,tr_test);    // full matching name search
-      if (!cvref) cvref = this->findAlignableBranch(nonres,cname.substr(m_pnami,m_pnaml),tr_test, false);  // partial name matching
+      cvref = findAlignableBranch(nonres,cname,tr_test);    // full matching name search
+      if (!cvref) cvref = findAlignableBranch(nonres,cname.substr(m_pnami,m_pnaml),tr_test, false);  // partial name matching
       if (cvref) break;
     }   
-    if (!cvref) cvref = this->findAlignableBranch(top_ref,cname,tr_test);    // full matching name search
-    if (!cvref) cvref = this->findAlignableBranch(top_ref,cname.substr(m_pnami,m_pnaml),tr_test, false);   // partial name matching
+    if (!cvref) cvref = findAlignableBranch(top_ref,cname,tr_test);    // full matching name search
+    if (!cvref) cvref = findAlignableBranch(top_ref,cname.substr(m_pnami,m_pnaml),tr_test, false);   // partial name matching
     
     m_test2db[ic].valid_strategy = 2;  
     
@@ -212,20 +212,20 @@ void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::st
     const GeoVFullPhysVol* cvfref = dynamic_cast<const GeoVFullPhysVol*> (cvref);
     GeoTrf::Transform3D tr_ref = cvfref->getAbsoluteTransform();
     
-    m_test2db[ic].valid_position = this->compareTransforms(tr_test,tr_ref, tolerance);  
+    m_test2db[ic].valid_position = compareTransforms(tr_test,tr_ref, tolerance);  
     
     if (m_test2db[ic].valid_position==6 && printFullInfo )  {
       std::cout <<ic<<":"<<cv->getLogVol()->getName()<<" position differs:translation:"<<std::endl;
-      this->printTranslationDiff( tr_test, tr_ref, tolerance);
+      printTranslationDiff( tr_test, tr_ref, tolerance);
     }
     
     if (m_test2db[ic].valid_position==7 && printFullInfo )   {
       std::cout <<ic<<":"<<cv->getLogVol()->getName()<<" position differs:rotation:"<<std::endl;
-      this->printRotationDiff( tr_test, tr_ref, tolerance );
+      printRotationDiff( tr_test, tr_ref, tolerance );
     }
     
     m_test2db[ic].ref_branch = cvref;
-    m_test2db[ic].valid_branch = this->compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
+    m_test2db[ic].valid_branch = compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
     // short printout if no difference found ( or simple renaming )
     if ( m_test2db[ic].valid_branch<2 && m_test2db[ic].valid_position==0 ) 
       std::cout << ic<<":"<<cv->getLogVol()->getName()<<":branch content:"<<m_test2db[ic].valid_branch<<":branch transforms:"<<m_test2db[ic].valid_position<<std::endl;
@@ -242,22 +242,22 @@ void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::st
 
   for (unsigned int ic = 0; ic < nctest; ic++) {
     if (m_test2db[ic].ref_branch) continue;
-    const GeoVPhysVol* cv = &(*(top_test->getChildVol(ic)));
+    const GeoVPhysVol* cv = top_test->getChildVol(ic);
     const GeoVFullPhysVol* cvf = dynamic_cast<const GeoVFullPhysVol*> (cv);
     if (cvf) continue;
     cname = cv->getLogVol()->getName();
     m_test2db[ic].valid_strategy = 3;
 
-    const GeoVPhysVol* cvref = this->findBranch(top_ref,cname,true,0);      // top level search
+    PVConstLink cvref = findBranch(top_ref,cname,true,0);      // top level search
     if (!cvref)  for (auto nonres : ref_nonresolved) {            // search in non-resolved ref branches
-      cvref = this->findBranch(nonres,cname);   
+      cvref = findBranch(nonres,cname);   
       if (cvref) break;
     }   
-    if (!cvref) cvref = this->findBranch(top_ref,cname);      // full search ( time consuming )
+    if (!cvref) cvref = findBranch(top_ref,cname);      // full search ( time consuming )
 
     if (cvref) {
       m_test2db[ic].ref_branch = cvref;
-      m_test2db[ic].valid_branch = this->compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
+      m_test2db[ic].valid_branch = compareGeoVolumes(cv,cvref,tolerance,printFullInfo,0);
       std::cout << ic<<":"<<cv->getLogVol()->getName()<<":branch content:"<<m_test2db[ic].valid_branch<<std::endl;
     } else  { 
       // branch does not exist : if logical volume, try to resolve child volumes
@@ -265,10 +265,10 @@ void GeoModelTools::GeoPhysVolHelper::compareDB( std::string dbref_path, std::st
       for (unsigned int id = 0; id < cv->getNChildVols(); id++) {
 	const GeoVPhysVol* dv = &(*(cv->getChildVol(id)));
 	std::string dname = dv->getLogVol()->getName();
-	const GeoVPhysVol* dvref = this->findBranch(top_ref,dname);
+	const GeoVPhysVol* dvref = findBranch(top_ref,dname);
 	if (dvref) {   
 	  GeoModelTools::GM_valid mcode( dv, dvref, 3, -1,-1);
-	  mcode.valid_branch = this->compareGeoVolumes(dv,dvref,tolerance,printFullInfo,0);
+	  mcode.valid_branch = compareGeoVolumes(dv,dvref,tolerance,printFullInfo,0);
 	  std::cout << ic<<":"<<cname<<":resolved in child branch:"<<id<<":"<<dname<<":content:"<<mcode.valid_branch<<std::endl;
           m_test2db.push_back(mcode); // add the resolved child branch to the list for further checks ( material )
 	} else {
@@ -340,8 +340,8 @@ int GeoModelTools::GeoPhysVolHelper::compareGeoVolumes( const GeoVPhysVol* gv1, 
       decodeShape(gv2->getLogVol()->getShape());
       // extract objects for visual inspection
       if (m_dump_diff_path!="" ) {
-	this->saveToDb(gv1, m_dump_diff_path+"/"+gv1->getLogVol()->getName()+"_test.db",true);
-	this->saveToDb(gv2, m_dump_diff_path+"/"+gv2->getLogVol()->getName()+"_ref.db",true);
+	saveToDb(gv1, m_dump_diff_path+"/"+gv1->getLogVol()->getName()+"_test.db",true);
+	saveToDb(gv2, m_dump_diff_path+"/"+gv2->getLogVol()->getName()+"_ref.db",true);
       }
     }
     else return m_diff;
@@ -367,7 +367,7 @@ int GeoModelTools::GeoPhysVolHelper::compareGeoVolumes( const GeoVPhysVol* gv1, 
       m_diff = 1000*level + 10*ic + 6;
       if (dumpInfo) {
 	std::cout <<"CASE 6: translation differs at level:"<<level<<": between mother and child:"<<gv1->getLogVol()->getName()<<":"<< cv1->getLogVol()->getName()<<std::endl;
-        this->printTranslationDiff(transf1,transf2,tolerance);
+        printTranslationDiff(transf1,transf2,tolerance);
       } 
       else return m_diff; 
     }
@@ -376,7 +376,7 @@ int GeoModelTools::GeoPhysVolHelper::compareGeoVolumes( const GeoVPhysVol* gv1, 
       m_diff = 1000*level + 10*ic + 7;
       if (dumpInfo) {
 	std::cout <<"CASE 7: rotation differs at level:"<<level<<":between mother and child:"<<gv1->getLogVol()->getName()<<":"<< cv1->getLogVol()->getName()<<std::endl;
-        this->printRotationDiff(transf1,transf2,tolerance);
+        printRotationDiff(transf1,transf2,tolerance);
       }
      else return m_diff; 
     }
@@ -420,10 +420,10 @@ void GeoModelTools::GeoPhysVolHelper::saveToDb(const GeoVPhysVol* pv, std::strin
 }
 
 // temporary, to be replaced by GMIO.h
-const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::retrieveFromDb(std::string filename) const  { 
+PVConstLink GeoModelTools::GeoPhysVolHelper::retrieveFromDb(const std::string& filename) const  { 
 
   // open the DB
-  GMDBManager* db = new GMDBManager(filename);
+  auto db = std::make_unique<GMDBManager>(filename);
 
   if (!db->checkIsDBOpen()) { 
     std::cout << "error in database readout, no GeoVolume retrieved"<< std::endl;
@@ -431,18 +431,15 @@ const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::retrieveFromDb(std::string f
   }
  
    // setup the GeoModel reader 
-   GeoModelIO::ReadGeoModel readInGeo = GeoModelIO::ReadGeoModel(db);
-
-   // build the GeoModel geometry 
-   const GeoVPhysVol* dbPhys = dynamic_cast<const GeoVPhysVol*>(readInGeo.buildGeoModel()); // builds the GeoModel tree in memory
-
-   return dbPhys;
+  GeoModelIO::ReadGeoModel readInGeo{db.get()};
+  
+  return readInGeo.buildGeoModel(); // builds the GeoModel tree in memory
 }
 
 
-const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::findBranch( const GeoVPhysVol* top, std::string name, bool fullName, int searchDepth ) const {
+PVConstLink GeoModelTools::GeoPhysVolHelper::findBranch( const GeoVPhysVol* top, std::string name, bool fullName, int searchDepth ) const {
 
-  const GeoVPhysVol* branch = 0;
+  PVConstLink branch{nullptr};
   if (fullName && name == top->getLogVol()->getName() ) return top;
   if (!fullName && top->getLogVol()->getName().find(name)!=std::string::npos ) return top;
   GeoModelTools::GeoMaterialHelper mat_helper;
@@ -451,7 +448,7 @@ const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::findBranch( const GeoVPhysVo
   std::string cname;  
   // proceed level by level
   for (unsigned int ic = 0; ic < nc; ic++) {
-    const GeoVPhysVol* cv = &(*(top->getChildVol(ic)));
+    const GeoVPhysVol* cv = top->getChildVol(ic);
     const GeoLogVol* clv = cv->getLogVol();
     if (fullName && name == clv->getName() )  return cv;
     if (!fullName && clv->getName().find(name)!=std::string::npos ) return cv;
@@ -459,7 +456,7 @@ const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::findBranch( const GeoVPhysVo
   if (searchDepth==0) return branch;    //  stop search 
   int newSearchDepth = ( searchDepth<0 ) ? searchDepth : searchDepth - 1;
   for (unsigned int ic = 0; ic < nc; ic++) {
-    const GeoVPhysVol* cv = &(*(top->getChildVol(ic)));
+    const GeoVPhysVol* cv = top->getChildVol(ic);
     const GeoLogVol* clv = cv->getLogVol();
     branch = findBranch(cv, name, fullName, newSearchDepth);
     if (branch) return branch;   
@@ -467,24 +464,24 @@ const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::findBranch( const GeoVPhysVo
   return branch;
 } 
 
-const GeoVPhysVol* GeoModelTools::GeoPhysVolHelper::findAlignableBranch( const GeoVPhysVol* top, std::string name, GeoTrf::Transform3D transf, bool fullName, int searchDepth ) const {
+PVConstLink GeoModelTools::GeoPhysVolHelper::findAlignableBranch( const GeoVPhysVol* top, std::string name, GeoTrf::Transform3D transf, bool fullName, int searchDepth ) const {
 
-  const GeoVPhysVol* branch = 0;
+  PVConstLink branch{};
   GeoModelTools::GeoMaterialHelper mat_helper;
   if (!mat_helper.dummy_material(top) && searchDepth>-2) return branch;  // stop short of splitting material branch 
   unsigned int nc = top->getNChildVols();
   std::string cname;  double dist;
   // compare distance to name-matching objects at the same level 
-  std::pair<const GeoVPhysVol*,double> bestMatch(0,-1.);
+  std::pair<PVConstLink,double> bestMatch(0,-1.);
   for (unsigned int ic = 0; ic < nc; ic++) {
-    const GeoVPhysVol* cv = &(*(top->getChildVol(ic)));
+    const GeoVPhysVol* cv = top->getChildVol(ic);
     const GeoLogVol* clv = cv->getLogVol();
     if ((fullName && name == clv->getName()) || (!fullName && clv->getName().find(name)!=std::string::npos)  ) {
       const GeoVFullPhysVol* cvf = dynamic_cast<const GeoVFullPhysVol*> (cv);
       if (cvf) { 
 	GeoTrf::Transform3D trf = cvf->getAbsoluteTransform();
 	dist = (trf.translation()-transf.translation()).norm();
-        if (bestMatch.second<0. || dist<bestMatch.second ) bestMatch=std::pair<const GeoVPhysVol*,double>(cv,dist);
+        if (bestMatch.second<0. || dist<bestMatch.second ) bestMatch=std::make_pair(cv,dist);
       }
     }
   }

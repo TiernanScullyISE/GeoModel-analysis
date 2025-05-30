@@ -86,6 +86,7 @@
 // WARNING: classes making use of 'Persistifier' should be included AFTER 'GeoModelIO/ReadGeoModel'
 #include "GeoModelKernel/GeoShapeUnion.h"
 #include "GeoModelKernel/GeoShapeShift.h"
+#include "GeoModelHelpers/defineWorld.h"
 
 // Qt includes
 #include <QStack>
@@ -128,9 +129,9 @@ public:
   std::map<SoSeparator*,VolumeHandle*> sonodesep2volhandle;
   //Might be needed later:  std::map<PVConstLink,VolumeHandle*> pv2volhandle;
 
-  GeoVPhysVol* getGeometry();
-  GeoVPhysVol* createTheWorld(const GeoVPhysVol* world = nullptr);
-  GeoVPhysVol* getGeometryFromLocalDB();
+  PVLink getGeometry();
+  PVLink createTheWorld(PVConstLink world = nullptr);
+  PVLink getGeometryFromLocalDB();
 
   SoTexture2* getDummyTexture();
   SoMaterial* getDummyMaterial();
@@ -499,24 +500,19 @@ void VP1GeometrySystem::buildPermanentSceneGraph(StoreGateSvc*/*detstore*/, SoSe
 }
 
 //_____________________________________________________________________________________
-GeoVPhysVol* VP1GeometrySystem::Imp::getGeometry()
+PVLink VP1GeometrySystem::Imp::getGeometry()
 {
   return getGeometryFromLocalDB(); // for production
 }
 
 //_____________________________________________________________________________________
-GeoVPhysVol* VP1GeometrySystem::Imp::createTheWorld(const GeoVPhysVol* world)
+PVLink VP1GeometrySystem::Imp::createTheWorld(PVConstLink world)
 {
-  if (world == nullptr)
-  {
-    // Setup the 'World' volume from which everything else will be suspended
-    double densityOfAir=0.1;
-    const GeoMaterial* worldMat = new GeoMaterial("std::Air", densityOfAir);
-    const GeoBox* worldBox = new GeoBox(2000*SYSTEM_OF_UNITS::cm, 2000*SYSTEM_OF_UNITS::cm, 2500*SYSTEM_OF_UNITS::cm);
-    const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, worldMat);
-    world = new GeoPhysVol(worldLog);
+  if (world == nullptr) {
+
+    world = createGeoWorld();
   }
-  return const_cast<GeoVPhysVol*>(world);
+  return const_pointer_cast(world);
 }
 
 
@@ -532,7 +528,7 @@ QString VP1GeometrySystem::Imp::selectGeometryFile() {
 }
 
 //_____________________________________________________________________________________
-GeoVPhysVol* VP1GeometrySystem::Imp::getGeometryFromLocalDB()
+PVLink VP1GeometrySystem::Imp::getGeometryFromLocalDB()
 {
 
   QString path;
@@ -557,7 +553,7 @@ GeoVPhysVol* VP1GeometrySystem::Imp::getGeometryFromLocalDB()
 
   if (path=="") return nullptr;
 
-  GeoVPhysVol *world=getenv("GX_GEOMETRY_FILE1") ? createTheWorld(nullptr) : nullptr;
+  PVLink world = getenv("GX_GEOMETRY_FILE1") ? createTheWorld(nullptr) : nullptr;
 
   int g=0;
   while (path!="") {
@@ -568,14 +564,14 @@ GeoVPhysVol* VP1GeometrySystem::Imp::getGeometryFromLocalDB()
     }
     if (path.contains(".db")) {
       // open the DB
-      GMDBManager* db = new GMDBManager(path.toStdString());
+      auto db = std::make_unique<GMDBManager>(path.toStdString());
       if (!db->checkIsDBOpen()) throw std::runtime_error ("Error, database is not open ");
 
       /* set the GeoModel reader */
-      GeoModelIO::ReadGeoModel readInGeo = GeoModelIO::ReadGeoModel(db);
+      GeoModelIO::ReadGeoModel readInGeo{db.get()};
 
       /* build the GeoModel geometry */
-      const GeoVPhysVol* dbPhys = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory
+      PVConstLink dbPhys = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory
 
       if (world) {
 
@@ -583,11 +579,9 @@ GeoVPhysVol* VP1GeometrySystem::Imp::getGeometryFromLocalDB()
 	GeoVolumeCursor aV(dbPhys);
 
 	while (!aV.atEnd()) {
-	  GeoNameTag *nameTag=new GeoNameTag(aV.getName());
-	  GeoTransform *transform= new GeoTransform(aV.getTransform());
-	  world->add(nameTag);
-	  world->add(transform);
-	  world->add((GeoVPhysVol *) &*aV.getVolume());
+	  world->add(make_intrusive<GeoNameTag>(aV.getName()));
+	  world->add(make_intrusive<GeoTransform>(aV.getTransform()));
+	  world->add(const_pointer_cast(aV.getVolume()));
 	  aV.next();
 	}
 

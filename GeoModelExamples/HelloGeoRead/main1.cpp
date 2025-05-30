@@ -17,6 +17,7 @@
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelRead/ReadGeoModel.h"
+#include "GeoModelKernel/throwExcept.h"
 
 // C++ includes
 #include <cstdlib>  // EXIT_FAILURE
@@ -39,10 +40,9 @@ int main(int argc, char* argv[]) {
     // Get the 'world' volume from the GeoModel DB
     std::cout << "Picking the 'World' volume from the geometry DB file..."
               << std::endl;
-    const GeoVPhysVol *world = GeoModelIO::IO::loadDB(fileName);
-    if(world == nullptr) {
-        std::cout << "---ERROR! 'World' is a 'nullptr'! exiting...\n\n";
-        exit(1);
+    PVConstLink world = GeoModelIO::IO::loadDB(fileName);
+    if(!world) {
+       THROW_EXCEPTION("---ERROR! 'World' is a 'nullptr'! exiting...\n\n");
     } else {
         std::cout << "'World' volume loaded." << std::endl;
     }

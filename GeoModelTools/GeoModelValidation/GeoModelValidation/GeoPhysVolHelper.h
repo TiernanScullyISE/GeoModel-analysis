@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define GEOPHYSVOLHELPER_H
 
 #include <GeoModelKernel/GeoDefinitions.h>
+#include <GeoModelKernel/GeoVPhysVol.h>
 #include <vector>
 
 class GeoVPhysVol;
@@ -41,11 +42,9 @@ namespace GeoModelTools {     // TODO resolve prototype/clone, identification sc
       
       public:
         /** Default constructor*/
-        GeoPhysVolHelper()
-       {}
-
+        GeoPhysVolHelper() = default;
         /** Destructor*/
-        virtual ~GeoPhysVolHelper(){}
+        virtual ~GeoPhysVolHelper() = default;
 
 	/** Recursive comparison of trees/branches/volumes : 
 	    in quiet mode (printFullInfo=False) , returns the indicator of first encountered difference ( 0 if none),
@@ -64,14 +63,14 @@ namespace GeoModelTools {     // TODO resolve prototype/clone, identification sc
         void saveToDb( const GeoVPhysVol* gv, std::string filename, bool silentMode=false); 
 
 	/** retrieve tree/branch/volume from sqlite database file : to be replaced by GMIO.h */
-        const GeoVPhysVol* retrieveFromDb( std::string filename) const; 
+        PVConstLink retrieveFromDb(const std::string& filename) const; 
 
 	/** shape comparison */
 	bool compareShapes( const GeoShape* gs1, const GeoShape* gv2, float tolerance ) const; 
 
         /** navigation through logical volumes */
-        const GeoVPhysVol* findBranch( const GeoVPhysVol* top, std::string name, bool fullName=true, int searchDepth=-1 ) const;
-        const GeoVPhysVol* findAlignableBranch( const GeoVPhysVol* top, std::string name, GeoTrf::Transform3D transf, bool fullName=true, int searchDepth=-1 ) const;
+        PVConstLink findBranch( const GeoVPhysVol* top, std::string name, bool fullName=true, int searchDepth=-1 ) const;
+        PVConstLink findAlignableBranch( const GeoVPhysVol* top, std::string name, GeoTrf::Transform3D transf, bool fullName=true, int searchDepth=-1 ) const;
 
         /** define partial name */
         void set_partial_name(unsigned int i0, unsigned int len) {

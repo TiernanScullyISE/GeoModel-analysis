@@ -118,7 +118,7 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
 {
     fTimer.Start();
 
-    const GeoVPhysVol* world = nullptr;
+    PVConstLink world{};
     G4LogicalVolume* envelope;
     if (fGeometryFileName.contains(".dylib") || fGeometryFileName.contains(".so"))
     {
@@ -178,7 +178,7 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
         G4cout << "Building the detector from the SQLite file: "<<fGeometryFileName<<G4endl;
 
         // open the DB
-        GMDBManager* db = new GMDBManager(fGeometryFileName.data());
+        auto db = std::make_unique<GMDBManager>(fGeometryFileName.data());
         /* Open database */
         if (db->checkIsDBOpen()) {
             G4cout << "Database is open!" << G4endl;
@@ -194,12 +194,11 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
         //std::cout << "Printing the list of all GeoMaterial nodes" << std::endl;
         //db->printAllMaterials();
         /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel readInGeo = GeoModelIO::ReadGeoModel(db);
+        GeoModelIO::ReadGeoModel readInGeo{db.get()};
         G4cout << "ReadGeoModel set.";
 
 
         /* build the GeoModel geometry */
-        //GeoPhysVol* world = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory and get an handle to the 'world' volume
         world = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory and get an handle to the 'world' volume
         G4cout << "ReadGeoModel::buildGeoModel() done." << G4endl;
         fTimer.Stop();

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
 
   /* build the GeoModel geometry */
-  GeoPhysVol* dbPhys = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory
+  PVConstLink dbPhys = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory
   qDebug() << "ReadGeoModel::buildGeoModel() done.";
 
   // create the world volume container and its manager

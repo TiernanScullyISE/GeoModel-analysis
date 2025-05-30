@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     std::cout << "\nSpecific NameTags and SerialDenominator tests:\n";
     const std::string db1_name = "geometry_db_test_1.db";
     GeoModelIO::IO::saveToDB(world, db1_name, 0, true); // we write to a .db file replacing the existing file
-    const GeoVPhysVol *world2 = GeoModelIO::IO::loadDB(db1_name, 0); // we reload it 
+    PVConstLink world2 = GeoModelIO::IO::loadDB(db1_name, 0); // we reload it 
     std::vector<std::string> t1 = testNTSD(world, "world");
     std::vector<std::string> t2 = testNTSD(pv1, "pv1");
     std::vector<std::string> t3 = testNTSD(world2, "world2");

@@ -193,7 +193,7 @@ int main(int argc, char ** argv) {
     }
 
     /* set the GeoModel reader */
-    GeoModelIO::ReadGeoModel readInGeo = GeoModelIO::ReadGeoModel(db.get());
+    GeoModelIO::ReadGeoModel readInGeo{db.get()};
 
     /* build the GeoModel geometry */
    PVConstLink dbPhys{readInGeo.buildGeoModel()}; // builds the whole GeoModel tree in memory

@@ -49,7 +49,7 @@ class TestIO {
             GeoModelIO::IO::countNodesFromDB(db1);
 
         std::cout << "3 -- Reading back the geometry from file" << std::endl;
-        const GeoVPhysVol* world2 = GeoModelIO::IO::loadDB(db1_name, loglevel);
+        PVConstLink world2 = GeoModelIO::IO::loadDB(db1_name, loglevel);
 
         std::cout << "4 -- Writing the geometry to file - 2nd time" << std::endl;
         GMDBManager db2 = GeoModelIO::IO::saveToDB(world2, db2_name, loglevel, forceDelete);
@@ -115,7 +115,7 @@ class TestIO {
         }
         std::string dbname = "test_geometry_db_memory.db";
         GMDBManager db = GeoModelIO::IO::saveToDB(world, dbname, loglevel, forceDelete);
-        const GeoVPhysVol* world2 = GeoModelIO::IO::loadDB(dbname, loglevel);
+        PVConstLink world2 = GeoModelIO::IO::loadDB(dbname, loglevel);
         if (loglevel >= 1) {
             std::cout
                 << "3 -- Objects in the restored in-memory 'world' volume..."

@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     infile.close();
 
     // open the DB
-    GMDBManager* db = new GMDBManager(fileName);
+    auto db = std::make_unique<GMDBManager>(fileName);
 
     /* Open database */
     if (db->checkIsDBOpen()) {
@@ -93,12 +93,11 @@ int main(int argc, char* argv[]) {
     db->printAllLogVols();
 
     /* setup the GeoModel reader */
-    GeoModelIO::ReadGeoModel readInGeo = GeoModelIO::ReadGeoModel(db);
+    GeoModelIO::ReadGeoModel readInGeo{db.get()};
     std::cout << "ReadGeoModel set.\n";
 
     /* build the GeoModel geometry */
-    const GeoVPhysVol* world =
-        readInGeo.buildGeoModel();  // builds the whole GeoModel tree in memory
+    PVConstLink world = readInGeo.buildGeoModel();  // builds the whole GeoModel tree in memory
                                     // and get an handle to the 'world' volume
     std::cout << "ReadGeoModel::buildGeoModel() done.\n";
 

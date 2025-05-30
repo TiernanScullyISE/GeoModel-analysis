@@ -79,7 +79,7 @@ class IO {
         return db;
     }
 
-    static const GeoVPhysVol* loadDB(const std::string path, unsigned loglevel = 0) {
+    static PVConstlink loadDB(const std::string path, unsigned loglevel = 0) {
         // check if DB file exists. 
         // If not, print a warning message and return a nullptr.
         std::ifstream inputfile(path.c_str());
@@ -97,14 +97,14 @@ class IO {
         }
 
         // open the DB
-        GMDBManager* db = new GMDBManager(path);
+       auto db = std::make_unique<GMDBManager>(path);
         if (!db->checkIsDBOpen()) {
             std::cout << "ERROR!! -- Database is not open!\n";
             THROW_EXCEPTION("It was not possible to open the DB correctly!");
         }
 
         /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel geoReader = GeoModelIO::ReadGeoModel(db);
+        GeoModelIO::ReadGeoModel geoReader{db.get()};
         // set loglevel of read action, if > 0
         if (loglevel > 0) {
             geoReader.setLogLevel(loglevel);
@@ -112,10 +112,7 @@ class IO {
 
         /* build the GeoModel geometry */
         // builds the whole GeoModel tree in memory
-        const GeoVPhysVol* rootVolume = geoReader.buildGeoModel();
-
-        delete db;
-        db = nullptr;
+        PVConstLink rootVolume = geoReader.buildGeoModel();
 
         return rootVolume;  // FIXME: See if you can pass a smart ptr
     }
@@ -134,14 +131,14 @@ class IO {
         inputfile.close();
 
         // open the DB
-        GMDBManager* db = new GMDBManager(path);
+        auto db = std::make_unique<GMDBManager>(path);
         if (!db->checkIsDBOpen()) {
             std::cout << "ERROR!! -- Database is not open!\n";
             THROW_EXCEPTION("It was not possible to open the DB correctly!");
         }
 
         /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel geoReader = GeoModelIO::ReadGeoModel(db);
+        GeoModelIO::ReadGeoModel geoReader{db.release()};
         // set loglevel of read action, if > 0
         if (loglevel > 0) {
             geoReader.setLogLevel(loglevel);

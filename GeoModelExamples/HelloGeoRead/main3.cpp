@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     inputfile.close();
 
     // open the DB
-    GMDBManager* db = new GMDBManager(fileName);
+    auto db = std::make_unique<GMDBManager>(fileName);
     /* Open database */
     if (db->checkIsDBOpen()) {
         std::cout << "OK! Database is open!\n";
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     db->printAllElements();
 
     /* set the GeoModel reader */
-    GeoModelIO::ReadGeoModel geoReader = GeoModelIO::ReadGeoModel(db);
+    GeoModelIO::ReadGeoModel geoReader{db.get()};
     std::cout << "OK! ReadGeoModel is set." << std::endl;
     
     /* reading data from the imported .db file by usinhg the reader object */
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 
 
     /* build the GeoModel tree and load it in memory */
-    const GeoVPhysVol* world = geoReader.buildGeoModel(); 
+    PVConstLink world = geoReader.buildGeoModel(); 
 
 
     // --- Reading the properties of the 'world' volume retrieved from the .db file

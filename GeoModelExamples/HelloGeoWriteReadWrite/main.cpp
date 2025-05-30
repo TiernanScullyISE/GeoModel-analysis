@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
   }
   infile2.close();
   // open the DB
-  GMDBManager* db2 = new GMDBManager(path);
+  auto db2 = std::make_unique<GMDBManager>(path);
   /* Open database */
   if (db2->checkIsDBOpen()) {
     std::cout << "OK! Database is open!\n";
@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
     throw;
   }
   /* setup the GeoModel reader */
-  GeoModelIO::ReadGeoModel geoReader = GeoModelIO::ReadGeoModel(db2);
+  GeoModelIO::ReadGeoModel geoReader{db2.get()};
   std::cout << "OK! ReadGeoModel is set." << std::endl;
   /* build the GeoModel geometry */
-  const GeoVPhysVol* dbPhys = geoReader.buildGeoModel(); // builds the whole GeoModel tree in memory
+  PVConstLink dbPhys = geoReader.buildGeoModel(); // builds the whole GeoModel tree in memory
   std::cout << "ReadGeoModel::buildGeoModel() done." << std::endl;
 
 

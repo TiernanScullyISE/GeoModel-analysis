@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     GeoModelIO::IO::saveToDB(world, testDB, loglevel, forceDelete);
 
     // load from the test DB
-    const GeoVPhysVol *world2 = GeoModelIO::IO::loadDB(testDB);
+    PVConstLink world2 = GeoModelIO::IO::loadDB(testDB);
 
     // get the child volume, then the shape from its logVol
     GeoIntrusivePtr<const GeoVPhysVol> childVol = world2->getChildVol(0);
