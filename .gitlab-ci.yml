@@ -203,7 +203,7 @@ ubu-gm-visualization:
   <<: *geomodel-job
   stage: step-A
   variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_VISUALIZATION=TRUE
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_VISUALIZATION=TRUE -DGEOMODEL_USE_QT6=1
 
 ubu-gm-examples:
   <<: *ubuntu-job
@@ -249,7 +249,7 @@ ubu-gm-all:
   <<: *geomodel-job
   stage: step-A
   variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE -DGEOMODEL_USE_QT6=1
   script: 
      - CI/compile_GeoModel.sh
      - mv ${CI_PROJECT_DIR}/../build ./
@@ -322,6 +322,7 @@ ubu-single-gmviz:
   needs: ["ubu-single-gmbase"]
   variables:
       SOURCE_DIR: "${CI_PROJECT_DIR}/GeoModelVisualization"
+      CMAKE_CONFIG_FLAGS: -DGEOMODEL_USE_QT6=1
   script:
     - CI/compile_GeoModel.sh
   artifacts:
