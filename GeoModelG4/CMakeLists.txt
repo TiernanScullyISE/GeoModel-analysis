@@ -2,7 +2,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 3.16...4.0)
-
+set(CMAKE_CXX_STANDARD 20)
 #Set up the project. Check if we build it with GeoModel or individually
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR) 
     # I am top-level project.

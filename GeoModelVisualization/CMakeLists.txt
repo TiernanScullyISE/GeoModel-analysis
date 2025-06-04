@@ -2,7 +2,7 @@
 
 # CMake settings
 cmake_minimum_required(VERSION 3.16...4.0)
-
+set(CMAKE_CXX_STANDARD 20)
 # Dummy call to 'project()', needed to set 'PROJECT_SOURCE_DIR'
 project( "GeoModelTools" )
 
