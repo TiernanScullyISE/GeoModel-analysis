@@ -366,7 +366,6 @@ public:
 	static QString buffer_writeaction(SoNode * root);
 	static void buffer_vrmlwriteaction(SoNode * root, const QString& filename);
 
-	static bool lineWidthAndPointSizeNeedsInit;
 	static double allowedLineWidthMin;
 	static double allowedLineWidthMax;
 	static double allowedLineWidthGranularity;
@@ -379,13 +378,12 @@ public:
 
 };
 
-bool VP1QtInventorUtils::Imp::lineWidthAndPointSizeNeedsInit = true;
-double VP1QtInventorUtils::Imp::allowedLineWidthMin = -1.0;
-double VP1QtInventorUtils::Imp::allowedLineWidthMax = -1.0;
-double VP1QtInventorUtils::Imp::allowedLineWidthGranularity = -1.0;
-double VP1QtInventorUtils::Imp::allowedPointSizeMin = -1.0;
-double VP1QtInventorUtils::Imp::allowedPointSizeMax = -1.0;
-double VP1QtInventorUtils::Imp::allowedPointSizeGranularity = -1.0;
+double VP1QtInventorUtils::Imp::allowedLineWidthMin = 1;
+double VP1QtInventorUtils::Imp::allowedLineWidthMax = 7.0;
+double VP1QtInventorUtils::Imp::allowedLineWidthGranularity = 0.5;
+double VP1QtInventorUtils::Imp::allowedPointSizeMin = 1;
+double VP1QtInventorUtils::Imp::allowedPointSizeMax = 12;
+double VP1QtInventorUtils::Imp::allowedPointSizeGranularity = 0.5;
 
 //____________________________________________________________________
 VP1QtInventorUtils::VP1QtInventorUtils()
@@ -1495,8 +1493,6 @@ void VP1QtInventorUtils::setMatColor( SoMaterial * m, const QColor& col,
 //_____________________________________________________________________________________
 void VP1QtInventorUtils::getLineWidthRanges(double& min, double& max, double& granularity)
 {
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	min = Imp::allowedLineWidthMin;
 	max = Imp::allowedLineWidthMax;
 	granularity = Imp::allowedLineWidthGranularity;
@@ -1505,8 +1501,6 @@ void VP1QtInventorUtils::getLineWidthRanges(double& min, double& max, double& gr
 //_____________________________________________________________________________________
 void VP1QtInventorUtils::getPointSizeRanges(double& min, double& max, double& granularity)
 {
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	min = Imp::allowedPointSizeMin;
 	max = Imp::allowedPointSizeMax;
 	granularity = Imp::allowedPointSizeGranularity;
@@ -1515,57 +1509,10 @@ void VP1QtInventorUtils::getPointSizeRanges(double& min, double& max, double& gr
 #include "VP1Base/VP1ExaminerViewer.h"
 
 //_____________________________________________________________________________________
-void VP1QtInventorUtils::ensureInitLineWidthAndPointSize(  SoQtRenderArea * ra )
-{
-	if (!Imp::lineWidthAndPointSizeNeedsInit)
-		return;
-	Imp::lineWidthAndPointSizeNeedsInit = false;
-	QWidget * w(0);
-	if (!ra) {
-		VP1Msg::messageVerbose("VP1QtInventorUtils WARNING: Have to create temporary renderarea for the sole "
-				"purpose of getting supported line widths and point sizes!");
-		w = new QWidget(0);
-		ra = new VP1ExaminerViewer(w);
-	}
-	SbVec2f range; float granularity;
-	ra->getLineWidthLimits(range, granularity);
-	float a,b;
-	range.getValue(a,b);
-	Imp::allowedLineWidthMin = a;
-	Imp::allowedLineWidthMax = b;
-	Imp::allowedLineWidthGranularity = granularity;
-	VP1Msg::messageVerbose("VP1QtInventorUtils Determined line widths supported by hardware (min,max,granularity) = ("
-			+VP1Msg::str(a)+", "+VP1Msg::str(b)+", "+VP1Msg::str(granularity)+")");
-	ra->getPointSizeLimits(range, granularity);
-	range.getValue(a,b);
-	Imp::allowedPointSizeMin = a;
-	Imp::allowedPointSizeMax = b;
-	Imp::allowedPointSizeGranularity = granularity;
-	VP1Msg::messageVerbose("VP1QtInventorUtils Determined point sizes supported by hardware (min,max,granularity) = ("
-			+VP1Msg::str(a)+", "+VP1Msg::str(b)+", "+VP1Msg::str(granularity)+")");
-	if (w) {
-		delete ra;
-		delete w;
-	}
-	//We clip to get a more consistent behaviour across hardware (and to limit ourselves to reasonable values:
-
-	if (Imp::allowedLineWidthMin<0.5)
-		Imp::allowedLineWidthMin = 0.5;
-	if (Imp::allowedLineWidthMax>7.0)
-		Imp::allowedLineWidthMax = 7.0;
-	if (Imp::allowedPointSizeMin<0.5)
-		Imp::allowedPointSizeMin = 0.5;
-	if (Imp::allowedPointSizeMax>12.0)
-		Imp::allowedPointSizeMax = 12.0;
-}
-
-//_____________________________________________________________________________________
 void VP1QtInventorUtils::setLimitsLineWidthSlider(QSlider * slider)
 {
 	if (!slider)
 		return;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	int nsteps = std::min(1000,std::max<int>(0,static_cast<int>((Imp::allowedLineWidthMax-Imp::allowedLineWidthMin)/Imp::allowedLineWidthGranularity)));
 	int stepsPerUnit = std::min(nsteps,std::max<int>(1,static_cast<int>(1.0/Imp::allowedLineWidthGranularity)));
 	slider->setRange(0,nsteps);
@@ -1578,8 +1525,6 @@ void VP1QtInventorUtils::setLimitsPointSizeSlider(QSlider * slider)
 {
 	if (!slider)
 		return;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	int nsteps = std::min(1000,std::max<int>(0,
 			static_cast<int>(0.5+(Imp::allowedPointSizeMax-Imp::allowedPointSizeMin)/Imp::allowedPointSizeGranularity)));
 	int stepsPerUnit = std::min(nsteps,std::max<int>(1,
@@ -1594,8 +1539,6 @@ void VP1QtInventorUtils::setValueLineWidthSlider(QSlider * slider, const double&
 {
 	if (!slider)
 		return;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	int itarget = std::min(slider->maximum(),std::max<int>(slider->minimum(),
 			static_cast<int>(0.5+(value-Imp::allowedLineWidthMin)/Imp::allowedLineWidthGranularity)));
 	if (slider->value()!=itarget)
@@ -1607,8 +1550,6 @@ void VP1QtInventorUtils::setValuePointSizeSlider(QSlider * slider, const double&
 {
 	if (!slider)
 		return;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	int itarget = std::min(slider->maximum(),std::max<int>(slider->minimum(),
 			static_cast<int>(0.5+(value-Imp::allowedPointSizeMin)/Imp::allowedPointSizeGranularity)));
 	if (slider->value()!=itarget)
@@ -1620,8 +1561,6 @@ double VP1QtInventorUtils::getValueLineWidthSlider(const QSlider * slider)
 {
 	if (!slider)
 		return 1.0;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	return std::max(Imp::allowedLineWidthMin,std::min(Imp::allowedLineWidthMax,
 			Imp::allowedLineWidthMin+Imp::allowedLineWidthGranularity * slider->value()));
 }
@@ -1631,8 +1570,6 @@ double VP1QtInventorUtils::getValuePointSizeSlider(const QSlider * slider)
 {
 	if (!slider)
 		return 1.0;
-	if (Imp::lineWidthAndPointSizeNeedsInit)
-		ensureInitLineWidthAndPointSize(0);
 	return std::max(Imp::allowedPointSizeMin,std::min(Imp::allowedPointSizeMax,
 			Imp::allowedPointSizeMin+Imp::allowedPointSizeGranularity * slider->value()));
 }

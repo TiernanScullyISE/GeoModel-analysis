@@ -147,9 +147,6 @@ public:
   static double getValueLineWidthSlider(const QSlider *);
   static double getValuePointSizeSlider(const QSlider *);
 
-  //Call whenever making a renderarea (so we don't need to create extra instances just for this info):
-  static void ensureInitLineWidthAndPointSize(SoQtRenderArea*);
-
 private:
 
   VP1QtInventorUtils();

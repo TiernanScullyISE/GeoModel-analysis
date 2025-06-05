@@ -26,7 +26,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     project( "GeoModelVisualization" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
     #Choose QT version here:
-    option (GEOMODEL_USE_QT6 "Use Qt6 for Visualization" OFF) 
+    option (GEOMODEL_USE_QT6 "Use Qt6 for Visualization" ON) 
 
     if (GEOMODEL_USE_QT6)
       set (QT_VERSION 6)

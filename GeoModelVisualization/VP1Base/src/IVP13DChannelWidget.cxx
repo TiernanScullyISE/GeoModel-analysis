@@ -100,7 +100,6 @@ void IVP13DChannelWidget::registerRenderArea(VP1ExaminerViewer* ra)
 		message("Error - tried to register NULL render area!");
 		return;
 	}
-	VP1QtInventorUtils::ensureInitLineWidthAndPointSize(ra);
 
 	m_d->renderareas.push_back(ra);
 	m_d->itE = m_d->renderareas.end();
