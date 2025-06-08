@@ -249,7 +249,7 @@ ubu-gm-all:
   <<: *geomodel-job
   stage: step-A
   variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE -DGEOMODEL_USE_QT6=1
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_TESTING=TRUE -DGEOMODEL_BUILD_ALL=TRUE -DGEOMODEL_USE_QT6=1
   script: 
      - CI/compile_GeoModel.sh
      - mv ${CI_PROJECT_DIR}/../build ./
