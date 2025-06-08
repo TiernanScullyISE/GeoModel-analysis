@@ -79,7 +79,7 @@ class IO {
         return db;
     }
 
-    static PVConstlink loadDB(const std::string path, unsigned loglevel = 0) {
+    static PVConstLink loadDB(const std::string path, unsigned loglevel = 0) {
         // check if DB file exists. 
         // If not, print a warning message and return a nullptr.
         std::ifstream inputfile(path.c_str());

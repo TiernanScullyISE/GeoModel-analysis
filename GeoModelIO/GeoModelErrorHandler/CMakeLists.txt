@@ -14,7 +14,7 @@ source_group( "GeoModelErrorHandler" FILES ${HEADERS} )
 target_include_directories( GeoModelErrorHandler INTERFACE
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
-target_link_libraries( GeoModelErrorHandler INTERFACE Qt5::Core )
+target_link_libraries( GeoModelErrorHandler INTERFACE Qt${QT_VERSION}::Core )
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR
    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
    target_compile_definitions( GeoModelErrorHandler INTERFACE

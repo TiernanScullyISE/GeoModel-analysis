@@ -24,7 +24,7 @@ find_package( CLHEP ) # Remove this dependency: it is brough in by TFPersistific
 
 ### External Dependencies
 # Find the Qt5 libraries, used e.g. to interface with the SQlite DB
-find_package(Qt5 COMPONENTS Core Sql Widgets REQUIRED) # TODO: remove Qt dependency, which comes from GeoModelDBManager
+find_package(Qt${QT_VERSION} COMPONENTS Core Sql Widgets REQUIRED) # TODO: remove Qt dependency, which comes from GeoModelDBManager
 # Instruct CMake to run Qt5 moc automatically when needed
 set(CMAKE_AUTOMOC ON) # TODO: do we need this here??
 
@@ -36,7 +36,7 @@ set(SRCS main.cpp )
 add_executable( hellogeo ${SRCS} )
 
 # Link all needed libraries
-target_link_libraries( hellogeo Qt5::Core Qt5::Sql GeoModelDBManager GeoModelRead GeoModelKernel GeoModelUtilities)
+target_link_libraries( hellogeo Qt${QT_VERSION}::Core Qt${QT_VERSION}::Sql GeoModelDBManager GeoModelRead GeoModelKernel GeoModelUtilities)
 
 # Set include directories
 target_include_directories( hellogeo SYSTEM PUBLIC ${GeoModelRead_INCLUDE_DIRS} ${GeoModelUtilities_INCLUDE_DIRS} )
