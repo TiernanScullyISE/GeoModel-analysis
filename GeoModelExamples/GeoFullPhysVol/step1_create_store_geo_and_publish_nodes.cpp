@@ -61,25 +61,9 @@ int main(int argc, char *argv[])
         #define cm3  SYSTEM_OF_UNITS::cm3
 
         // Define the chemical elements
-        GeoElement*  Nitrogen = new GeoElement ("Nitrogen" ,"N"  ,  7.0 ,  14.0067 *gr/mole);
-        GeoElement*  Oxygen   = new GeoElement ("Oxygen"   ,"O"  ,  8.0 ,  15.9995 *gr/mole);
-        GeoElement*  Argon    = new GeoElement ("Argon"    ,"Ar" , 18.0 ,  39.948  *gr/mole);
-        GeoElement*  Hydrogen = new GeoElement ("Hydrogen" ,"H"  ,  1.0 ,  1.00797 *gr/mole);
-        GeoElement*  Iron     = new GeoElement ("Iron"     ,"Fe" , 26.0 ,  55.847  *gr/mole);
-        GeoElement*  Carbon   = new GeoElement ("Carbon"   ,"C"  ,  6.0 ,  12.0107 *gr/mole);
-
-        // Define the materials
-
-	// Air: Nitrogen + Oxygen + Argon + Hydrogen
-        double densityOfAir=0.001214 *gr/cm3;
-        GeoMaterial *air = new GeoMaterial("Air", densityOfAir);
-        air->add(Nitrogen  , 0.7494);
-        air->add(Oxygen, 0.2369);
-        air->add(Argon, 0.0129);
-        air->add(Hydrogen, 0.0008);
-        air->lock();
-
-	// Steel: Iron + Carbon
+        GeoElement*  Iron     = make_intrusive<GeoElement>("Iron"     ,"Fe" , 26.0 ,  55.847  *gr/mole);
+        GeoElement*  Carbon   = make_intrusive<GeoElement>("Carbon"   ,"C"  ,  6.0 ,  12.0107 *gr/mole);
+      	// Steel: Iron + Carbon
         GeoMaterial* steel  = new GeoMaterial("Steel", 7.9 *gr/cm3);
         steel->add(Iron  , 0.98);
         steel->add(Carbon, 0.02);
@@ -95,22 +79,11 @@ int main(int argc, char *argv[])
   GeoPhysVol* world = new GeoPhysVol(worldLog);
 */
  
-  //--------------------------------------//
-  // Next make the box that describes
-  // the shape of the toy volume:
-  //--------------------------------------//
-  const GeoBox *toyBox = new GeoBox(1200*SYSTEM_OF_UNITS::cm,1200*SYSTEM_OF_UNITS::cm, 1200*SYSTEM_OF_UNITS::cm);
-  
-  //--------------------------------------//
-  // Bundle this with a material
-  // into a logical volume:
-  //--------------------------------------//
-  const GeoLogVol *toyLog = new GeoLogVol("ToyLog", toyBox, air);                 //
-  
+ 
   //--------------------------------------//
   // ..And create a physical volume:
   //--------------------------------------//
-  GeoPhysVol *toyPhys = new GeoPhysVol(toyLog);
+  PVLink toyPhys = createGeoWorld();
   
   //--------------------------------------//
   // Daughters

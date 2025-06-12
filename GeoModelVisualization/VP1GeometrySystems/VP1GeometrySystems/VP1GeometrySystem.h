@@ -90,7 +90,6 @@ protected slots:
   void saveMaterialsToFile(QString,bool);//(filename,onlyChangedMaterials)
   void loadMaterialsFromFile(QString);//filename
 
-  GeoPhysVol *newWorld()  const;
   void saveTrees();
 
   void toggleLocalAxes(int);
