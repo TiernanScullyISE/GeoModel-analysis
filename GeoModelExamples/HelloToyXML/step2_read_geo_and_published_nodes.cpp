@@ -17,7 +17,7 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 #include "GeoModelRead/ReadGeoModel.h"
 
 // C++ includes
@@ -139,8 +139,7 @@ int main(int argc, char* argv[]) {
                           << childVol->getLogVol()->getName();
                 std::cout << " and it has  " << childVol->getNChildVols()
                           << " child volumes" << std::endl;
-                std::cout << "\txf:";
-                GeoUtilFunctions::printTrf(childVol->getAbsoluteTransform());
+                std::cout << "\txf: "<<GeoTrf::toString(childVol->getAbsoluteTransform());
             }
         }
     }
@@ -171,8 +170,7 @@ int main(int argc, char* argv[]) {
                       << "']\n";
         std::cout << "\n\t--> key: " << key << " - AlignableTransform*: " << xf
                   << std::endl;
-        std::cout << "\txf:: ";
-        GeoUtilFunctions::printTrf(xf->getTransform());
+        std::cout << "\txf:: "<<GeoTrf::toString(xf->getTransform());
         ++ii;
     }
 
@@ -187,8 +185,7 @@ int main(int argc, char* argv[]) {
                       << "']\n";
         std::cout << "\n\t--> key: " << key << " - GeoFullPhysVol*: " << vol
                   << std::endl;
-        std::cout << "\txf:";
-        GeoUtilFunctions::printTrf(vol->getAbsoluteTransform());
+        std::cout << "\txf:"<<GeoTrf::toString(vol->getAbsoluteTransform());
         ++ii;
     }
 

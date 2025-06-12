@@ -15,7 +15,7 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoNameTag.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 // C++ includes
 #include <iostream>
@@ -96,8 +96,7 @@ int main(int argc, char *argv[])
 		  else if ( dynamic_cast<const GeoFullPhysVol*>(childVolV) ) {
 			  const GeoFullPhysVol* childVol = dynamic_cast<const GeoFullPhysVol*>(childVolV);
 			  std::cout << childVol << " is a GeoFullPhysVol, whose GeoLogVol's name is: " << childVol->getLogVol()->getName();
-			  std::cout<< " and it has  "<<childVol->getNChildVols()<<" child volumes" << std::endl;
-              GeoUtilFunctions::printTrf(childVol->getAbsoluteTransform());
+			  std::cout<< " and it has  "<<childVol->getNChildVols()<<" child volumes" << GeoTrf::toString(childVol->getAbsoluteTransform());
 		  }
 	  }
   }
@@ -124,8 +123,7 @@ int main(int argc, char *argv[])
                 << " - GeoFullPhysVol*: " << vol 
                     //<< " - AbsTransf: " << xf
                     //<< " , " << vol->getAbsoluteTransform() 
-                << std::endl;
-      GeoUtilFunctions::printTrf(vol->getAbsoluteTransform());
+                << GeoTrf::toString(vol->getAbsoluteTransform());
       ++ii;
   }
  

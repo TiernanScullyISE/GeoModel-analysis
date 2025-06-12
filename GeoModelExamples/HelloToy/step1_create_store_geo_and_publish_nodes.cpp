@@ -44,7 +44,7 @@
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
 #include "GeoModelKernel/GeoPublisher.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 #include "GeoGenericFunctions/AbsFunction.h"
 #include "GeoGenericFunctions/Variable.h"

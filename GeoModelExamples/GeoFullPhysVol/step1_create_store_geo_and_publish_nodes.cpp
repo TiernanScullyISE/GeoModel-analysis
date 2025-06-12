@@ -25,7 +25,7 @@
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
 #include "GeoModelKernel/GeoPublisher.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 #include "GeoGenericFunctions/AbsFunction.h"
 #include "GeoGenericFunctions/Variable.h"
@@ -148,8 +148,7 @@ int main(int argc, char *argv[])
     publisher->publishNode<GeoAlignableTransform*,std::string>(xform, keyStr);
     
     std::cout << "step1 - FPV, key: " << keyInt 
-              << " - xf: "; 
-    GeoUtilFunctions::printTrf(ringPhys->getAbsoluteTransform());
+              << " - xf: "<< GeoTrf::toString(ringPhys->getAbsoluteTransform());
 
   }
 
@@ -272,8 +271,8 @@ int main(int argc, char *argv[])
 		  else if ( dynamic_cast<const GeoFullPhysVol*>(childVolV) ) {
 			  const GeoFullPhysVol* childVol = dynamic_cast<const GeoFullPhysVol*>(childVolV);
 			  std::cout << childVol << " is a GeoFullPhysVol, whose GeoLogVol's name is: " << childVol->getLogVol()->getName();
-			  std::cout<< " and it has  "<<childVol->getNChildVols()<<" child volumes" << std::endl;
-              GeoUtilFunctions::printTrf(childVol->getAbsoluteTransform());
+			  std::cout<< " and it has  "<<childVol->getNChildVols()<<" child volumes "
+                  <<GeoTrf::toString(childVol->getAbsoluteTransform());
 		  }
 	  }
   }

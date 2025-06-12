@@ -38,7 +38,7 @@
 #include "GeoModelKernel/GeoSerialTransformer.h"
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoTube.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 #include "GeoModelWrite/WriteGeoModel.h"
 #include "GeoXmlInpManager/GeoInpRecordset.h"
 #include "GeoXmlInpManager/GeoXmlInpManager.h"
@@ -170,9 +170,6 @@ int main(int argc, char *argv[]) {
         publisher->publishNode<GeoAlignableTransform *, std::string>(xform,
                                                                      keyStr);
 
-        // std::cout << "step1 - FPV, key: " << keyInt
-        //           << " - xf: ";
-        // GeoUtilFunctions::printTrf(ringPhys->getAbsoluteTransform());
     }
 
     //--------------------------------------//

@@ -16,7 +16,7 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoNameTag.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 
 // C++ includes
 #include <iostream>
@@ -115,32 +115,6 @@ int main(int argc, char *argv[])
   unsigned int nChil = world->getNChildVols();
   std:: cout << "world's number of children: " << nChil << std::endl;
 
-/*
-  // loop over all children nodes
-  std::cout << "Looping over all 'volume' children (i.e., GeoPhysVol and GeoFullPhysVol)..." << std::endl;
-  for (unsigned int idx=0; idx<nChil; ++idx) {
-	  // PVConstLink nodeLink = world->getChildVol(idx);
-	  const GeoVPhysVol* childVolV = world->getChildVol(idx);
-
-	  // if ( dynamic_cast<const GeoVPhysVol*>( &(*( nodeLink ))) ) {
-
-		  std::cout << "\t" << "the child n. " << idx << " ";
-		  // const GeoVPhysVol *childVolV = &(*( nodeLink ));
-
-		  if ( dynamic_cast<const GeoPhysVol*>(childVolV) ) {
-			  const GeoPhysVol* childVol = dynamic_cast<const GeoPhysVol*>(childVolV);
-			  std::cout << "is a GeoPhysVol, whose GeoLogVol's name is: " << childVol->getLogVol()->getName();
-			  std::cout << " and it has  "<<childVol->getNChildVols()<<" child volumes" << std::endl;
-		  }
-		  else if ( dynamic_cast<const GeoFullPhysVol*>(childVolV) ) {
-			  const GeoFullPhysVol* childVol = dynamic_cast<const GeoFullPhysVol*>(childVolV);
-			  std::cout << "is a GeoFullPhysVol, whose GeoLogVol's name is: " << childVol->getLogVol()->getName();
-			  std::cout << " and it has  "<<childVol->getNChildVols()<<" child volumes" << std::endl;
-              std::cout << "\txf:"; GeoUtilFunctions::printTrf(childVol->getAbsoluteTransform());
-		  }
-	  // }
-  }
-  */
 
   std::cout << "We now read back from the DB the lists of published FullPhysVol and AlignableTransform nodes...\n";
   
@@ -179,8 +153,7 @@ int main(int argc, char *argv[])
       std::cout << "\n\t--> key: " << key
                 << " - AlignableTransform*: " << xf
                 << std::endl;
-      std::cout << "\txf:: ";
-      GeoUtilFunctions::printTrf(xf->getTransform());
+      std::cout << "\txf:: "<<GeoTrf::toString(xf->getTransform());
     }
     ++ii;
   }
@@ -200,7 +173,6 @@ int main(int argc, char *argv[])
         std::cout << "\n\t--> key: " << key
                   << " - GeoFullPhysVol*: " << vol
                   << std::endl;
-        // std::cout << "\txf:"; GeoUtilFunctions::printTrf(vol->getAbsoluteTransform()); // crashes
       }
       ++ii;
   }

@@ -70,7 +70,7 @@
 #include "GeoModelKernel/GeoSerialIdentifier.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
 #include "GeoModelKernel/GeoTransform.h"
-#include "GeoModelKernel/GeoUtilFunctions.h"
+#include "GeoModelHelpers/TransformToStringConverter.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoVSurface.h"
 #include "GeoModelKernel/GeoVSurfaceShape.h"
