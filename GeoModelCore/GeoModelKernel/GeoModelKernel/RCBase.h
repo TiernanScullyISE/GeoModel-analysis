@@ -33,10 +33,9 @@ class RCBase {
   //Decreases the reference count.  When the reference count
   //falls to zero, the object deletes itself.
   void unref () const noexcept {
-    if (m_count == 0) {
+    if (m_count == 0) [[unlikely]]{
       delete this; //...but do not touch m_count
-    }
-    if (--m_count == 0) {
+    } else if (--m_count == 0) {
       delete this;
     }
   }
