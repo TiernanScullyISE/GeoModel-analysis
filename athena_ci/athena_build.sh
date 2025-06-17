@@ -165,15 +165,14 @@ echo "package_filters=${package_filters}"
 
 
 echo "IS_MERGE_REQUEST = $IS_MERGE_REQUEST"
-#echo "HEADERS_CHANGED = $HEADERS_CHANGED"
+echo "HEADERS_CHANGED = $HEADERS_CHANGED"
 
-#if [ "$IS_MERGE_REQUEST" = "0" ] && [ "$HEADERS_CHANGED" = "1" ]; then
-#    echo "Is MR and header files have NOT changed"
-#else
-#    echo "Is NOT MR OR header files HAVE changed"
-#    cat "$full_package_filters" > "$package_filters"
-#fi
-cat "$full_package_filters" > "$package_filters"
+if [ "$IS_MERGE_REQUEST" = "0" ] && [ "$HEADERS_CHANGED" = "1" ]; then
+    echo "Is MR and header files have NOT changed"
+else
+    echo "Is NOT MR OR header files HAVE changed"
+    cat "$full_package_filters" > "$package_filters"
+fi
 
 cat "$patch_package_filters" >> "$package_filters"
 
