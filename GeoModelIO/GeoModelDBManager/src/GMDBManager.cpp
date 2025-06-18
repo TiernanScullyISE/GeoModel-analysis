@@ -199,8 +199,8 @@ void GMDBManager::createTableDataCaches() {
 
 void GMDBManager::printAllRecords(const std::string& tableName) const {
     // --- print table name
-    std::cout << "---" << std::endl;
-    std::cout << "'" << tableName << "' in db:" << std::endl;
+    std::cout << "---\n" ;
+    std::cout << "'" << tableName << "' in db:\n";
     // --- check if we stored table's data
     if (m_tableNames.find(tableName) == m_tableNames.end()) {
         std::cout << "\n*** ERROR!! No table '" << tableName
@@ -209,10 +209,9 @@ void GMDBManager::printAllRecords(const std::string& tableName) const {
     }
     // --- print table column names
     std::cout << "- " << GeoStrUtils::chainUp(m_tableNames.at(tableName), ", ")
-              << std::endl;
+              << "\n";
     // --- print records
     std::vector<std::vector<std::string>> records;
-    //  std::vector<std::string> nodeParams;
     records = getTableRecords_String(tableName);
     if (records.size()) {
         for (auto& row : records) {
@@ -220,7 +219,7 @@ void GMDBManager::printAllRecords(const std::string& tableName) const {
             for (auto& item : row) {
                 std::cout << item << ", ";
             }
-            std::cout << std::endl;
+            std::cout << "\n";
         }
     }
     std::cout << "---" << std::endl;

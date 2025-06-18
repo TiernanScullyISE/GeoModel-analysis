@@ -269,10 +269,8 @@ class GMDBManager {
     bool addRootVolume(const std::pair<std::string, unsigned>& rootValues);
 
     // GET methods
-
     std::string getDBFilePath();
 
-    // std::vector<std::string> getRootPhysVol();
     std::pair<unsigned, unsigned> getRootPhysVol();
 
     std::vector<std::string> getItemFromTableName(const std::string& tableName,

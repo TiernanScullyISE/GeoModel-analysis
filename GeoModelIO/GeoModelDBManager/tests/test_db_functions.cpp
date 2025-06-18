@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 #include <gtest/gtest.h>
+#include <array>
+#include <functional>
 #include <filesystem>
 
 #define GTEST_COUT std::cerr << "[ MESSAGE  ] "
@@ -40,18 +42,82 @@ protected:
     }
 };
 
+void expectTextInOutput(GMDBManager* d, auto fn, const std::string & txt) {
+  testing::internal::CaptureStdout();
+  (d->*fn)();
+  std::string output = testing::internal::GetCapturedStdout();
+  EXPECT_TRUE((output.find(txt)!=std::string::npos));
+}
+
+
 TEST_F(DatabaseTest, CanCreateDatabase) {
     EXPECT_TRUE(std::filesystem::exists(dbFile));
 }
 
 TEST_F(DatabaseTest, PropertiesOfAnUnintialisedDatabase) {
-  EXPECT_NO_THROW(dbManager->printAllDBTables());
   EXPECT_TRUE(dbManager->checkIsDBOpen());
-  EXPECT_NO_THROW(dbManager->printAllPhysVols());
-  EXPECT_NO_THROW(dbManager->printAllFullPhysVols());
-  EXPECT_NO_THROW(dbManager->printAllLogVols());
-  EXPECT_NO_THROW(dbManager->printAllMaterials());
-  
+  //
+  testing::internal::CaptureStdout();
+  EXPECT_NO_THROW(dbManager->printAllDBTables());
+  std::string output = testing::internal::GetCapturedStdout();
+  EXPECT_TRUE(output.empty()); //in contrast to subsequent tests, this is empty
+  output.clear();
+  // signature of an error in the output
+  const std::string errTxt{"ERROR"};
+  //
+  //Parameterless 'print' functions called on an uninitialised database
+  //do not throw but 
+  //result simply in a cout message which contains the "ERROR" text
+  auto expectErrorInOutput = [d = dbManager.get(), &errTxt] (auto fn){
+    expectTextInOutput(d,fn, errTxt);
+  };
+  using MemberFunc = decltype(&GMDBManager::printAllPhysVols);
+  constexpr std::array<MemberFunc,19> printFunctions{
+    &GMDBManager::printAllPhysVols,
+    &GMDBManager::printAllFullPhysVols,
+    &GMDBManager::printAllLogVols,
+    &GMDBManager::printAllMaterials,
+    &GMDBManager::printAllElements,
+    &GMDBManager::printAllShapes,
+    &GMDBManager::printAllShapesData,
+    &GMDBManager::printAllSerialDenominators,
+    &GMDBManager::printAllSerialIdentifiers,
+    &GMDBManager::printAllSerialTransformers,
+    &GMDBManager::printAllFunctions,
+    &GMDBManager::printAllTransforms,
+    &GMDBManager::printAllAlignableTransforms,
+    &GMDBManager::printAllNameTags,
+    &GMDBManager::printAllChildrenPositions,
+    &GMDBManager::printAllNodeTypes,
+    &GMDBManager::printRootVolumeId,
+    &GMDBManager::printDBVersion,
+    &GMDBManager::printRootVolumeId
+  };
+  for (const auto & f:printFunctions) expectErrorInOutput(f);
+  //'print' functions taking one parameter, defaulted to empty string
+  testing::internal::CaptureStdout();
+  EXPECT_NO_THROW(dbManager->printAllPublishedFullPhysVols());
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_TRUE((output.find(errTxt)!=std::string::npos));
+  output.clear();
+  //
+  testing::internal::CaptureStdout();
+  EXPECT_NO_THROW(dbManager->printAllPublishedAlignableTransforms());
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_TRUE((output.find(errTxt)!=std::string::npos));
+  output.clear();
+  //
+  testing::internal::CaptureStdout();
+  EXPECT_NO_THROW(dbManager->printAllRecords("Dummy"));//no tables exist anyway
+  output = testing::internal::GetCapturedStdout();
+  EXPECT_TRUE((output.find(errTxt)!=std::string::npos));
+  output.clear();
+  //
+  EXPECT_NO_THROW(dbManager->createTableDataCaches());
+  EXPECT_NO_THROW(dbManager->getAllDBTableColumns());
+  EXPECT_EQ(dbManager->getDBFilePath(),"test_database.db");
+  //the following throws, in contrast to most other methods
+  EXPECT_THROW(dbManager->getRootPhysVol(), std::runtime_error);
 }
 
 TEST_F(DatabaseTest, CanInitialiseDatabaseWithDefaultTables) {
