@@ -54,7 +54,7 @@ option(GEOMODEL_BUILD_FULLSIMLIGHT_PROFILING "Enable FullSimLight profiling targ
 option(GEOMODEL_BUILD_FSL "Enable the build of FSL and FullSimLight" OFF)
 option(GEOMODEL_BUILD_ATLASEXTENSIONS "Build the Custom ATLAS Extensions" OFF)
 option(GEOMODEL_BUILD_TESTING "Build the unit tests of GeoModel" OFF )
-option(GEOMODEL_USE_QT6 "Use QT6 for Visualization and FSL" OFF)
+option(GEOMODEL_USE_QT5 "Use QT5 for Visualization and FSL" OFF)
 
 include(CTest) # needs to be included at the top level
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
@@ -69,10 +69,10 @@ if(GEOMODEL_BUILD_FSL AND GEOMODEL_BUILD_FULLSIMLIGHT)
   set(GEOMODEL_BUILD_FULLSIMLIGHT FALSE)
 endif()
 
-if (GEOMODEL_USE_QT6)
-  set (QT_VERSION 6)
-else()
+if (GEOMODEL_USE_QT5)
   set (QT_VERSION 5)
+else()
+  set (QT_VERSION 6)
 endif()
 
 if(GEOMODEL_BUILD_FULLSIMLIGHT_PROFILING)

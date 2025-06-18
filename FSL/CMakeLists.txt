@@ -15,16 +15,11 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # set the project, with the version taken from the GeoModel parent project
     project( "fsl" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
-    #Choose QT version here:
-    option (GEOMODEL_USE_QT6 "Use Qt6 for Visualization" ON)
-
-    if (GEOMODEL_USE_QT6)
-      set (QT_VERSION 6)
-    else()
+    if (GEOMODEL_USE_QT5)
       set (QT_VERSION 5)
+    else()
+      set (QT_VERSION 6)
     endif()
-
-
 
     # Define color codes for CMake messages
     include( cmake_colors_defs )

@@ -30,29 +30,25 @@ On macOS, you can install all the needed third-party dependencies by using the [
 # install external dependencies
 brew install cmake eigen doxygen wget boost xerces-c nlohmann-json sqlite
 
-# if you want to build the visualization tools as well, please install and configure Qt5
-brew install qt5
+# if you want to build the visualization tools as well, please install and configure Qt6
+brew install qt
 ```
 Then, add the path to your shell, by running the command below, depending on your macOS machine:
 
 * Intel chip:
 ```
-echo 'export PATH="/usr/local/opt/qt@5/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> ~/.zshrc
 ```
 
 * Apple M1 (ARM64) chip:
 ```
-echo 'export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/opt/homebrew/opt/qt/bin:$PATH"' >> ~/.zshrc
 ```
 
 !!! note 
 
     After having installed `qt` with brew, and having run the `echo` command stated above, you should either open a new shell or run `source ~/.zshrc` in order to get the `qt` in the `PATH`.
      
-
-!!! warning 
-    If you have both Qt5 and Qt6 installed through the `brew` package managers on your macOS machine, you will probably get errors while building GeoModelVisualization. `brew` in fact installs the Qt6 and Qt5 packages as `qt` and `qt@5` respectively. When compiling GeoModelVisualization, CMake does find the correct version of Qt, while later the linker fails to do that and complain. To fix that, just remove Qt6 with `brew remove qt`. This is a temporary solution, until we move the GeoModel code to Qt6.
-
 
 !!! warning
 
@@ -74,9 +70,10 @@ On Ubuntu, you can install all the needed third-party dependencies by using the 
 sudo add-apt-repository ppa:kaktusjoe/geomodel
 sudo apt update
 
-sudo apt install git cmake wget unzip build-essential nlohmann-json3-dev libsoqt-bb-dev libxerces-c-dev libeigen3-dev geant4-dev libsqlite3-dev zlib1g-dev libhdf5-dev qtbase5-dev libhepmc3-dev pythia-dev
+sudo apt install git cmake wget unzip build-essential nlohmann-json3-dev libsoqt-bb-dev libxerces-c-dev libeigen3-dev geant4-dev libsqlite3-dev zlib1g-dev libhdf5-dev qt6-base-dev qt6-5compat-dev libhepmc3-dev pythia-dev
 ```
 
+<!--
 ### Linux/Fedora
 
 **On Fedora < 34**:
@@ -122,7 +119,7 @@ source /cvmfs/sft.cern.ch/lcg/views/LCG_100/x86_64-centos7-gcc9-opt/setup.sh
 ```
 
 After that, you can build the `GeoModel` without any extra options. 
-
+-->
 
 
 ## Visualization 3D graphics dependencies
@@ -187,7 +184,7 @@ cd ..
 
 #### b) Coin3D & SoQt
 
-Now, you should build Coin3D (the 3D graphics engine) and SoQt (the glue package between the 3D graphics engine, Coin, and the windowing system, Qt5):
+Now, you should build Coin3D (the 3D graphics engine) and SoQt (the glue package between the 3D graphics engine, Coin, and the windowing system, Qt6):
 
 
 ```bash
@@ -372,16 +369,15 @@ cmake -DGEOMODEL_BUILD_VISUALIZATION=1 ../GeoModel
 
 will enable the build of the geometry visualization tool, `GeoModelExplorer` (aka `gmex`).
 
-This option brings in the dependencies on either Qt5 or Qt6 (see below), Coin3D, SoQt, and nlohmann_json. 
+This option brings in the dependencies on either Qt6 (default) or Qt5 (activated explicitly, see below for details), Coin3D, SoQt, and nlohmann_json. 
 
-#### GEOMODEL_USE_QT6 -- Build GeoModel visualization against Qt6
+#### GEOMODEL_USE_QT5 -- Build GeoModel visualization against Qt5
 
 ```
-cmake -DGEOMODEL_USE_QT6=1 -DGEOMODEL_BUILD_VISUALIZATION=1 ../GeoModel
+cmake -DGEOMODEL_USE_QT5=1 -DGEOMODEL_BUILD_VISUALIZATION=1 ../GeoModel
 ```
 
-when combined with `GEOMODEL_BUILD_VISUALIZATION` configures the building of `GeoModel` visualization against `Qt6`.
-At the time of writing this documentation GeoModel is still building its visualization against `Qt5` by default.
+when combined with `GEOMODEL_BUILD_VISUALIZATION` configures the building of `GeoModel` visualization against `Qt5`.
 
 #### GEOMODEL_BUILD_EXAMPLES -- Build the examples
 
