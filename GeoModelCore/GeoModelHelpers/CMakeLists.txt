@@ -7,7 +7,7 @@ file( GLOB HEADERS GeoModelHelpers/*.h GeoModelHelpers/*.icc )
 # Create the library.
 add_library( GeoModelHelpers SHARED ${HEADERS} ${SOURCES} )
 
-target_link_libraries( GeoModelHelpers PRIVATE GeoModelCore::GeoModelKernel )
+target_link_libraries( GeoModelHelpers PRIVATE GeoModelCore::GeoModelKernel pthread )
 
 
 target_include_directories( GeoModelHelpers PUBLIC
@@ -53,7 +53,7 @@ if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     endif() 
   
     add_executable(${_theExec} ${_exeFile})
-    target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GTest::GTest GTest::Main)
+    target_link_libraries( ${_theExec} GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GTest::GTest GTest::Main pthread )
     add_test(NAME ${_theExec}
              COMMAND ${_theExec})
 
