@@ -85,7 +85,7 @@ Opening up the CMakeLists.txt file, we call our project GenerateHitsPlugin and c
 
 ```cmake
 # Set up the project.
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 project( "GenerateHitsPlugin" )
 
 # Find and set the source file.
