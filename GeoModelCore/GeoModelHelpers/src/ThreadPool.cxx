@@ -15,7 +15,7 @@ namespace{
 }
 #define PRINT_MSG(MSG)                                 \
     if (logLevel >= 1) {                               \
-        std::scoped_lock{s_coutMutex};                 \
+        (void)std::scoped_lock{s_coutMutex};           \
         std::cout<<__func__<<"() - "<<__LINE__<<" ("   \
                  <<std::this_thread::get_id()<<") "    \
                  <<MSG<<std::endl;                     \

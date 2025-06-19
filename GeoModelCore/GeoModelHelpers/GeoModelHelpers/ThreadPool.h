@@ -9,6 +9,8 @@
 #include <memory>
 #include <shared_mutex>
 #include <atomic>
+#include <stop_token>
+
 namespace GeoThreading {
     /** @brief Helper class to maintain a pool of threads. The threads
                are kept open until the pool closed. Users can send their tasks

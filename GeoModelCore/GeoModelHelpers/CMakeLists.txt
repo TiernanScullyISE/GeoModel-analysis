@@ -9,6 +9,10 @@ add_library( GeoModelHelpers SHARED ${HEADERS} ${SOURCES} )
 
 target_link_libraries( GeoModelHelpers PRIVATE GeoModelCore::GeoModelKernel pthread )
 
+#APPLE Clang not yet supporting stop_lock
+if( APPLE )
+  target_compile_options(GeoModelHelpers PUBLIC -fexperimental-library)
+endif()
 
 target_include_directories( GeoModelHelpers PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
