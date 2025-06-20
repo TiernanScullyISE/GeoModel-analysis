@@ -1,6 +1,5 @@
 // GeoModel includes
 #include "GeoModelDBManager/GMDBManager.h"
-
 #include "gtest/gtest.h"
 #include <gtest/gtest.h>
 #include <array>
@@ -22,9 +21,7 @@ protected:
     // open the DB connection
     dbManager = std::make_unique<GMDBManager>(dbFile);
     // check the DB connection
-    if (dbManager->checkIsDBOpen()){
-        std::cout << "OK! Database is open!" << std::endl;
-    } else {
+    if (not dbManager->checkIsDBOpen()){
         std::cout << "Database ERROR!! Exiting..." << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -64,6 +61,7 @@ void expectTextInOutput(GMDBManager* d, auto fn, const std::string & txt) {
   testing::internal::CaptureStdout();
   (d->*fn)();
   std::string output = testing::internal::GetCapturedStdout();
+  GTEST_COUT<<output<<"\n";
   EXPECT_TRUE((output.find(txt)!=std::string::npos));
 }
 void expectEmpty(GMDBManager* d, auto fn) {
@@ -220,7 +218,7 @@ TEST_F(DatabaseTest, PropertiesOfAnInitialisedButEmptyDatabase) {
   output.clear();
   //
   testing::internal::CaptureStdout();
-  EXPECT_NO_THROW(dbManager->printAllRecords("Shapes_Para"));
+  EXPECT_NO_THROW(dbManager->printAllRecords("Materials"));
   output = testing::internal::GetCapturedStdout();
   //id, computedVolume, XHalfLength, YHalfLength, ZHalfLength, Alpha, Theta, Phi
   GTEST_COUT<<output<<std::endl;
@@ -233,13 +231,87 @@ TEST_F(DatabaseTest, PropertiesOfAnInitialisedButEmptyDatabase) {
   EXPECT_TRUE((output.find(errTxt)!=std::string::npos));
   output.clear();
   EXPECT_FALSE(dbManager->checkTableFromDB("Dummy"));
-  EXPECT_TRUE(dbManager->checkTableFromDB("Shapes_Para"));
-  EXPECT_FALSE(dbManager->checkTableFromCache("Shapes_Para"));
+  EXPECT_TRUE(dbManager->checkTableFromDB("Materials"));
+  EXPECT_FALSE(dbManager->checkTableFromCache("Materials"));
   //
   EXPECT_NO_THROW(dbManager->createTableDataCaches());
-  EXPECT_TRUE(dbManager->checkTableFromCache("Shapes_Para"));
+  EXPECT_TRUE(dbManager->checkTableFromCache("Materials"));
   EXPECT_FALSE(dbManager->checkTableFromCache("Dummy"));
   EXPECT_NO_THROW(dbManager->getAllDBTableColumns());
 }
+
+TEST_F(DatabaseTest, CannotGetTableIdFromNodeTypeInEmptyDb){
+  dbManager->initDB();
+  //cache uninitialised
+  EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
+  dbManager->createTableDataCaches(); //does nothing on a new database
+  EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
+}
+
+
+
+TEST_F(DatabaseTest, WritingRecordsToInexistentTableThrows){
+  dbManager->initDB();
+  std::vector<std::vector<std::string>> records{
+    {"Carbon", "C"}
+  };
+  EXPECT_THROW(dbManager->addListOfRecordsToTable("Dummy", records), std::runtime_error);
+}
+
+TEST_F(DatabaseTest,WritingIncompleteDataToTableReturnsTrue){
+  dbManager->initDB();
+  std::vector<std::vector<std::string>> records{
+    {"Carbon", "C"} //incomplete record, gives error message but method returns 'true'
+  };
+  EXPECT_TRUE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingEmptyDataToTableReturnsTrue){
+  dbManager->initDB();
+  std::vector<std::vector<std::string>> records{
+  };
+  EXPECT_TRUE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingNonsenseToTableReturnsFalse){
+  dbManager->initDB();
+  std::vector<std::vector<std::string>> records{
+    {"Carbon", "C", "pooky", "bear"} //nonsense record; this successfully writes to the DB
+  };
+  EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingValidDataToTableReturnsFalse){
+  dbManager->initDB();
+  std::vector<std::vector<std::string>> records{
+    {"Carbon", "C", "6", "12"}
+  };
+  //the following actually returns false
+  EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, CannotGetTableIdFromNodeTypeForNewDatabase){
+  dbManager->initDB();
+   std::vector<std::vector<std::string>> records{
+    {"Carbon", "C", "6", "12"}
+  };
+  //the following actually returns false
+  dbManager->addListOfRecordsToTable("Elements", records);
+  //cache uninitialised
+  EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
+  dbManager->createTableDataCaches();//does nothing on a new database
+  EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 

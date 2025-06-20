@@ -765,29 +765,25 @@ bool GMDBManager::addListOfRecords(
 bool GMDBManager::addListOfRecordsToTable(
     const std::string& tableName,
     const std::vector<std::vector<std::string>>& records) {
-    
     if ( !(hasTableBeenCreatedInDB(tableName)) ) {
         THROW_EXCEPTION("ERROR!!! The DB has no '" << tableName << "' table; probably, the table has not been created in the DB.");
     }
-
     // get table columns and format them for query
     std::string tableColString =
         "(" + GeoStrUtils::chainUp(m_tableNames.at(tableName), ", ") + ")";
     if (m_loglevel > 2) std::cout << "tableColString:" << tableColString << std::endl;
 
     unsigned int nRecords = records.size();
-    std::cout << "Info: number of " << tableName
-              << " records to dump into the DB: " << nRecords << std::endl;
+    std::cout << "Info: number of " << tableName << " records to dump into the DB: " << nRecords << std::endl;
 
     // preparing the SQL query
-    std::string sql =
-        std::format("INSERT INTO {0} {1} VALUES ", tableName, tableColString);
+    std::string sql = std::format("INSERT INTO {0} {1} VALUES ", tableName, tableColString);
     unsigned int id = 0;
     for (const std::vector<std::string>& rec : records) {
         ++id;
         std::vector<std::string> items;
         items.reserve(rec.size());
-for (const std::string& item : rec) {
+        for (const std::string& item : rec) {
             items.push_back(
                 "'" + item +
                 "'");  // TODO: we should differentiate strings from other
@@ -880,8 +876,8 @@ bool GMDBManager::addListOfRecordsToTable(
         return false;
     }
     return true;
-    } 
-    return false;
+  } 
+  return false;
 }
 
 bool GMDBManager::addRecordsToTable(
@@ -2546,38 +2542,7 @@ void GMDBManager::storeNodeType(const std::string& nodeType, const std::string& 
 
 
 
-// TODO: move to sqlite3 library
-// void GMDBManager::loadTestData()
-//{
-//  // create test data
-//  QSqlQuery q;
-//  //
-//  //  qDebug() << "Loading Shapes...";
-//  //  if (!q.prepare(QLatin1String("insert into Shapes(name) values(?)")))
-//  {
-//  //    showError(q.lastError());
-//  //    return;
-//  //  }
-//  QVariant boxId    = addShape(QLatin1String("Box"), "");
-//  QVariant coneId   = addShape(QLatin1String("Cone"), "");
-//  QVariant sphereId = addShape(QLatin1String("Sphere"), "");
-//
-//  qWarning() << "Sample GeoElement data --> to be implemented!";
-//
-//  QVariant airId  =
-//  addMaterial(QLatin1String("Air"),QLatin1String("density"),QLatin1String("elements"));
-//  QVariant ironId =
-//  addMaterial(QLatin1String("Iron"),QLatin1String("density"),QLatin1String("elements"));
-//  QVariant leadId =
-//  addMaterial(QLatin1String("Lead"),QLatin1String("density"),QLatin1String("elements"));
-//
-//  QVariant worldLogId = addLogVol(QLatin1String("WorldLog"), boxId,
-//  airId); QVariant toyLogId  = addLogVol(QLatin1String("ToyLog"), coneId,
-//  leadId);
-//
-//  QVariant rootPhysId = addPhysVol(worldLogId, QVariant()); // no parent
-//  QVariant childPhysId = addPhysVol(toyLogId, rootPhysId);
-//}
+
 
 bool GMDBManager::storeRootVolume(const unsigned &id,
                                   const std::string_view nodeType) {

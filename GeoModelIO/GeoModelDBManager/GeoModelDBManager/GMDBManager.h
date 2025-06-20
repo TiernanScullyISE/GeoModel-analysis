@@ -345,10 +345,7 @@ class GMDBManager {
 
 
     unsigned int getTableIdFromNodeType(const std::string_view nodeType);
-    // bool createCustomTable(const std::string tableName, const
-    // std::vector<std::string> tableColNames, const std::vector<std::string>
-    // tableColTypes, const std::vector<std::vector<std::string>> &records ); //
-    // not used anymore!!
+    
 
     bool addListOfRecordsToTable(
         const std::string& tableName,
@@ -358,8 +355,7 @@ class GMDBManager {
         const std::vector<
             DBRowEntry>&
             records);
-    //  bool addListOfRecordsToTableOld(const QString tableName, const
-    //  std::vector<QStringList> records); // for the old SQlite only
+    
 
 
    private:
