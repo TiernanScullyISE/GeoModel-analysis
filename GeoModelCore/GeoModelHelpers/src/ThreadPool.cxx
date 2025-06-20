@@ -12,6 +12,7 @@
 
 namespace{
     constexpr unsigned logLevel = 0;
+    constexpr auto threadSleep = std::chrono::microseconds(10);
 }
 #define PRINT_MSG(MSG)                                 \
     if (logLevel >= 1) {                               \
@@ -56,13 +57,16 @@ namespace GeoThreading{
         m_workers.front()->newTask(std::make_unique<ThreadTask>([this](){distributeTasks();}));
     }
     void ThreadPool::appendTask(TaskFunction_t && f) {
-        /// No external threads registered
+        appendTask(std::make_unique<ThreadTask>(std::move(f)));
+    }
+    void ThreadPool::appendTask(std::unique_ptr<IThreadTask>&& task) {
+        /// No external threads registered. Execute the task right away
         if (m_workers.empty()) {
-            f();
+            task->execute();
             return;
         }
         std::unique_lock lock{m_mutex};
-        m_queue.emplace_back(std::make_unique<ThreadTask>(std::move(f)));
+        m_queue.emplace_back(std::move(task));
     }
     unsigned ThreadPool::queue() const {
         std::shared_lock lock{m_mutex};
@@ -81,40 +85,48 @@ namespace GeoThreading{
                 /// Just wait until the next one becomes free
                 if (idle_worker == m_workers.end()) {
                     PRINT_MSG("All worker are busy. Wait.");
-                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                    std::this_thread::sleep_for(threadSleep);
+                    continue;
+                }
+                std::unique_lock lock{m_mutex};
+
+                TaskCont_t::iterator ready_task = std::ranges::find_if(m_queue,
+                                                      [](const std::unique_ptr<IThreadTask>& task){
+                                                           return task->ready();
+                                                       });
+                if (ready_task == m_queue.end()) {
+                    PRINT_MSG("None of the "<<m_queue.size()<<" tasks is ready for execution.");
+                    std::this_thread::sleep_for(threadSleep);
                     continue;
                 }
                 /// Take the first task in the queue & assign it to the worker
-                std::unique_lock lock{m_mutex};
-                std::unique_ptr<ThreadTask>& theTask = m_queue.front();
-                (*idle_worker)->newTask(std::move(theTask));
+                (*idle_worker)->newTask(std::move(*ready_task));
                 /// Erase it from the queue
-                m_queue.erase(m_queue.begin());
+                m_queue.erase(ready_task);
             }
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(threadSleep);
         } while (m_active);
     }
     unsigned ThreadPool::nThreads() const { return m_workers.size() - 1; }
     void ThreadPool::drainQueue(){ 
         while (unsigned int n = queue()) {
             PRINT_MSG("Wait until the last "<<n<<" tasks are launched. ");
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(threadSleep);
         }
         while (unsigned int n = std::ranges::count_if(m_workers,
                 [](const std::unique_ptr<ThreadWorker>& worker){
                     return !worker->isIdle();
                 }) > m_active) {
             PRINT_MSG("Wait until the last "<<n<<" tasks are finished. ");
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(threadSleep);
         }
     }
 
 
     ThreadPool::ThreadTask::ThreadTask(TaskFunction_t&& f):
         m_func{std::move(f)}{}
-    void ThreadPool::ThreadTask::execute(){
-        m_func();
-    }
+    void ThreadPool::ThreadTask::execute(){ m_func(); }
+    bool ThreadPool::ThreadTask::ready() const { return true; }
 
     ThreadPool::ThreadWorker::ThreadWorker() = default;
     ThreadPool::ThreadWorker::~ThreadWorker() {
@@ -124,7 +136,7 @@ namespace GeoThreading{
         std::shared_lock lock{m_mutex};
         return !m_task;
     }
-    void ThreadPool::ThreadWorker::newTask(std::unique_ptr<ThreadTask>&& task){
+    void ThreadPool::ThreadWorker::newTask(std::unique_ptr<IThreadTask>&& task){
         std::unique_lock lock{m_mutex};
         if (m_task) {
             THROW_EXCEPTION("Cannot get a new task if there's still one");
@@ -145,7 +157,7 @@ namespace GeoThreading{
             PRINT_MSG("New execution round for the worker");
             while (isIdle()) {
                 PRINT_MSG("No thread yet registered ");
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                std::this_thread::sleep_for(threadSleep);
                 if (stop.stop_requested()) {
                     break;
                 }
@@ -157,7 +169,7 @@ namespace GeoThreading{
         m_thread.request_stop();
         while (!isIdle()) {
             PRINT_MSG("Wait until the last task is finished before shutting down");
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            std::this_thread::sleep_for(threadSleep);
         }
         PRINT_MSG("Shutdown thread: "<<m_thread.get_id()<<", "<<m_thread.joinable());
         m_thread.join();

@@ -17,8 +17,20 @@ namespace GeoThreading {
                onto the queue of the pool. The tasks are then taken
                from the queue and assigned to the next free thread for
                processing. */
-    class ThreadPool{
+    class ThreadPool {
         public:
+            /** @brief Interface class of which all thread tasks may inherit */
+            class IThreadTask{
+                public:
+                    virtual ~IThreadTask() = default;
+                    /** @brief Interface function for task execution. The
+                     *         method is called by the worker to launch the task */
+                    virtual void execute()  = 0;
+                    /** @brief Task state flag. If the task is not ready
+                     *          it's not scheduled for execution albeit it's 
+                     *          first in the queue */
+                    virtual bool ready() const = 0;
+            };
             /** @brief Returns the singelton to the ThreadPool instance
                        if called for the first time a new pool is created
                        with the number of threads specified during the call.
@@ -37,6 +49,8 @@ namespace GeoThreading {
              *      pool.appendTask([](){foo();});
              * @param f: Created task function to be appended to the queue */
             void appendTask(TaskFunction_t && f);
+            /** @brief Append a gneric task to the thread pool */
+            void appendTask(std::unique_ptr<IThreadTask>&& task);
             /** @brief Returns how many tasks are currently in the queue */
             unsigned queue() const;
             /** @brief Returns the number of threads in the pool */
@@ -65,10 +79,11 @@ namespace GeoThreading {
              *         in the queue the workers are kept in idle */
             void distributeTasks();
 
-            class ThreadTask{
+            class ThreadTask : public IThreadTask {
                 public:
                     ThreadTask(TaskFunction_t&& f);
-                    void execute();
+                    void execute() override final;
+                    virtual bool ready() const override final;
                 private:
                     TaskFunction_t m_func{[](){}}; 
             };
@@ -82,7 +97,7 @@ namespace GeoThreading {
                     /** @brief Returns whether the work is free for a new task */
                     bool isIdle() const;
                     /** @brief Assign a new task to the worker */
-                    void newTask(std::unique_ptr<ThreadTask>&& task);
+                    void newTask(std::unique_ptr<IThreadTask>&& task);
                     /** @brief Shuts down the worker. The current task is finalized
                      *         & the thread resources are freed */
                     void stop();
@@ -97,7 +112,7 @@ namespace GeoThreading {
                     /** @brief Mutex object to assign tasks thread safely  */
                     mutable std::shared_mutex m_mutex{};
                     /** @brief Current task to process */
-                    std::unique_ptr<ThreadTask> m_task{};
+                    std::unique_ptr<IThreadTask> m_task{};
                     /** @brief Thread object instantiated by the class */
                     std::jthread m_thread{[this](std::stop_token stop){launch(stop);}};
 
@@ -109,7 +124,8 @@ namespace GeoThreading {
 
             mutable std::shared_mutex m_mutex{};
             std::vector<std::unique_ptr<ThreadWorker>> m_workers{};
-            std::vector<std::unique_ptr<ThreadTask>> m_queue{};
+            using TaskCont_t = std::vector<std::unique_ptr<IThreadTask>>;
+            TaskCont_t m_queue{};
             std::atomic<bool> m_active{true};
 
 
