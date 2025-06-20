@@ -74,10 +74,10 @@ namespace GeoThreading {
             /** @brief Destructor finalizing the tasks which are still active and
              *         then emptying the queue */
             ~ThreadPool();
-            /** @brief Main function of the thread pool. The available tasks in the queue
-             *         are distributed among the available thread workers. If no task is 
-             *         in the queue the workers are kept in idle */
-            void distributeTasks();
+            /** @brief Main function called by the workers. The thread pool returns the 
+             *         next available task for processing, if there's any. The returned task 
+             *         is removed from the queue */
+            std::unique_ptr<IThreadTask> nextTask();
 
             class ThreadTask : public IThreadTask {
                 public:
@@ -91,13 +91,11 @@ namespace GeoThreading {
             class ThreadWorker{
                 public:
                     /** @brief Constructor spawning a new thread */
-                    ThreadWorker();
+                    ThreadWorker(ThreadPool* parent);
                     /** @brief Destructor */
                     ~ThreadWorker();
                     /** @brief Returns whether the work is free for a new task */
                     bool isIdle() const;
-                    /** @brief Assign a new task to the worker */
-                    void newTask(std::unique_ptr<IThreadTask>&& task);
                     /** @brief Shuts down the worker. The current task is finalized
                      *         & the thread resources are freed */
                     void stop();
@@ -107,14 +105,12 @@ namespace GeoThreading {
                                the thread to sleep 
                         @param stop: Control token to indicate that the thread needs to terminate. */
                     void launch(std::stop_token stop);
-                    /** @brief  Execute the task and release it after  */
-                    void executeTask();
-                    /** @brief Mutex object to assign tasks thread safely  */
-                    mutable std::shared_mutex m_mutex{};
-                    /** @brief Current task to process */
-                    std::unique_ptr<IThreadTask> m_task{};
+                    /** @brief Pointer to the thread pool instance spawning the Worker. */
+                    ThreadPool* m_parent{};
                     /** @brief Thread object instantiated by the class */
                     std::jthread m_thread{[this](std::stop_token stop){launch(stop);}};
+                    /** @brief flag indicating that the worker is sleeping */
+                    std::atomic<bool> m_idle{true};
 
             };
             /** @brief Singelton pointer */
@@ -126,9 +122,6 @@ namespace GeoThreading {
             std::vector<std::unique_ptr<ThreadWorker>> m_workers{};
             using TaskCont_t = std::vector<std::unique_ptr<IThreadTask>>;
             TaskCont_t m_queue{};
-            std::atomic<bool> m_active{true};
-
-
     };
 }
 
