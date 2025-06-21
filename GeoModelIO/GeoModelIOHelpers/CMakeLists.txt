@@ -49,19 +49,19 @@ install( FILES ${HEADERS}
 
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     # global I/O tests
-    add_executable(test_io_shared_serialtransformers tests/test_io_shared_serialtransformers.cpp)
-    target_link_libraries( test_io_shared_serialtransformers GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-    add_test(NAME test_IO_SharedSerialTransformers
-    	     COMMAND test_io_shared_serialtransformers)
+      file(GLOB_RECURSE files "tests/*.cxx")
+    foreach(_exeFile ${files})
+      get_filename_component(_theExec ${_exeFile} NAME_WE)
+      get_filename_component(_theLoc ${_exeFile} DIRECTORY)
+  
+    if(${_theLoc} MATCHES "DoNotBuild")
+      continue()
+    endif() 
+  
+    add_executable(${_theExec} ${_exeFile})
+    target_link_libraries( ${_theExec} GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers GTest::GTest GTest::Main pthread )
+    add_test(NAME ${_theExec}
+             COMMAND ${_theExec})
 
-    # I/O Unit tests
-    add_executable(test_io_shapes_unidentifiedshape tests/test_io_UnidentifiedShape.cpp)
-    target_link_libraries( test_io_shapes_unidentifiedshape GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-    add_test(NAME test_IO_Shapes_UnidentifiedShape
-             COMMAND test_io_shapes_unidentifiedshape)
-
-    add_executable(test_io_shapes_ellipticaltube tests/test_io_shape_EllipticalTube.cpp)
-    target_link_libraries( test_io_shapes_ellipticaltube GeoModelIO::GeoModelDBManager GeoModelCore::GeoModelHelpers GeoModelCore::GeoModelKernel GeoModelIO::GeoModelIOHelpers)
-    add_test(NAME test_IO_Shapes_EllipticalTube
-             COMMAND test_io_shapes_ellipticaltube)
+    endforeach()
 endif()
