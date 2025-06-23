@@ -4,9 +4,12 @@
 #include <gtest/gtest.h>
 #include <array>
 #include <functional>
+#include <iostream>
 #include <filesystem>
 
 #define GTEST_COUT std::cerr << "[ MESSAGE  ] "
+
+using namespace std::string_literals;
 
 class DatabaseTest : public ::testing::Test {
 protected:
@@ -29,7 +32,7 @@ protected:
 
   void TearDown() override {
     if (std::filesystem::exists(dbFile)) {
-        std::filesystem::remove(dbFile);
+      std::filesystem::remove(dbFile);
     }
   }
 };
@@ -248,9 +251,8 @@ TEST_F(DatabaseTest, CannotGetTableIdFromNodeTypeInEmptyDb){
   EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
 }
 
-
-
-TEST_F(DatabaseTest, WritingRecordsToInexistentTableThrows){
+TEST_F(DatabaseTest, WritingStringRecordsToInexistentTableThrows){
+  GTEST_COUT <<"Tests using vector<vector<string>> input\n";
   dbManager->initDB();
   std::vector<std::vector<std::string>> records{
     {"Carbon", "C"}
@@ -258,7 +260,7 @@ TEST_F(DatabaseTest, WritingRecordsToInexistentTableThrows){
   EXPECT_THROW(dbManager->addListOfRecordsToTable("Dummy", records), std::runtime_error);
 }
 
-TEST_F(DatabaseTest,WritingIncompleteDataToTableReturnsTrue){
+TEST_F(DatabaseTest,WritingStringIncompleteDataToTableReturnsTrue){
   dbManager->initDB();
   std::vector<std::vector<std::string>> records{
     {"Carbon", "C"} //incomplete record, gives error message but method returns 'true'
@@ -266,14 +268,14 @@ TEST_F(DatabaseTest,WritingIncompleteDataToTableReturnsTrue){
   EXPECT_TRUE(dbManager->addListOfRecordsToTable("Elements", records));
 }
 
-TEST_F(DatabaseTest, WritingEmptyDataToTableReturnsTrue){
+TEST_F(DatabaseTest, WritingStringEmptyDataToTableReturnsTrue){
   dbManager->initDB();
   std::vector<std::vector<std::string>> records{
   };
   EXPECT_TRUE(dbManager->addListOfRecordsToTable("Elements", records));
 }
 
-TEST_F(DatabaseTest, WritingNonsenseToTableReturnsFalse){
+TEST_F(DatabaseTest, WritingStringNonsenseToTableReturnsFalse){
   dbManager->initDB();
   std::vector<std::vector<std::string>> records{
     {"Carbon", "C", "pooky", "bear"} //nonsense record; this successfully writes to the DB
@@ -281,7 +283,7 @@ TEST_F(DatabaseTest, WritingNonsenseToTableReturnsFalse){
   EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
 }
 
-TEST_F(DatabaseTest, WritingValidDataToTableReturnsFalse){
+TEST_F(DatabaseTest, WritingStringValidDataToTableReturnsFalse){
   dbManager->initDB();
   std::vector<std::vector<std::string>> records{
     {"Carbon", "C", "6", "12"}
@@ -302,6 +304,54 @@ TEST_F(DatabaseTest, CannotGetTableIdFromNodeTypeForNewDatabase){
   dbManager->createTableDataCaches();//does nothing on a new database
   EXPECT_THROW(dbManager->getTableIdFromNodeType("Elements"), std::runtime_error);
 }
+
+TEST_F(DatabaseTest, WritingVariantRecordsToInexistentTableThrows){
+  dbManager->initDB();
+  GTEST_COUT<<"Testing vector<vector<variant<int,long,float,double,std::string>>> inputs\n";
+  DBRowsList records{
+    {"Carbon"s, "C"s}
+  };
+  EXPECT_THROW(dbManager->addListOfRecordsToTable("Dummy", records), std::runtime_error);
+}
+
+TEST_F(DatabaseTest,WritingVariantIncompleteDataToTableReturnsTrue){
+  dbManager->initDB();
+  DBRowsList records{
+    {"Carbon"s, "C"s} //incomplete record, gives error message but method returns 'true'
+  };
+  EXPECT_TRUE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingVariantEmptyDataToTableReturnsFalse){ //contrary to string case
+  dbManager->initDB();
+  DBRowsList records{
+  };
+  EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingVariantNonsenseToTableReturnsFalse){
+  dbManager->initDB();
+  DBRowsList records{
+    {"Carbon"s, "C"s, "pooky"s, "bear"s} //nonsense record; this successfully writes to the DB
+  };
+  EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+TEST_F(DatabaseTest, WritingVariantValidDataToTableReturnsFalse){
+  dbManager->initDB();
+  DBRowsList records{
+    {"Carbon", "C", 6, 12}
+  };
+  //the following actually returns false
+  EXPECT_FALSE(dbManager->addListOfRecordsToTable("Elements", records));
+}
+
+
+
+
+
+
+
 
 
 

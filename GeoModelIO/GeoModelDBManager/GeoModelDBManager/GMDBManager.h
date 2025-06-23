@@ -225,16 +225,10 @@ class GMDBManager {
 
     int execQuery(const std::string& queryStr);
 
-    bool addListOfRecords(const std::string& geoType,
-                          const std::vector<std::vector<std::string>>& records);
-    bool addListOfRecords(const std::string& geoType,
-                          const DBRowsList& records);
+    bool addListOfRecords(const std::string& geoType, const std::vector<std::vector<std::string>>& records);
+    bool addListOfRecords(const std::string& geoType, const DBRowsList& records);
 
-    bool addRecordsToTable(
-        const std::string& tableName,
-        const DBRowEntry&
-            records);
-
+    bool addRecordsToTable(const std::string& tableName, const DBRowEntry& records);
     bool addListOfChildrenPositions(const DBRowsList &records);
 
     /**
