@@ -271,9 +271,9 @@ void GeoMaterial::lock () {
   // -------------------------------------------//     
 
   double dEDxConstant{0.}, dEDxI0{0.}, NILinv{0.}, radInv{0.};
-//  std::sort(m_elements.begin(), m_elements.end(),[](const ElementWithFrac& a, const ElementWithFrac& b){
-//      return a.second > b.second;
-//  });
+  std::sort(m_elements.begin(), m_elements.end(),[](const ElementWithFrac& a, const ElementWithFrac& b){
+      return a.second > b.second;
+  });
 
   // ===============Renormalization================================  
   { 
