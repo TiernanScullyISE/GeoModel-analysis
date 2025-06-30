@@ -9,6 +9,9 @@ project( "GeoModel" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 # Make the 'cmake' module directory visible to CMake.
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
