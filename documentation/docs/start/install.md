@@ -40,7 +40,6 @@ If you have outdated packages, these commands will replace those packages with t
 
     We strongly suggest to use the alternative X11 window manager when running GMEX (or all other SoQt/Coin3D-based applications) on Ubuntu, for the time being.
 
-    Note also:  hardware acceleration is required for the GMEX application to work properly.  On computers with NVidia graphics, install and run the `nvidia-settings` application; go into the `PRIME Profiles` section and choose performance mode.  
 
 ## How to install GeoModel on macOS
 
@@ -187,7 +186,7 @@ If you want to uninstall GeoModel libraries and applications, you can follow the
 If you installed GeoModel by using Homebrew as suggested above, you can easily uninstall all the GeoModel packages with a single `brew` command:
 
 ```
-brew remove geomodel geomodel-tools geomodel-visualization geomodel-geomodelg4 geomodel-fullsimlight geomodel-thirdparty-simage geomodel-thirdparty-coin geomodel-thirdparty-soqt
+brew remove geomodel geomodel-tools geomodel-visualization geomodel-geomodelg4 geomodel-fullsimlight
 ```
 
 
