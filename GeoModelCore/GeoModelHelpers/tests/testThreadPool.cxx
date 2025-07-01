@@ -53,14 +53,18 @@ TEST_F(ThreadPoolTest, MultipleTasksExecution) {
 TEST_F(ThreadPoolTest, QueueSizeDecreasesAfterDraining) {
     ThreadPool& pool = ThreadPool::getPool(2);
     constexpr unsigned nTests = 10;
+    bool keepOnHold{true};
     for (int i = 0; i < nTests; ++i) {
-        pool.appendTask([]() { 
-            const unsigned wait = std::rand() % 15 + 50;
-            std::this_thread::sleep_for(wait*1ms); 
+        pool.appendTask([&keepOnHold]() { 
+            while (keepOnHold) {
+                const unsigned wait = std::rand() % 15 + 50;
+                std::this_thread::sleep_for(wait*1ms); 
+            }
         });
     }
 
     EXPECT_EQ(pool.queue(), nTests);
+    keepOnHold = false;
     pool.drainQueue();
     EXPECT_EQ(pool.queue(), 0);
 }
