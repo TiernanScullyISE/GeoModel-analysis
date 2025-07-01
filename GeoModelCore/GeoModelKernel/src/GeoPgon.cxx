@@ -149,9 +149,7 @@ bool GeoPgon::contains (double x, double y, double z) const
 void GeoPgon::addPlane (double ZPlane, double RMinPlane, double RMaxPlane)
 {
   // Basic sanity checks
-  if(RMinPlane < 0.
-     || RMaxPlane <= 0.
-     || RMaxPlane < RMinPlane) {
+  if(RMinPlane < 0. || RMaxPlane < RMinPlane) {
     THROW_EXCEPTION("GeoPcon::addPlane() wrong arguments! ("
 		    << ZPlane << ","
 		    << RMinPlane << ","
