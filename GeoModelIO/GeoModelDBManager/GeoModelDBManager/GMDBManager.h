@@ -48,7 +48,6 @@ class GMDBManager {
      * @param path - absolute path to db file
      */
     GMDBManager(const std::string &path);
-    //  GMDBManagerStd(const std::string &path);
 
     /**
      * @brief Destructor

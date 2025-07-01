@@ -50,7 +50,19 @@ if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     	     COMMAND test_create_db_file)
 
     # Create test executable
-    add_executable(testGeoModelDBManager tests/testGeoModelDBManager.cpp)
-    target_link_libraries(testGeoModelDBManager GeoModelDBManager GTest::GTest GTest::Main GeoModelKernel)
-    add_test(NAME testGeoModelDBManager COMMAND testGeoModelDBManager)
+    add_executable(testGMDBManager tests/testGMDBManager.cpp)
+    target_link_libraries(testGMDBManager GeoModelDBManager  GTest::GTest GTest::Main GeoModelKernel)
+    add_test(NAME testGMDBManager COMMAND testGMDBManager)
+    #
+    add_executable(testGMDBManagerQuery tests/testGMDBManagerQuery.cpp)
+    target_link_libraries(testGMDBManagerQuery GeoModelDBManager  GTest::GTest GTest::Main GeoModelKernel)
+    add_test(NAME testGMDBManagerQuery COMMAND testGMDBManagerQuery)
+    #
+    add_executable(testGMSQLiteConnection tests/testGMSQLiteConnection.cpp)
+    target_link_libraries(testGMSQLiteConnection GeoModelDBManager GTest::GTest GTest::Main SQLite::SQLite3 GeoModelKernel )
+    add_test(NAME testGMSQLiteConnection COMMAND testGMSQLiteConnection)
+    #
+    add_executable(testGMSQLiteConnectionQuery tests/testGMSQLiteConnectionQuery.cpp)
+    target_link_libraries(testGMSQLiteConnectionQuery GeoModelDBManager GTest::GTest GTest::Main SQLite::SQLite3 GeoModelKernel )
+    add_test(NAME testGMSQLiteConnectionQuery COMMAND testGMSQLiteConnectionQuery)
 endif()
