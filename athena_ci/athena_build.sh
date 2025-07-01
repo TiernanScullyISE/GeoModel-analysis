@@ -47,7 +47,7 @@ fi
 echo "ATHENA_SOURCE: ${ATHENA_SOURCE}"
 
 source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh || true
-asetup none,gcc13,cmakesetup || true
+asetup none,gcc13,cmakesetup --gcclocation=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18 || true
 lsetup git || true
 
 NINJA=/cvmfs/sft.cern.ch/lcg/releases/ninja/1.10.0-d608d/x86_64-el9-gcc13-opt/bin/ninja
@@ -138,7 +138,7 @@ cmake --install geomodel-build > gm_install.log
 
 heading "Setup Athena"
 
-asetup Athena,${ATHENA_RELEASE},latest || true
+asetup Athena,${ATHENA_RELEASE},latest --gcclocation=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18 || true
 
 
 n=10
