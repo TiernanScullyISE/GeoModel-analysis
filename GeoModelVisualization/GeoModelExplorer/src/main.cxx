@@ -37,7 +37,7 @@ int main(int argc, char** argv)
   setenv("LC_MEASUREMENT","en_US.UTF-8",1);
   setenv("LC_TIME","en_US.UTF-8",1);
   setenv("LC_NUMERIC","en_US.UTF-8",1);
-    
+  setenv("QT_QPA_PLATFORM","xcb",0);
 
   
   auto pManip= [] (const char * variable, const char *plus) {
