@@ -28,6 +28,8 @@
 int main(int argc, char** argv)
 {
 
+#ifndef __APPLE__
+    
   setenv("LC_ADDRESS","en_US.UTF-8",1);
   setenv("LC_NAME","en_US.UTF-8",1);
   setenv("LC_MONETARY","en_US.UTF-8",1);
@@ -38,7 +40,7 @@ int main(int argc, char** argv)
   setenv("LC_TIME","en_US.UTF-8",1);
   setenv("LC_NUMERIC","en_US.UTF-8",1);
   setenv("QT_QPA_PLATFORM","xcb",0);
-
+#endif
   
   auto pManip= [] (const char * variable, const char *plus) {
 		 const char *path=getenv(variable);
