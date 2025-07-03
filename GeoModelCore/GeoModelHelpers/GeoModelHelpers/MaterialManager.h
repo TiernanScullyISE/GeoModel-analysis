@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO_MODEL_XML_MATERIAL_MANAGER_H
@@ -36,7 +36,7 @@ class MaterialManager {
                     double a);
     /// @brief  Add a GeoElement* to the managed objects. If an element with the same name
     ///         has already been registered, then an exception is thrown
-    void addElement(GeoElement* elePtr);
+    void addElement(const GeoElement* elePtr);
     /// @brief Returns whether the element is already registered
     bool isElementDefined(const std::string& eleName) const;
 
@@ -78,8 +78,7 @@ class MaterialManager {
  
     virtual ~MaterialManager();
 
-    using ElementPtr = GeoIntrusivePtr<GeoElement>;
-    using ConstElementPtr = GeoIntrusivePtr<const GeoElement>;
+    using ElementPtr = GeoIntrusivePtr<const GeoElement>;
     using MaterialPtr = GeoIntrusivePtr<GeoMaterial>;
     using ConstMaterialPtr = GeoIntrusivePtr<const GeoMaterial>;
 
@@ -91,11 +90,11 @@ class MaterialManager {
         MaterialFactory(MaterialPtr mat);
 
         void addComponent(const ConstMaterialPtr& mat, double fraction);
-        void addComponent(const ConstElementPtr& ele, double fraction);
+        void addComponent(const ElementPtr& ele, double fraction);
 
         const GeoMaterial* get() const;
       private:
-        using ElementComponent = std::pair<ConstElementPtr, double>;
+        using ElementComponent = std::pair<ElementPtr, double>;
         std::vector<ElementComponent> m_components{};
         double m_totFraction{0.};
         MaterialPtr m_material{};

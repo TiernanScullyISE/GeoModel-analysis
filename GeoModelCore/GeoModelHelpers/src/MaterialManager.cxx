@@ -51,11 +51,11 @@ MaterialManager::MaterialFactory::MaterialFactory(MaterialPtr mat):
 
 void MaterialManager::MaterialFactory::addComponent(const ConstMaterialPtr& mat, double fraction) {
     for (unsigned int ele = 0 ; ele < mat->getNumElements(); ++ele) {
-        ConstElementPtr elePtr{mat->getElement(ele)};
+        ElementPtr elePtr{mat->getElement(ele)};
         addComponent(elePtr, mat->getFraction(ele) * fraction);
     }
 }
-void MaterialManager::MaterialFactory::addComponent(const ConstElementPtr& ele, double fraction) {
+void MaterialManager::MaterialFactory::addComponent(const ElementPtr& ele, double fraction) {
     m_components.emplace_back(std::make_pair(ele, fraction));
     m_totFraction += fraction;
 }
@@ -133,12 +133,12 @@ void MaterialManager::printAll() const {
 }
 
 void MaterialManager::addElement(const std::string &name, const std::string &symbol, double z, double a) {
-    GeoIntrusivePtr<GeoElement> newElement{make_intrusive<GeoElement>(name,symbol,z,a*atomicDensity)};
+    auto newElement{make_intrusive<GeoElement>(name,symbol,z,a*atomicDensity)};
     addElement(newElement);
 }
 
-void MaterialManager::addElement(GeoElement* el) {
-    GeoIntrusivePtr<GeoElement> newElement{el};
+void MaterialManager::addElement(const GeoElement* el) {
+    GeoIntrusivePtr<const GeoElement> newElement{el};
     auto result = m_elements.insert(std::make_pair(newElement->getName(), newElement));
     if(!result.second) {
       THROW_EXCEPTION("Attempted to redefine element " << newElement->getName());

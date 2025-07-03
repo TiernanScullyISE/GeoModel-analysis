@@ -107,12 +107,13 @@ if [ "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" == "main" ];then
     fill_line "-"
     git fetch origin
     git diff HEAD origin/main
-    git rebase origin/main
-    fill_line "-"
-    echo "Changes w.r.t to main after rebase"
-    fill_line "-"
+    git status
+#    git rebase origin/main
+#    fill_line "-"
+#    echo "Changes w.r.t to main after rebase"
+#    fill_line "-"
 
-    git diff HEAD origin/main
+#    git diff HEAD origin/main
 
 fi
 

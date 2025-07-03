@@ -29,7 +29,7 @@ int GeoMaterialSorter::compare(const GeoMaterial* a, const GeoMaterial* b) const
     if (std::abs(densityCmp) > equivTol) {
         return densityCmp < 0. ? -1 : 1; 
     }
-    /// Assume sorting of elements by fraction
+
     for (unsigned e = 0; e < a->getNumElements(); ++e) {
         const double fracComp = a->getFraction(e) - b->getFraction(e);
         if (std::abs(fracComp) > equivTol) {
