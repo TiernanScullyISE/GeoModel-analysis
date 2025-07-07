@@ -29,7 +29,7 @@ public:
     
     //Execute simple SQL statements which return a result
     DBRowsList resultOfQuery(const std::string& sql) const;
-    std::string errmsg() const;
+    
     sqlite3* ptr() const; 
 
 private:

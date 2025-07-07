@@ -27,7 +27,7 @@
 
 #include "GeoModelKernel/throwExcept.h"
 #include "GeoModelHelpers/StringUtils.h"
-#include "GeoModelDBManager/GMSQLiteConnection.h"
+
 // include SQLite
 #include <sqlite3.h>
 
@@ -47,13 +47,13 @@ class GMDBManager::Imp {
    public:
     // constructor
     explicit Imp(GMDBManager* dbm)
-        : theManager(dbm), dbSqlite(dbm->getDBFilePath(), true), m_SQLiteErrMsg(nullptr) {}
+        : theManager(dbm), m_dbSqlite(nullptr), m_SQLiteErrMsg(0) {}
 
     // The class
     GMDBManager* theManager;
 
     // Pointer to SQLite connection
-    GMSQLiteConnection dbSqlite;
+    sqlite3* m_dbSqlite;
 
     /// Variable to store error messages from SQLite
     char* m_SQLiteErrMsg;
@@ -73,6 +73,18 @@ GMDBManager::GMDBManager(const std::string& path)
     // FIXME: TODO: we should check the existence of the file, otherwise SQLite
     // will create a new file from scratch
 
+    // Save the connection result
+    int exit = sqlite3_open(path.c_str(), &m_d->m_dbSqlite);
+
+    // Test if there was an error
+    if (exit == SQLITE_OK) {
+        std::cout << "The Geometry Database '" << path
+                  << "' has been opened successfully!" << std::endl;
+    } else {
+        std::cout << "DB Open Error: " << sqlite3_errmsg(m_d->m_dbSqlite)
+                  << std::endl;
+    }
+
     // set verbosity level
     m_loglevel = 0;
     if (const char* env_p = std::getenv("GEOMODEL_GEOMODELIO_LOGLEVEL")) {
@@ -91,6 +103,8 @@ GMDBManager::GMDBManager(const std::string& path)
 }
 
 GMDBManager::~GMDBManager() {
+    sqlite3_close(m_d->m_dbSqlite);
+    m_d->m_dbSqlite = nullptr;
     delete m_d;
     m_d = nullptr;
 }
@@ -257,7 +271,7 @@ std::vector<std::vector<std::string>> GMDBManager::getTableRecords_String(
 
             if (res == SQLITE_DONE || res == SQLITE_ERROR) {
                 if (res == SQLITE_ERROR) {
-                    std::string errmsg(m_d->dbSqlite.errmsg());
+                    std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
                     sqlite3_finalize(stmt);
                     THROW_EXCEPTION(errmsg);
                 }
@@ -280,25 +294,33 @@ DBRowsList GMDBManager::getTableRecords_VecVecData(
     // get the query statetement ready to be executed
     sqlite3_stmt *stmt = nullptr;
 
-    if ("ChildrenPositions" == tableName) {
+    if ("ChildrenPositions" == tableName)
+    {
         stmt = m_d->selectAllFromTableChildrenPositions();
-    } else {
+    }
+    else
+    {
         stmt = m_d->selectAllFromTable(tableName);
     }
     // execute the query and loop over all rows and all columuns
-    if (stmt) {
+    if (stmt)
+    {
         int ctotal = sqlite3_column_count(
             stmt); // Count the Number of Columns in the Table
         int res = 0;
         unsigned nRows{0};
-        while (1) {
+        while (1)
+        {
             res = sqlite3_step(stmt); // Execute SQL Statement.
-            if (res == SQLITE_ROW) {
+            if (res == SQLITE_ROW)
+            {
                 DBRowEntry
                     nodeParams; // stores the data items contained in a
                                 // single row
                 // Loop times the number of columns in the table
-                for (int i = 0; i < ctotal; i++) {
+                for (int i = 0; i < ctotal;
+                     i++)
+                {
                     int datacode = sqlite3_column_type(stmt, i);
                     // debug msg
                     // if (0==nRows) std::cout << "table: " << tableName << ", col " << i << "/" << ctotal << " -- typecode: " << datacode << std::endl;
@@ -308,35 +330,45 @@ DBRowsList GMDBManager::getTableRecords_VecVecData(
                     std::string valS;
 
                     // ** INT **
-                    if (SQLiteColumnTypes::INT_TYPE == datacode) {
+                    if (SQLiteColumnTypes::INT_TYPE == datacode)
+                    {
                         valI = sqlite3_column_int(stmt, i);
                         // if (0==nRows) std::cout << "valI: " << valI << std::endl;// debug msg
                         nodeParams.push_back(valI);
                     }
                     // ** FLOAT **
-                    else if (SQLiteColumnTypes::FLOAT_TYPE == datacode) {
+                    else if (SQLiteColumnTypes::FLOAT_TYPE == datacode)
+                    {
                         valD = sqlite3_column_double(stmt, i);
                         // if (0==nRows) std::cout << "valD: " << valD << std::endl;// debug msg
                         nodeParams.push_back(valD);
                     }
                     // ** TEXT **
-                    else if (SQLiteColumnTypes::TEXT_TYPE == datacode) {
+                    else if (SQLiteColumnTypes::TEXT_TYPE == datacode)
+                    {
                         const char *cc = (char *)sqlite3_column_text(stmt, i);
-                        if (cc == nullptr) {
+                        if (cc == NULL)
+                        {
                             valS = "NULL";
-                        } else {
+                        }
+                        else
+                        {
                             valS = cc;
                         }
                         nodeParams.push_back(valS);
                     }
                     // ** BLOB **
-                    else if (SQLiteColumnTypes::BLOB_TYPE == datacode) {
+                    else if (SQLiteColumnTypes::BLOB_TYPE == datacode)
+                    {
                         THROW_EXCEPTION("ERROR!!! The 'BLOB' data format is not supported yet!!");
                     }
                     // ** NULL **
-                    else if (SQLiteColumnTypes::NULL_TYPE == datacode) {
+                    else if (SQLiteColumnTypes::NULL_TYPE == datacode)
+                    {
                         THROW_EXCEPTION("ERROR!!! 'NULL' format detected. Check that!");
-                    } else {
+                    }
+                    else
+                    {
                         THROW_EXCEPTION("ERROR!!! You should NOT get here!! Unsupported SQLite data typecode: " << datacode << " -- Check this!!");
                     }
                 }
@@ -344,9 +376,11 @@ DBRowsList GMDBManager::getTableRecords_VecVecData(
                 ++nRows;
             }
 
-            if (res == SQLITE_DONE || res == SQLITE_ERROR) {
-                if (res == SQLITE_ERROR) {
-                    std::string errmsg(m_d->dbSqlite.errmsg());
+            if (res == SQLITE_DONE || res == SQLITE_ERROR)
+            {
+                if (res == SQLITE_ERROR)
+                {
+                    std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
                     sqlite3_finalize(stmt);
                     THROW_EXCEPTION(errmsg);
                 }
@@ -449,7 +483,7 @@ DBRowEntry GMDBManager::getTableRecords_VecData(
             {
                 if (res == SQLITE_ERROR)
                 {
-                    std::string errmsg(m_d->dbSqlite.errmsg());
+                    std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
                     sqlite3_finalize(stmt);
                     THROW_EXCEPTION(errmsg);
                 }
@@ -956,15 +990,15 @@ void GMDBManager::addDBversion(const std::string& version) {
     sqlite3_stmt* st = nullptr;
     int rc = -1;
     std::string sql = "INSERT INTO dbversion(version) VALUES(?)";
-    rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_d->m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     rc = sqlite3_bind_text(st, 1, version.c_str(), version.length(),
                            SQLITE_TRANSIENT);
     rc = sqlite3_step(st);
     if (rc != SQLITE_DONE) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     // finalize
     sqlite3_finalize(st);
@@ -972,7 +1006,7 @@ void GMDBManager::addDBversion(const std::string& version) {
 }
 
 bool GMDBManager::checkIsDBOpen() const {
-    if (m_d->dbSqlite.ptr() != nullptr) {
+    if (m_d->m_dbSqlite != nullptr) {
         return true;
     } else {
         THROW_EXCEPTION("ERROR! The SQLite DB is not accessible! Exiting...");
@@ -1006,9 +1040,9 @@ std::vector<std::string> GMDBManager::getItemFromTableName(
     // prepare the query
     sqlite3_stmt* stmt = nullptr;
     int rc = -1;
-    rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), sql.c_str(), -1, &stmt, NULL);
+    rc = sqlite3_prepare_v2(m_d->m_dbSqlite, sql.c_str(), -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] 'prepare' (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] 'prepare' (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     // bind the parameters
     rc = sqlite3_bind_int(stmt, 1, id);
@@ -1033,7 +1067,7 @@ std::vector<std::string> GMDBManager::getItemFromTableName(
             }
             if (res == SQLITE_DONE || res == SQLITE_ERROR) {
                 if (res == SQLITE_ERROR) {
-                    std::string errmsg(m_d->dbSqlite.errmsg());
+                    std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
                     sqlite3_finalize(stmt);
                     THROW_EXCEPTION(errmsg);
                 }
@@ -1041,7 +1075,12 @@ std::vector<std::string> GMDBManager::getItemFromTableName(
             }
         }
     }
-    
+    // TODO: do we need that error check here??
+    //  if (rc != SQLITE_DONE) {
+    //    printf( "[SQLite ERR] 'step' (%s) : Error msg: %s\n", __func__,
+    //    sqlite3_errmsg(m_d->m_dbSqlite) );
+    ////    exit(EXIT_FAILURE);
+    //  }
     // finalize
     sqlite3_finalize(stmt);
 
@@ -1095,9 +1134,9 @@ int GMDBManager::loadGeoNodeTypesAndBuildCache() {
     std::string nodeType = "";
     std::string tableName = "";
     // prepare the query
-    rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_d->m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     // execute the statement until all selected records are processed
     while ((rc = sqlite3_step(st)) == SQLITE_ROW) {
@@ -1121,7 +1160,7 @@ int GMDBManager::loadGeoNodeTypesAndBuildCache() {
             std::pair<std::string, unsigned int>(nodeType, id));
     }
     if (rc != SQLITE_DONE) {
-        std::string errmsg(m_d->dbSqlite.errmsg());
+        std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
         sqlite3_finalize(st);
         THROW_EXCEPTION(errmsg);
     }
@@ -1168,9 +1207,9 @@ sqlite3_stmt* GMDBManager::Imp::selectAllFromTableSortBy(
     std::string sql =
         std::format("SELECT * FROM {0} ORDER BY {1}", tableName, sortColumn);
     // prepare the query
-    rc = sqlite3_prepare_v2(dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_dbSqlite));
     }
     return st;
 }
@@ -1182,7 +1221,7 @@ bool GMDBManager::Imp::checkTableFromDB_imp(const std::string& tableName) const 
     // set the SQL query string
     std::string sql = std::format("SELECT * FROM {0}", tableName);
     // prepare the query
-    rc = sqlite3_prepare_v2(dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) return false;
     return true;
 }
@@ -1196,9 +1235,9 @@ sqlite3_stmt* GMDBManager::Imp::selectAllFromTableChildrenPositions() const {
         "SELECT * FROM ChildrenPositions ORDER BY parentTable, parentId, "
         "parentCopyNumber, position";
     // prepare the query
-    rc = sqlite3_prepare_v2(dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_dbSqlite));
     }
     return st;
 }
@@ -1244,9 +1283,9 @@ void GMDBManager::getAllDBTables() {
     // prepare the query with the query string
     sqlite3_stmt* stmt;
     int rc =
-        sqlite3_prepare_v2(m_d->dbSqlite.ptr(), queryStr.c_str(), -1, &stmt, NULL);
+        sqlite3_prepare_v2(m_d->m_dbSqlite, queryStr.c_str(), -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION(m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION(std::string(sqlite3_errmsg(m_d->m_dbSqlite)));
     }
     // execute the statement until all selected records are processed
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -1256,7 +1295,7 @@ void GMDBManager::getAllDBTables() {
         tables.insert(tableName);
     }
     if (rc != SQLITE_DONE) {
-        std::string errmsg(m_d->dbSqlite.errmsg());
+        std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
         sqlite3_finalize(stmt);
         THROW_EXCEPTION(errmsg);
     }
@@ -1284,7 +1323,7 @@ void GMDBManager::getAllDBTableColumns() {
         // see: https://stackoverflow.com/a/54962853/320369
         std::string queryStr =
             "select name from pragma_table_info('" + tableName + "')";
-        int rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), queryStr.c_str(), -1,
+        int rc = sqlite3_prepare_v2(m_d->m_dbSqlite, queryStr.c_str(), -1,
                                     &stmt, NULL);
         if (rc == SQLITE_OK) {
             // OK, now looping over table's columns...
@@ -2437,7 +2476,7 @@ int GMDBManager::execQuery(const std::string& queryStr) {
         std::cout << "queryStr to execute: " << queryStr << std::endl;  // debug
     checkIsDBOpen();
     int result = -1;
-    if ((result = sqlite3_exec(m_d->dbSqlite.ptr(), queryStr.c_str(), NULL, 0,
+    if ((result = sqlite3_exec(m_d->m_dbSqlite, queryStr.c_str(), NULL, 0,
                                &m_d->m_SQLiteErrMsg))) {
         printf("[ERR] : \t> CMD: %s , Error: %d\n", queryStr.c_str(), result);
         if (m_d->m_SQLiteErrMsg) {
@@ -2477,9 +2516,9 @@ void GMDBManager::storeNodeType(const std::string& nodeType, const std::string& 
     // preparing the SQL query
     std::string sql =
         "INSERT INTO GeoNodesTypes(nodeType, tableName) VALUES(?, ?)";
-    rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_d->m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     if (m_loglevel > 2)
         std::cout << "storeNodeType - Query string:" << sql
@@ -2492,7 +2531,7 @@ void GMDBManager::storeNodeType(const std::string& nodeType, const std::string& 
     // execute the query
     rc = sqlite3_step(st);
     if (rc != SQLITE_DONE) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     // finalize
     sqlite3_finalize(st);
@@ -2520,9 +2559,9 @@ bool GMDBManager::storeRootVolume(const unsigned &id,
     // preparing the SQL query
     sqlite3_stmt* st = nullptr;
     int rc = -1;
-    rc = sqlite3_prepare_v2(m_d->dbSqlite.ptr(), sql.c_str(), -1, &st, NULL);
+    rc = sqlite3_prepare_v2(m_d->m_dbSqlite, sql.c_str(), -1, &st, NULL);
     if (rc != SQLITE_OK) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     if (m_loglevel > 2) std::cout << "Query string:" << sql << std::endl;  // debug
     // bind the parameters
@@ -2531,7 +2570,7 @@ bool GMDBManager::storeRootVolume(const unsigned &id,
     // execute the query
     rc = sqlite3_step(st);
     if (rc != SQLITE_DONE) {
-        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << m_d->dbSqlite.errmsg());
+        THROW_EXCEPTION("[SQLite ERR] (" << __func__ << ") : Error msg: " << sqlite3_errmsg(m_d->m_dbSqlite));
     }
     // finalize
     sqlite3_finalize(st);
@@ -2560,7 +2599,7 @@ std::pair<unsigned, unsigned> GMDBManager::getRootPhysVol() {
         // TODO: fill a cache
     }
     if (rc != SQLITE_DONE) {
-        std::string errmsg(m_d->dbSqlite.errmsg());
+        std::string errmsg(sqlite3_errmsg(m_d->m_dbSqlite));
         sqlite3_finalize(stmt);
         THROW_EXCEPTION(errmsg);
     }

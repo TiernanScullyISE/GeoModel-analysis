@@ -4,20 +4,11 @@
 
 #include <filesystem>
 #include <stdexcept>
-#include <system_error>
-namespace fs = std::filesystem;
 
 GMSQLiteConnection::GMSQLiteConnection(const std::string& filename, bool recreate)
     : m_filename(filename){
-  if (recreate && fs::exists(filename)) {
-    try{
-      std::filesystem::remove(filename); //throws if filesystem is read only
-    } catch (const fs::filesystem_error& e){
-      if (e.code().value() != EROFS) { //if the file system is not read only, rethrow
-        throw;
-      }
-      recreate = false; //cannot recreate on a read-only filesystem
-    }
+  if (recreate && std::filesystem::exists(filename)) {
+    std::filesystem::remove(filename);
   }
   openDatabase(filename, recreate);//throws if not possible
 }
@@ -32,7 +23,7 @@ GMSQLiteConnection::openDatabase(const std::string& filename, bool recreate) {
   if (recreate) flag |= SQLITE_OPEN_CREATE;
   const int rc = sqlite3_open_v2(filename.c_str(),&m_db, flag, nullptr);
   if (rc != SQLITE_OK) {
-    THROW_EXCEPTION( "Could not open SQLite database with name "<<filename<<"; "<<sqlite3_errmsg(m_db));
+    THROW_EXCEPTION( "Could not open SQLite database: "<<sqlite3_errmsg(m_db));
   }
 }
 
@@ -92,11 +83,4 @@ GMSQLiteConnection::resultOfQuery(const std::string& sql) const {
 sqlite3* 
 GMSQLiteConnection::ptr() const {
   return m_db;
-}
-
-std::string 
-GMSQLiteConnection::errmsg() const {
-  const char * pChar = sqlite3_errmsg(m_db);
-  std::string msg = pChar ? pChar : "(unknown error)";
-  return msg;
 }
