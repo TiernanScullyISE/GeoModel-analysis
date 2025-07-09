@@ -69,10 +69,11 @@ Run the executable with the --help option to see the available options:
 ``` bash
 -c :   [OPTIONAL] : json configuration file generated with fsl
 -g :   [REQUIRED] : the Geometry file name - if not specified in the configuration file
+-i :   [OPTIONAL] : flag  ==> run the application in interactive visual mode (default: FALSE)
 -m :   [OPTIONAL] : the standard Geant4 macro file name  
--o :   flag  ==> run the geometry overlap check (default: FALSE)
--f :   physics list name (default: FTFP_BERT) 
--P :   [OPTIONAL] :use Pythia primary generator [config. available: ttbar/higgs/minbias or use a Pythia command input file]
+-o :   [OPTIONAL] : flag  ==> run the geometry overlap check (default: FALSE)
+-f :   [OPTIONAL] : physics list name (default: FTFP_BERT) 
+-P :   [OPTIONAL] : use Pythia primary generator [config. available: ttbar/higgs/minbias or use a Pythia command input file]
 ``` 
 Please refer to the [Command line examples](#command-line-examples) section for some examples that illustrate the different possibilities.
 
@@ -327,3 +328,46 @@ To execute the application using a custom `mymacro.g4` macro file, with the ATLA
 ``` bash
 ./fullSimLight -m mymacro.g4 -f FTFP_BERT_ATL -P ttbar -g mygeometry.db 
 ```
+### Run FullSimLight in interactive mode
+
+It is possible to run `fullSimLight` in interactive mode, activating the Geant4 visualization tool. In order to do that you would need to compile Geant4 with the visualization on by using the following options:
+
+``` bash
+-DGEANT4_USE_QT=ON -DGEANT4_USE_QT_QT6=ON 
+```
+
+For versions of Geant4 greater than Geant 11.3 it will be needed to specify also the following option:
+
+``` bash
+-DGEANT4_INSTALL_PACKAGE_CACHE=ON
+```
+In order to run `fullSimLight` in interactive mode you should use the `-i` option, i.e.
+
+``` bash
+./fullSimLight  -g libPixePlugin.1.0.0.dylib/.so -i
+```
+
+In this way you will be prompted with a GUI that will display the chosen geometry. The default macro file used with the interacting mode is `initVis.g4`. It is installed under <install-geomodel>/share/FullSimLight and by default it activates some of the Geant4 visualization commands. 
+
+For example, by default only 2 layers of the geometry will be visualized. This is necessary especially for complex geometries like HEP detectors (ATLAS, CMS, LHCb and ALICE) that have a number of layers that would be prohibitive to visualize. The user can change the default number of layers by editing the macro file. 
+
+In order to run the simulation, you have to give the run/beamOn command the GUI. This can be done by editing the "Session" tab:
+```
+/run/beamOn
+```
+
+!!! Tip "Watch!"
+    Watch the following video for a quick demo on how to run `fullSimLight` in interactive mode! 
+    <video src="fullSimLightVisualDemo.mov" width="720" height="540" controls></video>
+
+
+You can visualize tracks/showers as they are developing in real-time by using the following command: 
+```
+/vis/open OGLS
+```
+
+If you are interested in more documentation about how to tune the Geant4 visualization you can have a look at the following resources:
+
+[Geant4 Visualization Lecture 1](https://videos.cern.ch/record/2300857)
+[Geant4 Visualization Lecture 2](https://videos.cern.ch/record/2300872)
+[Geant4 Users Application Manual](https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/Visualization/visualization.html)
