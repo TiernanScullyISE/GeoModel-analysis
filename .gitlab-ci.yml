@@ -108,17 +108,17 @@ debug-job:
 #   stage: step-B
 #   needs: ["mac-coin"]
 
- mac-gm:
-   <<: *macos-job
-   <<: *geomodel-job
-   stage: step-A
+mac-gm:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
 
- mac-gm-tools:
-   <<: *macos-job
-   <<: *geomodel-job
-   stage: step-A
-   variables:
-     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_TOOLS=TRUE
+mac-gm-tools:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_TOOLS=TRUE
 
 # mac-gm-visualization:
 #   <<: *macos-job
