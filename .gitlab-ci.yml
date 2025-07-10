@@ -97,16 +97,16 @@ debug-job:
 # Thus, for our macOS pipeline, we use 'brew bundle' to check and install all needed
 # dependencies, which are listed in a custom Brewfile under the CI folder.
 
-# mac-coin:
-#   <<: *macos-job
-#   <<: *coin-job
-#   stage: step-A
+mac-coin:
+  <<: *macos-job
+  <<: *coin-job
+  stage: step-A
 
-# mac-soqt:
-#   <<: *macos-job
-#   <<: *soqt-job
-#   stage: step-B
-#   needs: ["mac-coin"]
+mac-soqt:
+  <<: *macos-job
+  <<: *soqt-job
+  stage: step-B
+  needs: ["mac-coin"]
 
 mac-gm:
   <<: *macos-job
@@ -120,64 +120,64 @@ mac-gm-tools:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_TOOLS=TRUE
 
-# mac-gm-visualization:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-C
-#   needs: ["mac-coin", "mac-soqt"]
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_VISUALIZATION=TRUE
+mac-gm-visualization:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-C
+  needs: ["mac-coin", "mac-soqt"]
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_VISUALIZATION=TRUE
 
-# mac-gm-examples:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   # needs: ["mac-config"]
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES=TRUE
+mac-gm-examples:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  # needs: ["mac-config"]
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES=TRUE
 
-# mac-gm-gmg4:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
+mac-gm-gmg4:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
 
-# mac-gm-examples-gmg4:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES_W_GEANT4=TRUE
+mac-gm-examples-gmg4:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES_W_GEANT4=TRUE
 
-# mac-gm-fullsimlight:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FULLSIMLIGHT=TRUE
+mac-gm-fullsimlight:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FULLSIMLIGHT=TRUE
 
-# mac-gm-fsl:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
+mac-gm-fsl:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
 
-# mac-gm-all:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-C
-#   needs: ["mac-coin", "mac-soqt"]
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
+mac-gm-all:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-C
+  needs: ["mac-coin", "mac-soqt"]
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
   
-# mac-gm-atlasextras:
-#   <<: *macos-job
-#   <<: *geomodel-job
-#   stage: step-A
-#   variables:
-#     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ATLASEXTENSIONS=TRUE
+mac-gm-atlasextras:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ATLASEXTENSIONS=TRUE
 
 
 ### UBUNTU ALL-IN-ONE BUILD JOBS
