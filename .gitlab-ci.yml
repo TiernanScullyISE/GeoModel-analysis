@@ -164,13 +164,13 @@ mac-gm-fsl:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
 
-mac-gm-all:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-C
-  needs: ["mac-coin", "mac-soqt"]
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
+#mac-gm-all:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-C
+#  needs: ["mac-coin", "mac-soqt"]
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
   
 mac-gm-atlasextras:
   <<: *macos-job
