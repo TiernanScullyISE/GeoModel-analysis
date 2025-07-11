@@ -38,9 +38,10 @@ workflow:
   before_script:
     - brew tap davidchall/hep
     - brew bundle --file=CI/Brewfile # install third-party dependencies, if needed
-    - export PATH="/usr/local/opt/expat/bin:$PATH" # to make CMake use expat from Homebrew instead of the old one shipped with the system in /usr/lib
-    - export LDFLAGS="-L/usr/local/opt/expat/lib"
-    - export CPPFLAGS="-I/usr/local/opt/expat/include"
+    - export PATH="/opt/homebrew/opt/expat/bin:$PATH # to make CMake use expat from Homebrew instead of the one in /usr/lib
+    - export CPPFLAGS="-I/opt/homebrew/opt/expat/include"
+    - export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
+    
 
 # Base template for all Ubuntu jobs
 .ubuntu-template-job-default: &ubuntu-job
