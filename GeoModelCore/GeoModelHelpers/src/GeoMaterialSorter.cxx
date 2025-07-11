@@ -23,7 +23,7 @@ int GeoMaterialSorter::compare(const GeoMaterial* a, const GeoMaterial* b) const
         return 0;
     }
     if (a->getNumElements() != b->getNumElements()) {
-        return a->getNumElements() < b->getNumElements();
+        return a->getNumElements() < b->getNumElements() ? -1 : 1;
     }
     const double densityCmp = a->getDensity() - b->getDensity();
     if (std::abs(densityCmp) > equivTol) {
