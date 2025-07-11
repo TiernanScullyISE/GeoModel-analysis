@@ -41,7 +41,6 @@ workflow:
     - export PATH="/usr/local/opt/expat/bin:$PATH" # to make CMake use expat from Homebrew instead of the old one shipped with the system in /usr/lib
     - export LDFLAGS="-L/usr/local/opt/expat/lib"
     - export CPPFLAGS="-I/usr/local/opt/expat/include"
-    - export PATH="/usr/local/opt/qt5/bin:$PATH" # to make Qt5 discoverable by CMake
 
 # Base template for all Ubuntu jobs
 .ubuntu-template-job-default: &ubuntu-job
