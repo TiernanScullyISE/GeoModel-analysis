@@ -143,26 +143,26 @@ mac-gm-gmg4:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
 
-mac-gm-examples-gmg4:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-A
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES_W_GEANT4=TRUE
+#mac-gm-examples-gmg4:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-A
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES_W_GEANT4=TRUE
 
-mac-gm-fullsimlight:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-A
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FULLSIMLIGHT=TRUE
+#mac-gm-fullsimlight:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-A
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FULLSIMLIGHT=TRUE
 
-mac-gm-fsl:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-A
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
+#mac-gm-fsl:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-A
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
 
 #mac-gm-all:
 #  <<: *macos-job
@@ -172,12 +172,12 @@ mac-gm-fsl:
 #  variables:
 #    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
   
-mac-gm-atlasextras:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-A
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ATLASEXTENSIONS=TRUE
+#mac-gm-atlasextras:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-A
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ATLASEXTENSIONS=TRUE
 
 
 ### UBUNTU ALL-IN-ONE BUILD JOBS
