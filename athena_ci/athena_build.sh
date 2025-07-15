@@ -139,7 +139,7 @@ cmake --install geomodel-build > gm_install.log
 
 heading "Setup Athena"
 
-asetup Athena,${ATHENA_RELEASE},latest --gcclocation=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18 || true
+asetup Athena,${ATHENA_RELEASE},latest,gcc13 --gcclocation=/cvmfs/sft.cern.ch/lcg/releases/gcc/13.1.0-b3d18 || true
 
 
 n=10
