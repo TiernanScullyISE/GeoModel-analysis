@@ -13,18 +13,23 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_SimplePolygonBrep_H
 #define GEOMODELREAD_BuildGeoShapes_SimplePolygonBrep_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include "GeoModelDBManager/definitions.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_SimplePolygonBrep : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_SimplePolygonBrep(const unsigned size, DBRowsList shapeData):BuildGeoShapes("SimplePolygonBrep", size, shapeData){};
-  void buildShape(const DBRowEntry row) override;
-};
+namespace GeoModelIO {
 
+class BuildGeoShapes_SimplePolygonBrep : public BuildGeoShapes {
+  public:
+      /** @brief Constructor taking all defined entries in the database
+        *         to construct SimplePolygonBreps */
+      BuildGeoShapes_SimplePolygonBrep(DBRowsList&& allPolyBrepData,
+                                       DBRowsList&& allVertexData);
+  private:
+    void buildShape(const DBRowEntry row) override;
+};
+}
 #endif

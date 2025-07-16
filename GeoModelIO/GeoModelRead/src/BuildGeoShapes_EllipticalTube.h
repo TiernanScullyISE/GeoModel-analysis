@@ -13,16 +13,20 @@
 #ifndef GEOMODELREAD_BUILDGEOSHAPES_EllipticalTube_H
 #define GEOMODELREAD_BUILDGEOSHAPES_EllipticalTube_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_EllipticalTube : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_EllipticalTube(const unsigned size):BuildGeoShapes("EllipticalTube", size){};
-  void buildShape(const DBRowEntry row) override;
-};
+namespace GeoModelIO {
 
+class BuildGeoShapes_EllipticalTube : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoEllipticalTubes */
+      BuildGeoShapes_EllipticalTube(DBRowsList&& allTubeData);
+    private:
+      void buildShape(const DBRowEntry row) override;
+};
+}
 #endif

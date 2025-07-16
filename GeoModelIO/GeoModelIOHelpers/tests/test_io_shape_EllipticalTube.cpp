@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     // get the World volume,
     // we build it outside the class for convenience only
-    GeoIntrusivePtr<GeoPhysVol> world{createGeoWorld()};
+    PVLink world{createGeoWorld()};
 
     // Define elements used in this example:
     GeoElement *elAluminum = new GeoElement("Aluminum", "Al", 13, 26 * gr / mole);
@@ -54,14 +54,13 @@ int main(int argc, char *argv[])
     // write to the test DB
     std::string testDB = "test_io_shape_EllipticalTube.db";
     unsigned loglevel = 2;
-    const bool forceDelete = true;
-    GeoModelIO::IO::saveToDB(world, testDB, loglevel, forceDelete);
+    GeoModelIO::IO::saveToDB(world, testDB, loglevel, true);
 
     // load from the test DB
     PVConstLink world2 = GeoModelIO::IO::loadDB(testDB);
 
     // get the child volume, then the shape from its logVol
-    GeoIntrusivePtr<const GeoVPhysVol> childVol = world2->getChildVol(0);
+    PVConstLink childVol = world2->getChildVol(0);
     const GeoEllipticalTube *shape = dynamic_cast<const GeoEllipticalTube *>(childVol->getLogVol()->getShape());
 
 

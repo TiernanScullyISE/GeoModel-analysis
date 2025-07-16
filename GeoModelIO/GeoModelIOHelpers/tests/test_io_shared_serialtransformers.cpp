@@ -154,9 +154,7 @@ int main(int argc, char *argv[]) {
     std::cout << "\nTests:\n";
     unsigned loglevel = 2;
     unsigned printtests = 1;
-    const bool forceDelete = true;
-    std::pair<bool, std::map<std::string, bool>> tests =
-        GeoModelIO::TestIO::runAllTests(world, loglevel, printtests, forceDelete);
+    std::pair<bool, std::map<std::string, bool>> tests = GeoModelIO::TestIO::runAllTests(world, loglevel, printtests);
     bool testall = tests.first;
     
     // Return 0 if all OK! :-) 

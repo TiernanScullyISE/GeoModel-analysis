@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
   
   /* setup the GeoModel reader */
-  GeoModelIO::ReadGeoModel readInGeo{db.get()};
+  GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
   std::cout << "OK! ReadGeoModel is set." << std::endl;
 
 

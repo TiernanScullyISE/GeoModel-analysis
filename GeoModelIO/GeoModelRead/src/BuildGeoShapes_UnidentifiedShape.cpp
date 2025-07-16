@@ -14,9 +14,12 @@
 
 #include <vector>
 #include <iostream>
+namespace GeoModelIO {
 
-void BuildGeoShapes_UnidentifiedShape::buildShape(const DBRowEntry row)
-{
+BuildGeoShapes_UnidentifiedShape::BuildGeoShapes_UnidentifiedShape(DBRowsList&& allUnidentShapeData):
+    BuildGeoShapes(GeoUnidentifiedShape::getClassType(), std::move(allUnidentShapeData)){};
+
+void BuildGeoShapes_UnidentifiedShape::buildShape(const DBRowEntry row) {
     // === get shape numeric data from the DB row
     // shape ID
     const unsigned shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "UnidentifiedShape:shapeID");
@@ -26,10 +29,8 @@ void BuildGeoShapes_UnidentifiedShape::buildShape(const DBRowEntry row)
     const std::string name = GeoModelHelpers::variantHelper::getFromVariant_String(row[2], "UnidentifiedShape:name");
     const std::string asciiData = GeoModelHelpers::variantHelper::getFromVariant_String(row[3], "UnidentifiedShape:asciiData");
 
-    GeoUnidentifiedShape *shape = new GeoUnidentifiedShape(name, asciiData);
+    auto shape =  make_intrusive<GeoUnidentifiedShape>(name, asciiData);
 
-    storeBuiltShape(shapeId, shape);
-
-    // return shape;
-    return;
+    storeBuiltShape(shapeId, std::move(shape));
+}
 }

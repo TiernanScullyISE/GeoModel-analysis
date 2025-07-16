@@ -9,63 +9,33 @@
  * Author: Rui XUE <r.xue@cern.ch><rux23@pitt.edu>
  *
  */
-#include "BuildGeoVSurface.h"
+#include "GeoModelRead/BuildGeoVSurface.h"
 
-GeoRectSurface* BuildGeoVSurface::buildRectSurface(const DBRowEntry row)
-{
-    // shape area
-    const double surfArea = GeoModelHelpers::variantHelper::getFromVariant_Double(row[1], "SurfaceRect_Area");
-    // shape parameters
-    const double XHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[2], "SurfaceRect_XHalfLength");
-    const double YHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "SurfaceRect_YHalfLength");
+namespace GeoModelIO {
 
-    GeoRectSurface *rectsurface = new GeoRectSurface(XHalfLength, YHalfLength);
-    
-    return rectsurface;
+BuildGeoVSurface::BuildGeoVSurface(DBRowsList&& surfaceRecords):
+    m_surfaceRecords{std::move(surfaceRecords)} {}
+
+GeoIntrusivePtr<GeoVSurfaceShape> 
+    BuildGeoVSurface::getSurface(const unsigned int dbID){
+    if (auto retObj = m_memCache.get(dbID); retObj!=nullptr) {
+        return retObj;
+    }
+    if (dbID > m_surfaceRecords.size()) {
+        THROW_EXCEPTION("Cannot build a new surface under ID "<<dbID);
+    }
+    const DBRowEntry& entry = m_surfaceRecords[dbID -1];
+    buildSurface(entry);
+    if (m_memCache.size() == m_surfaceRecords.size()) {
+        m_surfaceRecords = DBRowsList{};
+    }
+    return m_memCache.get(dbID);
 }
-
-GeoTrapezoidSurface* BuildGeoVSurface::buildTrapezoidSurface(const DBRowEntry row)
-{
-    // shape area
-    const double surfArea = GeoModelHelpers::variantHelper::getFromVariant_Double(row[1], "SurfaceTrapezoid_Area");
-    // shape parameters
-    const double XHalfLengthMin = GeoModelHelpers::variantHelper::getFromVariant_Double(row[2], "SurfaceTrapezoid_XHalfLengthMin");
-    const double XHalfLengthMax = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "SurfaceTrapezoid_XHalfLengthMax");    
-    const double YHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[4], "SurfaceTrapezoid_YHalfLength");
-
-    GeoTrapezoidSurface *trapezoid = new GeoTrapezoidSurface(XHalfLengthMin, XHalfLengthMax, YHalfLength);
-    
-    return trapezoid;
+void BuildGeoVSurface::storeNewSurface(unsigned int dbID,                           
+                                       GeoIntrusivePtr<GeoVSurfaceShape>&& surface){
+    if (!m_memCache.insert(std::make_pair(dbID, std::move(surface)))){
+        THROW_EXCEPTION("Failed to register surface under ID "<<dbID);
+    }
 }
-
-GeoAnnulusSurface* BuildGeoVSurface::buildAnnulusSurface(const DBRowEntry row)
-{
-    // shape area
-    const double surfArea = GeoModelHelpers::variantHelper::getFromVariant_Double(row[1], "SurfaceAnnulus_Area");
-    // shape parameters
-    const double Ox = GeoModelHelpers::variantHelper::getFromVariant_Double(row[2], "SurfaceAnnulus_Ox");
-    const double Oy = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "SurfaceAnnulus_Oy");
-    const double radius_in = GeoModelHelpers::variantHelper::getFromVariant_Double(row[4], "SurfaceAnnulus_RadiusIn");
-    const double radius_out = GeoModelHelpers::variantHelper::getFromVariant_Double(row[5], "SurfaceAnnulus_RadiusOut");
-    const double phi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "SurfaceAnnulus_Phi");
-
-    GeoAnnulusSurface *annulus = new GeoAnnulusSurface(Ox, Oy, radius_in, radius_out, phi);
-    
-    return annulus;
-}
-
-GeoDiamondSurface* BuildGeoVSurface::buildDiamondSurface(const DBRowEntry row)
-{
-    // shape area
-    const double surfArea = GeoModelHelpers::variantHelper::getFromVariant_Double(row[1], "SurfaceDiamond_Area");
-    // shape parameters
-    const double X_bottom_half = GeoModelHelpers::variantHelper::getFromVariant_Double(row[2], "SurfaceDiamond_XBottomHalf");
-    const double X_mid_half = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "SurfaceDiamond_XMidHalf");
-    const double X_top_half = GeoModelHelpers::variantHelper::getFromVariant_Double(row[4], "SurfaceDiamond_XTopHalf");
-    const double Y_bottom_half = GeoModelHelpers::variantHelper::getFromVariant_Double(row[5], "SurfaceDiamond_YBottomHalf");
-    const double Y_top_half = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "SurfaceDiamond_YTopHalf");
-
-    GeoDiamondSurface *diamond = new GeoDiamondSurface(X_bottom_half, X_mid_half, X_top_half, Y_bottom_half, Y_top_half);
-    
-    return diamond;
+std::size_t BuildGeoVSurface::size() const { return m_memCache.size(); }
 }

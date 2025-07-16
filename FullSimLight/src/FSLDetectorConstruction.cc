@@ -194,7 +194,7 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
         //std::cout << "Printing the list of all GeoMaterial nodes" << std::endl;
         //db->printAllMaterials();
         /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel readInGeo{db.get()};
+        GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
         G4cout << "ReadGeoModel set.";
 
 

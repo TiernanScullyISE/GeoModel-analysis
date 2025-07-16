@@ -13,16 +13,21 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_TwistedTrap_H
 #define GEOMODELREAD_BuildGeoShapes_TwistedTrap_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_TwistedTrap : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_TwistedTrap(const unsigned size):BuildGeoShapes("TwistedTrap", size){};
-  void buildShape(const DBRowEntry row) override;
+namespace GeoModelIO {
+
+class BuildGeoShapes_TwistedTrap : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoTwistedTrapezoids */  
+      BuildGeoShapes_TwistedTrap(DBRowsList&& allTwistedTrapData);
+    private:
+      void buildShape(const DBRowEntry row) override;
 };
+}
 
 #endif

@@ -13,16 +13,20 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_Tube_H
 #define GEOMODELREAD_BuildGeoShapes_Tube_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_Tube : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_Tube(const unsigned size):BuildGeoShapes("Tube", size){};
-  void buildShape(const DBRowEntry row) override;
-};
+namespace GeoModelIO {
 
+class BuildGeoShapes_Tube : public BuildGeoShapes {
+  public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoTubes */  
+      BuildGeoShapes_Tube(DBRowsList&& allTubeData); 
+  private: 
+      void buildShape(const DBRowEntry row) override;
+};
+}
 #endif

@@ -431,7 +431,7 @@ PVConstLink GeoModelTools::GeoPhysVolHelper::retrieveFromDb(const std::string& f
   }
  
    // setup the GeoModel reader 
-  GeoModelIO::ReadGeoModel readInGeo{db.get()};
+  GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
   
   return readInGeo.buildGeoModel(); // builds the GeoModel tree in memory
 }

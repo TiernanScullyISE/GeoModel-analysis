@@ -15,8 +15,12 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Torus::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Torus::BuildGeoShapes_Torus(DBRowsList&& allToriData):
+    BuildGeoShapes{GeoTorus::getClassType(), std::move(allToriData)}{}
+
+void BuildGeoShapes_Torus::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Torus:shapeID");
@@ -29,9 +33,8 @@ void BuildGeoShapes_Torus::buildShape(const DBRowEntry row)
   const double SPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[5], "Torus:SPhi");
   const double DPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "Torus:DPhi");
   
-  GeoShape *shape = new GeoTorus(RMin, RMax, RTor, SPhi, DPhi);
+  auto shape = make_intrusive<GeoTorus>(RMin, RMax, RTor, SPhi, DPhi);
 
   storeBuiltShape(shapeId, shape);
-
-  return;
+}
 }

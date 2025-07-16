@@ -15,8 +15,11 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_EllipticalTube::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_EllipticalTube::BuildGeoShapes_EllipticalTube(DBRowsList&& allTubeData):
+    BuildGeoShapes{GeoEllipticalTube::getClassType(), std::move(allTubeData)}{}
+void BuildGeoShapes_EllipticalTube::buildShape(const DBRowEntry row) {
     // === get shape numeric data from the DB row
     // shape ID
     const unsigned shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "EllipticalTube:shapeID");
@@ -27,10 +30,8 @@ void BuildGeoShapes_EllipticalTube::buildShape(const DBRowEntry row)
     const double YHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "EllipticalTube:YHalfLength");
     const double ZHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[4], "EllipticalTube:ZHalfLength");
 
-    GeoEllipticalTube *shape = new GeoEllipticalTube(XHalfLength, YHalfLength, ZHalfLength);
+    auto shape = make_intrusive<GeoEllipticalTube>(XHalfLength, YHalfLength, ZHalfLength);
 
-    storeBuiltShape(shapeId, shape);
-
-    // return shape;
-    return;
+    storeBuiltShape(shapeId, std::move(shape));
+}
 }

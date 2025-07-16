@@ -16,10 +16,14 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_SimplePolygonBrep::buildShape(const DBRowEntry row)
-{
-    if (!(m_shape_data.size()))
-    {
+namespace GeoModelIO {
+
+BuildGeoShapes_SimplePolygonBrep::BuildGeoShapes_SimplePolygonBrep(DBRowsList&& allPolyBrepData,
+                                                                  DBRowsList&& allVertexData):
+    BuildGeoShapes{GeoSimplePolygonBrep::getClassType(), std::move(allPolyBrepData),
+                   std::move(allVertexData)}{}
+void BuildGeoShapes_SimplePolygonBrep::buildShape(const DBRowEntry row) {
+    if (m_auxillaryData.empty()) {
         THROW_EXCEPTION("ERROR! GeoSimplePolygonBrep shape has no ZPlanes data!! [m_shape_data.size() == 0]");
     }
 
@@ -36,7 +40,7 @@ void BuildGeoShapes_SimplePolygonBrep::buildShape(const DBRowEntry row)
     const int dataEnd = GeoModelHelpers::variantHelper::getFromVariant_Int(row[5], "SimplePolygonBrep:dataEnd");
 
     // build the basic GeoSimplePolygonBrep shape
-    GeoSimplePolygonBrep *shape = new GeoSimplePolygonBrep(DZ);
+    auto shape = make_intrusive<GeoSimplePolygonBrep>(DZ);
 
     // and now loop over the additional shape's data,
     // to get the parameters of all vertices
@@ -46,19 +50,17 @@ void BuildGeoShapes_SimplePolygonBrep::buildShape(const DBRowEntry row)
     //       which is what the 'dataStart' stores, and the vector items, which start '0';
     //       also, the constructor of the sub-vector takes the element from 'begin+dataStart-1' included
     //       and 'begin+dataEnd' excluded.
-    const DBRowsList thisShapeData(m_shape_data.begin() + (dataStart - 1),
-                                   m_shape_data.begin() + (dataEnd));
-    if (!(thisShapeData.size()))
-    {
+    assert(dataStart > 0 && dataEnd <= m_auxillaryData.size());
+    const DBRowsList thisShapeData(m_auxillaryData.begin() + (dataStart - 1),
+                                   m_auxillaryData.begin() + (dataEnd));
+    if (thisShapeData.empty()) {
         THROW_EXCEPTION("ERROR! GeoSimplePolygonBrep shape ZPlanes data have not been retrieved!!");
     }
-    if (!(NVertices == thisShapeData.size()))
-    {
+    if (NVertices != thisShapeData.size()) {
         THROW_EXCEPTION("ERROR! GeoSimplePolygonBrep shape : size of ZPlanes data does not correspond to the number of ZPlanes declared!!");
     }
     // loop over the data defining the ZPlanes
-    for (const DBRowEntry &dataRow : thisShapeData)
-    {
+    for (const DBRowEntry &dataRow : thisShapeData) {
         const double xV = GeoModelHelpers::variantHelper::getFromVariant_Double(dataRow[1], "SimplePolygonBrep:data_xV");
         const double yV = GeoModelHelpers::variantHelper::getFromVariant_Double(dataRow[2], "SimplePolygonBrep:data_yV");
         // add a vertex to the GeoSimplePolygonBrep
@@ -66,16 +68,12 @@ void BuildGeoShapes_SimplePolygonBrep::buildShape(const DBRowEntry row)
     }
 
     // sanity checks on the resulting SimplePolygonBrep shape
-    if (shape->getNVertices() != NVertices)
-    {
+    if (shape->getNVertices() != NVertices) {
         THROW_EXCEPTION("ERROR! GeoSimplePolygonBrep actual number of vertices: " + std::to_string(shape->getNVertices()) + " is not equal to the original size! --> " + std::to_string(NVertices));
     }
-    if (!shape->isValid())
-    {
+    if (!shape->isValid()) {
         THROW_EXCEPTION("ERROR! GeoSimplePolygonBrep shape is not valid!!");
     }
-
-    storeBuiltShape(shapeId, shape);
-
-    return;
+    storeBuiltShape(shapeId, std::move(shape));
+}
 }

@@ -13,18 +13,22 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_GenericTrap_H
 #define GEOMODELREAD_BuildGeoShapes_GenericTrap_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include "GeoModelDBManager/definitions.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_GenericTrap : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_GenericTrap(const unsigned size, DBRowsList shapeData):BuildGeoShapes("GenericTrap", size, shapeData){};
-  void buildShape(const DBRowEntry row) override;
+namespace GeoModelIO {
+class BuildGeoShapes_GenericTrap : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GenericTrapezoids */
+      BuildGeoShapes_GenericTrap(DBRowsList&& allTrapData,
+                                 DBRowsList&& allVertexData);
+    private:
+      void buildShape(const DBRowEntry row) override;
 };
-
+}
 #endif

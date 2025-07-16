@@ -15,8 +15,12 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Box::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Box::BuildGeoShapes_Box(DBRowsList&& allBoxData):
+    BuildGeoShapes{GeoBox::getClassType(), std::move(allBoxData)} {}
+ 
+void BuildGeoShapes_Box::buildShape(const DBRowEntry row) {
     // === get shape numeric data from the DB row
     // shape ID
     const unsigned shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Box:shapeID");
@@ -27,10 +31,9 @@ void BuildGeoShapes_Box::buildShape(const DBRowEntry row)
     const double YHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[3], "Box:YHalfLength");
     const double ZHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[4], "Box:ZHalfLength");
 
-    GeoBox *shape = new GeoBox(XHalfLength, YHalfLength, ZHalfLength);
+    auto shape = make_intrusive<GeoBox>(XHalfLength, YHalfLength, ZHalfLength);
 
-    storeBuiltShape(shapeId, shape);
+    storeBuiltShape(shapeId, std::move(shape));
 
-    // return shape;
-    return;
+}
 }

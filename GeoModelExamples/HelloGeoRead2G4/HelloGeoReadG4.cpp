@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
     db->printAllLogVols();
 
     /* setup the GeoModel reader */
-    GeoModelIO::ReadGeoModel readInGeo{db.get()};
+    GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
     std::cout << "ReadGeoModel set.\n";
 
     /* build the GeoModel geometry */
@@ -157,8 +157,7 @@ int main(int argc, char* argv[]) {
     }
 
     // build the Geant4 geometry and get an hanlde to the world' volume
-    ExtParameterisedVolumeBuilder* builder =
-        new ExtParameterisedVolumeBuilder("ATLAS");
+    auto builder = std::make_unique<ExtParameterisedVolumeBuilder>("ATLAS");
     std::cout << "Building G4 geometry." << std::endl;
     G4LogicalVolume* g4World = builder->Build(world);
 

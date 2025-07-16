@@ -15,8 +15,12 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Trap::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Trap::BuildGeoShapes_Trap(DBRowsList&& allTrapData):
+  BuildGeoShapes{GeoTrap::getClassType(), std::move(allTrapData)}{}
+
+void BuildGeoShapes_Trap::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Trap:shapeID");
@@ -35,10 +39,9 @@ void BuildGeoShapes_Trap::buildShape(const DBRowEntry row)
   const double Dxdypdzp = GeoModelHelpers::variantHelper::getFromVariant_Double(row[11], "Trap:Dxdypdzp");
   const double Angleydzp = GeoModelHelpers::variantHelper::getFromVariant_Double(row[12], "Trap:Angleydzp");
 
-  GeoShape *shape = new GeoTrap(ZHalfLength, Theta, Phi, Dydzn, Dxdyndzn, Dxdypdzn,
-                                Angleydzn, Dydzp, Dxdyndzp, Dxdypdzp, Angleydzp);
+  auto shape = make_intrusive<GeoTrap>(ZHalfLength, Theta, Phi, Dydzn, Dxdyndzn, Dxdypdzn,
+                                       Angleydzn, Dydzp, Dxdyndzp, Dxdypdzp, Angleydzp);
 
-  storeBuiltShape(shapeId, shape);
-
-  return;
+  storeBuiltShape(shapeId, std::move(shape));
+}
 }

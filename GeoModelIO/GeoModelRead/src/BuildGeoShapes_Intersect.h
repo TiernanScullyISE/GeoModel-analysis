@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef GEOMODELREAD_BUILDGEOSHAPES_BOX_H
-#define GEOMODELREAD_BUILDGEOSHAPES_BOX_H
+#ifndef GEOMODELREAD_BUILDGEOSHAPES_INTERSECT_H
+#define GEOMODELREAD_BUILDGEOSHAPES_INTERSECT_H
 
 #include "GeoModelRead/BuildGeoShapes.h"
 
@@ -20,12 +20,16 @@
 
 namespace GeoModelIO {
 
-class BuildGeoShapes_Box : public BuildGeoShapes {
+class ReadGeoModel;
+
+class BuildGeoShapes_Intersect : public BuildGeoShapes {
     public:
       /** @brief Constructor taking all defined entries in the database
-       *         to construct GeoBoxes */
-      BuildGeoShapes_Box(DBRowsList&& allBoxData);
+       *         to construct Intersects of shapes */
+      BuildGeoShapes_Intersect(const ReadGeoModel* parent,
+                                DBRowsList&& allIsectData);
     private:
+      const ReadGeoModel* m_parent{};
       void buildShape(const DBRowEntry row) override;
 };
 }

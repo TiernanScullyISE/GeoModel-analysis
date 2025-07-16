@@ -16,9 +16,15 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Pcon::buildShape(const DBRowEntry row)
-{
-    if (!(m_shape_data.size())) {
+namespace GeoModelIO {
+
+BuildGeoShapes_Pcon::BuildGeoShapes_Pcon(DBRowsList&& allPconData,
+                                        DBRowsList&& allVertexData):
+    BuildGeoShapes{GeoPcon::getClassType(), std::move(allPconData), 
+                   std::move(allVertexData)} {}
+
+void BuildGeoShapes_Pcon::buildShape(const DBRowEntry row) {
+    if (m_auxillaryData.empty()) {
         THROW_EXCEPTION("ERROR! GeoPcon shape has no ZPlanes data!! [m_shape_data.size() == 0]");
     }
 
@@ -36,7 +42,7 @@ void BuildGeoShapes_Pcon::buildShape(const DBRowEntry row)
     const int dataEnd = GeoModelHelpers::variantHelper::getFromVariant_Int(row[6], "Pcon:dataEnd");
 
     // build the basic GeoPcon shape
-    GeoPcon *pcon = new GeoPcon(SPhi, DPhi);
+    auto pcon = make_intrusive<GeoPcon>(SPhi, DPhi);
 
     // and now loop over the additional shape's data, 
     // to get the parameters of all Z planes
@@ -46,17 +52,17 @@ void BuildGeoShapes_Pcon::buildShape(const DBRowEntry row)
     //       which is what the 'dataStart' stores, and the vector items, which start '0'; 
     //       also, the constructor of the sub-vector takes the element from 'begin+dataStart-1' included
     //       and 'begin+dataEnd' excluded.
-    const DBRowsList zplanesData(m_shape_data.begin() + (dataStart-1),
-                                 m_shape_data.begin() + (dataEnd) );
-    if (!(zplanesData.size())) {
+    assert(dataStart > 0 && dataEnd <= m_auxillaryData.size());
+    const DBRowsList zplanesData(m_auxillaryData.begin() + (dataStart-1),
+                                 m_auxillaryData.begin() + (dataEnd) );
+    if (zplanesData.empty()) {
         THROW_EXCEPTION("ERROR! GeoPcon shape ZPlanes data have not been retrieved!!");
     }
-    if (!( NZPlanes == zplanesData.size())) {
+    if (NZPlanes != zplanesData.size()) {
         THROW_EXCEPTION("ERROR! GeoPcon shape : size of ZPlanes data does not correspond to the number of ZPlanes declared!!");
     }
     // loop over the data defining the ZPlanes
-    for (const DBRowEntry &dataRow : zplanesData)
-    {
+    for (const DBRowEntry &dataRow : zplanesData){
         const double zpos = GeoModelHelpers::variantHelper::getFromVariant_Double(dataRow[1], "Pcon:data_ZPos");
         const double rmin = GeoModelHelpers::variantHelper::getFromVariant_Double(dataRow[2], "Pcon:data_RMin");
         const double rmax = GeoModelHelpers::variantHelper::getFromVariant_Double(dataRow[3], "Pcon:data_RMax");
@@ -65,16 +71,14 @@ void BuildGeoShapes_Pcon::buildShape(const DBRowEntry row)
     }
 
     // sanity checks on the resulting Pcon shape
-    if (pcon->getNPlanes() != NZPlanes)
-    {
-        THROW_EXCEPTION("ERROR! GeoPcon actual number of planes: " + std::to_string(pcon->getNPlanes()) + " is not equal to the original size! --> " + std::to_string(NZPlanes));
+    if (pcon->getNPlanes() != NZPlanes) {
+        THROW_EXCEPTION("ERROR! GeoPcon actual number of planes: "<<pcon->getNPlanes()
+                     <<" is not equal to the original size! --> "<<NZPlanes);
     }
-    if (!pcon->isValid())
-    {
+    if (!pcon->isValid()) {
         THROW_EXCEPTION("ERROR! GeoPcon shape is not valid!!");
     }
 
-    storeBuiltShape(shapeId, pcon);
-
-    return;
+    storeBuiltShape(shapeId, std::move(pcon));
+}
 }

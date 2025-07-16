@@ -15,8 +15,11 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Trd::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Trd::BuildGeoShapes_Trd(DBRowsList&& allTrdData): 
+    BuildGeoShapes{GeoTrd::getClassType(), std::move(allTrdData)}{}
+void BuildGeoShapes_Trd::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Trd:shapeID");
@@ -29,9 +32,9 @@ void BuildGeoShapes_Trd::buildShape(const DBRowEntry row)
   const double YHalfLength2 = GeoModelHelpers::variantHelper::getFromVariant_Double(row[5], "Trd:YHalfLength2");
   const double ZHalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "Trd:ZHalfLength");
   
-  GeoShape *shape = new GeoTrd(XHalfLength1, XHalfLength2, YHalfLength1, YHalfLength2, ZHalfLength);
+  auto shape = make_intrusive<GeoTrd>(XHalfLength1, XHalfLength2, YHalfLength1, YHalfLength2, ZHalfLength);
 
-  storeBuiltShape(shapeId, shape);
+  storeBuiltShape(shapeId, std::move(shape));
 
-  return;
+}
 }

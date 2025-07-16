@@ -186,20 +186,20 @@ int main(int argc, char ** argv) {
       std::cout.rdbuf(fileBuff);
     }
 
-    auto db = std::make_unique<GMDBManager>(file);
+    auto db = std::make_shared<GMDBManager>(file);
     if (!db->checkIsDBOpen()){
       std::cerr << "gmcat -- Error opening the input file: " << file << std::endl;
       return 6;
     }
 
     /* set the GeoModel reader */
-    GeoModelIO::ReadGeoModel readInGeo{db.get()};
+    GeoModelIO::ReadGeoModel readInGeo{db};
 
     /* build the GeoModel geometry */
    PVConstLink dbPhys{readInGeo.buildGeoModel()}; // builds the whole GeoModel tree in memory
 
     /* get an handle on a Volume Cursor, to traverse the whole set of Volumes */
-    GeoVolumeCursor aV(dbPhys);
+    GeoVolumeCursor aV{dbPhys};
 
     /* loop over the Volumes in the tree */
     while (!aV.atEnd()) {

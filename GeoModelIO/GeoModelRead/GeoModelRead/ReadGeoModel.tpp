@@ -21,20 +21,19 @@
 
 namespace GeoModelIO {
 
-    template <typename T, class N> std::map<T,N> ReadGeoModel::getPublishedNodes(std::string publisherName, bool doCheckTable /*optional variables*/) 
-    {
+    template <typename T, class N> std::map<T,N> 
+        ReadGeoModel::getPublishedNodes(std::string publisherName, bool doCheckTable) const {
  
 
         std::map<T, N> mapNodes;
         std::string keyType = "";
 
-        // std::vector<std::vector<std::string>> vecRecords;
         DBRowsList vecRecords;
 
         static_assert(std::is_same_v<GeoFullPhysVol*, N> || std::is_same_v<GeoAlignableTransform*, N> ,
                     "ERROR! The node type is not currently supported. If in doubt, please ask to 'geomodel-developers@cern.ch'.\n");
 
-        if constexpr ( std::is_same_v<GeoFullPhysVol*, N> ) {
+        if constexpr( std::is_same_v<GeoFullPhysVol*, N> ) {
             if(doCheckTable){ 
                 bool tableExists = m_dbManager->checkTableFromDB("PublishedFullPhysVols_"+publisherName);
                 if(!tableExists) return mapNodes;
@@ -56,15 +55,14 @@ namespace GeoModelIO {
             ++ii;
             N volPtr = nullptr;
             if constexpr ( std::is_same_v<GeoFullPhysVol*, N> ) {
-                volPtr = dynamic_cast<GeoFullPhysVol*>( getVPhysVol(volID, 2) ); //always table=2, and we should have copyN=1 because FullPhysVols are not sharable 
+                volPtr = getBuiltFullPhysVol(volID);
             } else if constexpr ( std::is_same_v<GeoAlignableTransform*, N> ) {
                 volPtr = getBuiltAlignableTransform(volID);
             } else {
-                std::cout << "ERROR! The node type '" << typeid(N).name() 
-                    << "' is not currently supported.\n"
-                    << "If in doubt, please ask to 'geomodel-developers@cern.ch'.\n"
-                    << "Exiting...\n";
-                exit(EXIT_FAILURE);
+                static_assert(false, "Unsupported type");
+            }
+            if (!volPtr) {
+                THROW_EXCEPTION("Failed to fetch element "<<volID<<" of type "<<typeid(N).name());
             }
 
             //TODO: check if we can get rid of stoul/stoi...

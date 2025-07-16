@@ -22,53 +22,71 @@
 #include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelWrite/WriteGeoModel.h"
 
+#include "filesystem"
+
 #include "GeoModelKernel/throwExcept.h"
+
+#include "GeoModelKernel/GeoBox.h"
+#include "GeoModelKernel/GeoCons.h"
+#include "GeoModelKernel/GeoEllipticalTube.h"
+#include "GeoModelKernel/GeoGenericTrap.h"
+#include "GeoModelKernel/GeoPara.h"
+#include "GeoModelKernel/GeoPcon.h"
+#include "GeoModelKernel/GeoPgon.h"
+#include "GeoModelKernel/GeoShapeIntersection.h"
+#include "GeoModelKernel/GeoShapeShift.h"
+#include "GeoModelKernel/GeoShapeSubtraction.h"
+#include "GeoModelKernel/GeoShapeUnion.h"
+#include "GeoModelKernel/GeoSimplePolygonBrep.h"
+#include "GeoModelKernel/GeoTessellatedSolid.h"
+#include "GeoModelKernel/GeoTorus.h"
+#include "GeoModelKernel/GeoTrap.h"
+#include "GeoModelKernel/GeoTrd.h"
+#include "GeoModelKernel/GeoTube.h"
+#include "GeoModelKernel/GeoTubs.h"
+#include "GeoModelKernel/GeoTwistedTrap.h"
+#include "GeoModelKernel/GeoUnidentifiedShape.h"
+
+
+
 
 namespace GeoModelIO {
 
 class IO {
    public:
 
-    // dummy constructor
-    IO(){};
+    using StatMap_t = std::map<std::string, std::size_t>;
 
-    static GMDBManager saveToDB(const GeoVPhysVol* world, const std::string path,
-                                unsigned loglevel = 0, const bool forceDelete = false ) {
+    static 
+        std::shared_ptr<GMDBManager> saveToDB(const PVConstLink world, 
+                                              const std::string& path,
+                                              unsigned loglevel = 0,
+                                              bool forceDelete = false) {
         // Check if the output DB file exists already. 
         // - If yes and the 'forceDelete' option is set to 'true' by the user, 
         // then delete it before trying to create the new one; that is, 
         // the 'forceDelete' option replaces the existing '.db' file.
-        // - If yes and the 'forceDelete' option is set to 'false', then throw
-        // and error and exits. 
-        std::ifstream inputfile(path.c_str());
-        if (inputfile.good()) {
-            if (true == forceDelete) {
-                std::cout << "GeoModelIO -- INFO: you set the 'forceDelete' option to 'true', so we replace the existing .db file: '" << path << "'." << std::endl;
-                std::remove(path.c_str());  // delete file
+        if (std::filesystem::exists(path)) {
+            if (forceDelete) {
+                std::cout<<"GeoModelIO - INFO: Delete already existing "<<path<<" object "<<std::endl;
+                std::filesystem::remove(path);
             } else {
-            std::cerr << "\n*** ERROR! The output '" << path << "' file exists already! If you want to replace it, set the 'forceDelete' option to 'true'. Otherwise, rename the existing file, or move it to another place, and retry. ***\n\n{"
-                  << __func__ << " ["
-                  << __PRETTY_FUNCTION__ 
-                  << "]}\n\n";
-                throw;
+                THROW_EXCEPTION("The database '"<<path<<"' already exist. Don't want to clobber with existing object");
             }
         }
-        inputfile.close();
 
         // open the DB connection
-        GMDBManager db(path);
+        auto db = std::make_unique<GMDBManager>(path);
 
         // check the DB connection
-        if (!db.checkIsDBOpen()) {
-            std::cout << "Database ERROR!! Exiting..." << std::endl;
+        if (!db->checkIsDBOpen()) {
             THROW_EXCEPTION("It was not possible to open the DB correctly!");
         }
 
         // Dump the tree volumes to a local file
-        std::cout << "Dumping the GeoModel geometry to the DB file..."
-                  << std::endl;
+        std::cout << "Dumping the GeoModel geometry to the DB file..." << std::endl;
         // init the GeoModel node action
-        GeoModelIO::WriteGeoModel dumpGeoModelGraph(db);
+        GeoModelIO::WriteGeoModel dumpGeoModelGraph(*db);
         // set loglevel of write action, if > 0
         if (loglevel > 0) {
             dumpGeoModelGraph.setLogLevel(loglevel);
@@ -79,151 +97,77 @@ class IO {
         return db;
     }
 
-    static PVConstLink loadDB(const std::string path, unsigned loglevel = 0) {
-        // check if DB file exists. 
-        // If not, print a warning message and return a nullptr.
-        std::ifstream inputfile(path.c_str());
-        bool failed = false;
-        if (!inputfile.good()) {
-            std::cerr << "\n*** WARNING! The input .db file does not exist! Check the path of the input file. Returning a nullptr... ***\n{"
-                  << __func__ << " ["
-                  << __PRETTY_FUNCTION__ 
-                  << "]}\n\n";
-            failed = true;
-        }
-        inputfile.close();
-        if(failed) {
-            return nullptr;
-        }
-
-        // open the DB
-       auto db = std::make_unique<GMDBManager>(path);
-        if (!db->checkIsDBOpen()) {
-            std::cout << "ERROR!! -- Database is not open!\n";
-            THROW_EXCEPTION("It was not possible to open the DB correctly!");
-        }
-
-        /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel geoReader{db.get()};
-        // set loglevel of read action, if > 0
-        if (loglevel > 0) {
-            geoReader.setLogLevel(loglevel);
-        }
-
-        /* build the GeoModel geometry */
-        // builds the whole GeoModel tree in memory
-        PVConstLink rootVolume = geoReader.buildGeoModel();
-
-        return rootVolume;  // FIXME: See if you can pass a smart ptr
-    }
 
     static GeoModelIO::ReadGeoModel getReaderDB(const std::string path, unsigned loglevel = 0) {
-        // check if DB file exists. 
-        // If not, print a warning message and exit.
-        std::ifstream inputfile(path.c_str());
-        if (!inputfile.good()) {
-            std::cerr << "\n*** ERROR! The input .db file does not exist! Check the path of the input file. Exiting...\n"
-                  << "{ " << __func__ << " "
-                  << "[" << __PRETTY_FUNCTION__ 
-                  << "]}.\n\n";
-            exit(EXIT_FAILURE);
-        }
-        inputfile.close();
-
         // open the DB
         auto db = std::make_unique<GMDBManager>(path);
         if (!db->checkIsDBOpen()) {
-            std::cout << "ERROR!! -- Database is not open!\n";
             THROW_EXCEPTION("It was not possible to open the DB correctly!");
         }
-
         /* setup the GeoModel reader */
-        GeoModelIO::ReadGeoModel geoReader{db.release()};
+        GeoModelIO::ReadGeoModel geoReader{std::move(db)};
+        /// Ensure that the intermediate maps are not cleaned
+        geoReader.m_autoClean = false;
         // set loglevel of read action, if > 0
         if (loglevel > 0) {
             geoReader.setLogLevel(loglevel);
         }
-
-        return geoReader;  // FIXME: See if you can pass a smart ptr
+        return geoReader;
+    }
+    
+    static PVConstLink loadDB(const std::string& path, unsigned loglevel = 0) {
+            return getReaderDB(path, loglevel).buildGeoModel();
     }
 
-    static std::map<std::string, unsigned long> countNodesFromDB(
-        GMDBManager& db) {
+    static std::vector<std::string> supportedShapes() {
+        return {
+            GeoBox::getClassType(),
+            GeoCons::getClassType(),
+            GeoEllipticalTube::getClassType(),
+            GeoGenericTrap::getClassType(),
+            GeoPara::getClassType(),
+            GeoPcon::getClassType(),
+            GeoPgon::getClassType(),
+            GeoShapeIntersection::getClassType(),
+            GeoShapeShift::getClassType(),
+            GeoShapeSubtraction::getClassType(),
+            GeoShapeUnion::getClassType(),
+            GeoSimplePolygonBrep::getClassType(),
+            GeoTessellatedSolid::getClassType(),
+            GeoTorus::getClassType(),
+            GeoTrap::getClassType(),
+            GeoTrd::getClassType(),
+            GeoTube::getClassType(),
+            GeoTubs::getClassType(),
+            GeoTwistedTrap::getClassType(),
+            GeoUnidentifiedShape::getClassType()
+        };
+    }
+    static StatMap_t countNodesFromDB(GMDBManager& db) {
         // map to populate and return
-        std::map<std::string, unsigned long> mmap;
+        StatMap_t mmap;
         // get the number of all nodes in the DB from the DB manager
-        unsigned long nphysvols = db.getTableFromNodeType_String("GeoPhysVol").size();
-        unsigned long nfullphysvols = db.getTableFromNodeType_String("GeoFullPhysVol").size();
-        unsigned long nlogvols = db.getTableFromNodeType_VecVecData("GeoLogVol").size();
-        unsigned long nelements = db.getTableFromNodeType_VecVecData("GeoElement").size();
-        unsigned long nmaterials = db.getTableFromNodeType_VecVecData("GeoMaterial").size();
-        unsigned long nalignables = db.getTableFromNodeType_String("GeoAlignableTransform").size();
-        unsigned long nfunctions = db.getTableFromNodeType_VecVecData("Function").size();
-        unsigned long nserialtransformers = db.getTableFromNodeType_String("GeoSerialTransformer").size();
-        unsigned long nserialdenominators = db.getTableFromNodeType_String("GeoSerialDenominator").size();
-        unsigned long ntransforms = db.getTableFromNodeType_VecVecData("GeoTransform").size();
-        unsigned long nserialidentifiers = db.getTableFromNodeType_VecVecData("GeoSerialIdentifier").size();
-        unsigned long nidentifiertags = db.getTableFromNodeType_VecVecData("GeoIdentifierTag").size();
-        unsigned long nnametags = db.getTableFromNodeType_VecVecData("GeoNameTag").size();
-        // get shapes
-        unsigned long nshapes = db.getTableFromNodeType_String("GoShape").size(); // TODO: to be removed later
-        unsigned long nshapes_box = db.getTableFromNodeType_VecVecData("GeoBox").size();
-        unsigned long nshapes_cons = db.getTableFromNodeType_VecVecData("GeoCons").size();
-        unsigned long nshapes_para = db.getTableFromNodeType_VecVecData("GeoPara").size();
-        unsigned long nshapes_pcon = db.getTableFromNodeType_VecVecData("GeoPcon").size();
-        unsigned long nshapes_pgon = db.getTableFromNodeType_VecVecData("GeoPgon").size();
-        unsigned long nshapes_simplepol = db.getTableFromNodeType_VecVecData("GeoSimplePolygonBrep").size();
-        unsigned long nshapes_trap = db.getTableFromNodeType_VecVecData("GeoTrap").size();
-        unsigned long nshapes_trd = db.getTableFromNodeType_VecVecData("GeoTrd").size();
-        unsigned long nshapes_tube = db.getTableFromNodeType_VecVecData("GeoTube").size();
-        unsigned long nshapes_tubs = db.getTableFromNodeType_VecVecData("GeoTubs").size();
-        unsigned long nshapes_twisted = db.getTableFromNodeType_VecVecData("GeoTwistedTrap").size();
-        unsigned long nshapes_unid = db.getTableFromNodeType_VecVecData("GeoUnidentifiedShape").size();
-        unsigned long nshapes_shift = db.getTableFromNodeType_VecVecData("GeoShapeShift").size();
-        unsigned long nshapes_union = db.getTableFromNodeType_VecVecData("GeoShapeUnion").size();
-        unsigned long nshapes_intersection = db.getTableFromNodeType_VecVecData("GeoShapeIntersection").size();
-        unsigned long nshapes_subtraction = db.getTableFromNodeType_VecVecData("GeoShapeSubtraction").size();
-        // get metadata
-        unsigned long nchildrenconnections = db.getChildrenTable().size();
-
-        mmap["PhysVol"] = nphysvols;
-        mmap["FullPhysVol"] = nfullphysvols;
-        mmap["LogVol"] = nlogvols;
-        mmap["Element"] = nelements;
-        mmap["Material"] = nmaterials;
-        mmap["Alignable"] = nalignables;
-        mmap["Function"] = nfunctions;
-        mmap["SerialTransformer"] = nserialtransformers;
-        mmap["SerialDenominator"] = nserialdenominators;
-        mmap["ChildrenConnections"] = nchildrenconnections;
-        mmap["Transform"] = ntransforms;
-        mmap["SerialIdentifier"] = nserialidentifiers;
-        mmap["IdentifierTag"] = nidentifiertags;
-        mmap["NameTag"] = nnametags;
-        mmap["Shape"] = nshapes;
-        mmap["Shape_Box"] = nshapes_box;
-        mmap["Shape_Cons"] = nshapes_cons;
-        mmap["Shape_Para"] = nshapes_para;
-        mmap["Shape_Pcon"] = nshapes_pcon;
-        mmap["Shape_Pgon"] = nshapes_pgon;
-        mmap["Shape_SimplePolygonBrep"] = nshapes_simplepol;
-        mmap["Shape_Trap"] = nshapes_trap;
-        mmap["Shape_Trd"] = nshapes_trd;
-        mmap["Shape_Tube"] = nshapes_tube;
-        mmap["Shape_Tubs"] = nshapes_tubs;
-        mmap["Shape_TwistedTrap"] = nshapes_twisted;
-        mmap["Shape_UnidentifiedShape"] = nshapes_unid;
-        mmap["Shape_Shift"] = nshapes_shift;
-        mmap["Shape_Union"] = nshapes_union;
-        mmap["Shape_Intersection"] = nshapes_intersection;
-        mmap["Shape_Subtraction"] = nshapes_subtraction;
-
+        mmap["PhysVol"]                 = db.getTableFromNodeType_String("GeoPhysVol").size();
+        mmap["FullPhysVol"]             = db.getTableFromNodeType_String("GeoFullPhysVol").size();
+        mmap["LogVol"]                  = db.getTableFromNodeType_VecVecData("GeoLogVol").size();
+        mmap["Element"]                 = db.getTableFromNodeType_VecVecData("GeoElement").size();
+        mmap["Material"]                = db.getTableFromNodeType_VecVecData("GeoMaterial").size();
+        mmap["Alignable"]               = db.getTableFromNodeType_String("GeoAlignableTransform").size();
+        mmap["Function"]                = db.getTableFromNodeType_VecVecData("Function").size();
+        mmap["SerialTransformer"]       = db.getTableFromNodeType_String("GeoSerialTransformer").size();
+        mmap["SerialDenominator"]       = db.getTableFromNodeType_String("GeoSerialDenominator").size();
+        mmap["Transform"]               = db.getTableFromNodeType_VecVecData("GeoTransform").size();
+        mmap["SerialIdentifier"]        = db.getTableFromNodeType_VecVecData("GeoSerialIdentifier").size();
+        mmap["IdentifierTag"]           = db.getTableFromNodeType_VecVecData("GeoIdentifierTag").size();
+        mmap["NameTag"]                 = db.getTableFromNodeType_VecVecData("GeoNameTag").size();
+        for (const std::string& shape : supportedShapes()) {
+            mmap[shape] = db.getTableFromNodeType_VecVecData(shape).size();
+        }
         return mmap;
     }
 
-    static std::map<std::string, unsigned long> countTreeMemoryNodesFromVolume(
-        const GeoVPhysVol* world, unsigned loglevel = 0) {
-        std::map<std::string, unsigned long> mmap;
+    static StatMap_t countTreeMemoryNodesFromVolume(const PVConstLink world, unsigned loglevel = 0) {
+        StatMap_t mmap;
 
         // init the graph action to count all nodes in the in-memory tree
         GeoModelIO::WriteGeoModel dump;
@@ -302,170 +246,41 @@ class IO {
 
         return mmap;
     }
-    static std::map<std::string, unsigned long> countLoadedNodesFromReadAction(
-        GeoModelIO::ReadGeoModel& read) {
-        std::map<std::string, unsigned long> mmap;
-
-        unsigned long nphysvols = read.getNPhysVols();
-        unsigned long nfullphysvols = read.getNFullPhysVols();
-        unsigned long nlogvols = read.getNLogVols();
-        unsigned long nelements = read.getNElements();
-        unsigned long nmaterials = read.getNMaterials();
-        unsigned long nalignables = read.getNAlignableTransforms();
-        unsigned long nfunctions = read.getNFunctions();
-        unsigned long nserialtransformers = read.getNSerialTransformers();
-        unsigned long nserialdenominators = read.getNSerialDenominators();
-        unsigned long nchildrenconnections = read.getNChildrenConnections();
-        // unsigned nrootvolume = read.getNRootVolume();
-        unsigned long ntransforms = read.getNTransforms();
-        unsigned long nserialidentifiers = read.getNSerialIdentifiers();
-        unsigned long nidentifiertags = read.getNIdentifierTags();
-        unsigned long nnametags = read.getNNameTags();
-        // get shapes
-        unsigned long nshapes = read.getNShapes(); // TODO: to be removed later
-        unsigned long nshapes_box = read.getNShapes_Box();
-        unsigned long nshapes_cons = read.getNShapes_Cons();
-        unsigned long nshapes_para = read.getNShapes_Para();
-        unsigned long nshapes_pcon = read.getNShapes_Pcon();
-        unsigned long nshapes_pgon = read.getNShapes_Pgon();
-        unsigned long nshapes_simplepol = read.getNShapes_SimplePolygonBrep();
-        unsigned long nshapes_trap = read.getNShapes_Trap();
-        unsigned long nshapes_trd = read.getNShapes_Trd();
-        unsigned long nshapes_tube = read.getNShapes_Tube();
-        unsigned long nshapes_tubs = read.getNShapes_Tubs();
-        unsigned long nshapes_twisted = read.getNShapes_TwistedTrap();
-        unsigned long nshapes_unid = read.getNShapes_UnidentifiedShape();
-        unsigned long nshapes_shift = read.getNShapes_Shift();
-        unsigned long nshapes_union = read.getNShapes_Union();
-        unsigned long nshapes_intersection = read.getNShapes_Intersection();
-        unsigned long nshapes_subtraction = read.getNShapes_Subtraction();
-
-        mmap["PhysVol"] = nphysvols;
-        mmap["FullPhysVol"] = nfullphysvols;
-        mmap["LogVol"] = nlogvols;
-        mmap["Element"] = nelements;
-        mmap["Material"] = nmaterials;
-        mmap["Alignable"] = nalignables;
-        mmap["Function"] = nfunctions;
-        mmap["SerialTransformer"] = nserialtransformers;
-        mmap["Shape"] = nshapes;
-        mmap["SerialDenominator"] = nserialdenominators;
-        mmap["ChildrenConnections"] = nchildrenconnections;
-        mmap["Transform"] = ntransforms;
-        mmap["SerialIdentifier"] = nserialidentifiers;
-        mmap["IdentifierTag"] = nidentifiertags;
-        mmap["NameTag"] = nnametags;
-        mmap["Shape"] = nshapes;
-        mmap["Shape_Box"] = nshapes_box;
-        mmap["Shape_Cons"] = nshapes_cons;
-        mmap["Shape_Para"] = nshapes_para;
-        mmap["Shape_Pcon"] = nshapes_pcon;
-        mmap["Shape_Pgon"] = nshapes_pgon;
-        mmap["Shape_SimplePolygonBrep"] = nshapes_simplepol;
-        mmap["Shape_Trap"] = nshapes_trap;
-        mmap["Shape_Trd"] = nshapes_trd;
-        mmap["Shape_Tube"] = nshapes_tube;
-        mmap["Shape_Tubs"] = nshapes_tubs;
-        mmap["Shape_TwistedTrap"] = nshapes_twisted;
-        mmap["Shape_UnidentifiedShape"] = nshapes_unid;
-        mmap["Shape_Shift"] = nshapes_shift;
-        mmap["Shape_Union"] = nshapes_union;
-        mmap["Shape_Intersection"] = nshapes_intersection;
-        mmap["Shape_Subtraction"] = nshapes_subtraction;
-
-        return mmap;
-    }
-
-    static void printNodesMap(std::map<std::string, unsigned long> mmap) {
-        for (auto& node : mmap) {
-            std::cout << node.first << ": " << node.second << std::endl;
+    static void printNodesMap(const StatMap_t& mmap) {
+        for (auto& [key, counts] : mmap) {
+            std::cout << key << ": " << counts << std::endl;
         }
     }
 
-    static void printKeyMaps(std::string key,
-                             std::map<std::string, unsigned long> m1,
-                             std::map<std::string, unsigned long> m2) {
-        std::cout << "number of " << key << " : " << m1[key] << " -- "
-                  << m2[key] << std::endl;
+    static std::size_t readKey(const std::string& key, const StatMap_t& m){
+        auto itr = m.find(key);
+        return itr != m.end() ? itr->second : 0;
     }
 
-    static std::vector<std::string> getMapKeys()
-    {
-        std::vector<std::string> keys{"PhysVol",
-                                      "FullPhysVol",
-                                      "LogVol",
-                                      "Element",
-                                      "Material",
-                                      "Alignable",
-                                      "Function",
-                                      "SerialTransformer",
-                                      "Transform",
-                                      "SerialIdentifier",
-                                      "IdentifierTag",
-                                      "NameTag"
-                                      "SerialDenominator",
-                                      "ChildrenConnections",
-                                      "Shape",
-                                      "Shape_Box",
-                                      "Shape_Cons",
-                                      "Shape_Para",
-                                      "Shape_Pcon",
-                                      "Shape_Pgon",
-                                      "Shape_SimplePolygonBrep",
-                                      "Shape_Trap",
-                                      "Shape_Trd",
-                                      "Shape_Tube",
-                                      "Shape_Tubs",
-                                      "Shape_TwistedTrap",
-                                      "Shape_UnidentifiedShape",
-                                      "Shape_Shift",
-                                      "Shape_Union",
-                                      "Shape_Intersection",
-                                      "Shape_Subtraction"};
-        return keys;
+    static void printKeyMaps(const std::string& key,
+                             const StatMap_t& m1,
+                             const StatMap_t& m2) {
+        std::cout << "number of " << key << " : " <<readKey(key, m1) 
+                  << " -- " << readKey(key, m2) << std::endl;
     }
-    static void printCompareTwoNodesMaps(
-        std::map<std::string, unsigned long> m1,
-        std::map<std::string, unsigned long> m2) {
-        std::vector<std::string> keys = getMapKeys();
-        for (auto& key : keys) {
+
+
+    static void printCompareTwoNodesMaps(const StatMap_t& m1,
+                                         const StatMap_t& m2) {
+        for (const auto& [key, _] : m1) {
             printKeyMaps(key, m1, m2);
         }
     }
 
-    static void printDifferencesBetweenTwoNodesMaps(
-        std::map<std::string, unsigned long> m1,
-        std::map<std::string, unsigned long> m2)
-    {
-        for (const auto &entry : m1)
-        {
+    static void printDifferencesBetweenTwoNodesMaps(const StatMap_t& m1,
+                                                    const StatMap_t& m2) {
+        for (const auto &entry : m1) {
             const std::string key = entry.first;
-            const unsigned i1 = m1[key];
-            const unsigned i2 = m2[key];
-            if (i1 != i2)
-            {
+            const unsigned i1 = readKey(key, m1);
+            const unsigned i2 = readKey(key, m2);
+            if (i1 != i2) {
                 std::cout << "ERROR! ==> the number of '" << key << "' are different! " << i1 << " <-> " << i2 << std::endl;
             }
-        }
-    }
-
-    static std::map<std::string, unsigned long> initNodesMap() {
-        std::map<std::string, unsigned long> nmap;
-        std::vector<std::string> keys = getMapKeys();
-        // init the map
-        for (auto& key : keys) {
-            nmap[key] = 0;
-        }
-        return nmap;
-    }
-
-    static void checkTwoNodesMapsSameSize(
-        std::map<std::string, unsigned long> m1,
-        std::map<std::string, unsigned long> m2)
-    {
-        if (m1.size() != m2.size())
-        {
-            THROW_EXCEPTION("ERROR! Maps are not of the same size!");
         }
     }
 };

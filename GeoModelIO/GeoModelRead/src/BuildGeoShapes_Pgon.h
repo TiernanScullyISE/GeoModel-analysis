@@ -13,18 +13,23 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_Pgon_H
 #define GEOMODELREAD_BuildGeoShapes_Pgon_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include "GeoModelDBManager/definitions.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_Pgon : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_Pgon(const unsigned size, DBRowsList shapeData):BuildGeoShapes("Pgon", size, shapeData){};
-  void buildShape(const DBRowEntry row) override;
-};
+namespace GeoModelIO {
 
+class BuildGeoShapes_Pgon : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoPgons */
+      BuildGeoShapes_Pgon(DBRowsList&& allPconData,
+                          DBRowsList&& allVertexData);
+    private:
+        void buildShape(const DBRowEntry row) override;
+};
+}
 #endif

@@ -13,16 +13,19 @@
 #ifndef GEOMODELREAD_BUILDGEOSHAPES_UnidentifiedShape_H
 #define GEOMODELREAD_BUILDGEOSHAPES_UnidentifiedShape_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 
-class BuildGeoShapes_UnidentifiedShape : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_UnidentifiedShape(const unsigned size):BuildGeoShapes("UnidentifiedShape", size){};
-  void buildShape(const DBRowEntry row) override;
+namespace GeoModelIO {
+
+class BuildGeoShapes_UnidentifiedShape : public BuildGeoShapes {
+    public:
+      BuildGeoShapes_UnidentifiedShape(DBRowsList&& allUnidentShapeData);
+    private:
+      void buildShape(const DBRowEntry row) override;
 };
+}
 
 #endif

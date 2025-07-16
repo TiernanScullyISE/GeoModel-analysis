@@ -15,8 +15,12 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_TwistedTrap::buildShape(const DBRowEntry row)
-{
+
+namespace GeoModelIO {
+
+BuildGeoShapes_TwistedTrap::BuildGeoShapes_TwistedTrap(DBRowsList&& allTwistedTrapData):
+    BuildGeoShapes{GeoTwistedTrap::getClassType(), std::move(allTwistedTrapData)}{}
+void BuildGeoShapes_TwistedTrap::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "TwistedTrap:shapeID");
@@ -35,12 +39,10 @@ void BuildGeoShapes_TwistedTrap::buildShape(const DBRowEntry row)
   const double DX4HalfLength = GeoModelHelpers::variantHelper::getFromVariant_Double(row[11], "TwistedTrap:DX4HalfLength");
   const double DTiltAngleAlpha = GeoModelHelpers::variantHelper::getFromVariant_Double(row[12], "TwistedTrap:DTiltAngleAlpha");
 
-  GeoShape *shape =
-      new GeoTwistedTrap(PhiTwist, ZHalfLength, Theta, Phi, DY1HalfLength,
-                         DX1HalfLength, DX2HalfLength, DY2HalfLength,
-                         DX3HalfLength, DX4HalfLength, DTiltAngleAlpha);
+  auto shape = make_intrusive<GeoTwistedTrap>(PhiTwist, ZHalfLength, Theta, Phi, DY1HalfLength,
+                                              DX1HalfLength, DX2HalfLength, DY2HalfLength,
+                                              DX3HalfLength, DX4HalfLength, DTiltAngleAlpha);
 
-  storeBuiltShape(shapeId, shape);
-
-  return;
+  storeBuiltShape(shapeId, std::move(shape));
+}
 }

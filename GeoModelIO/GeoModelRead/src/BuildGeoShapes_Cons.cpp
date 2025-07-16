@@ -15,8 +15,11 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Cons::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Cons::BuildGeoShapes_Cons(DBRowsList&& allConsData):
+    BuildGeoShapes{GeoCons::getClassType(), std::move(allConsData)}{}
+void BuildGeoShapes_Cons::buildShape(const DBRowEntry row){
     // === get shape numeric data from the DB row
     // shape ID
     const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Cons:shapeID");
@@ -31,9 +34,9 @@ void BuildGeoShapes_Cons::buildShape(const DBRowEntry row)
     const double SPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[7], "Cons:SPhi");
     const double DPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[8], "Cons:DPhi");
 
-    GeoCons *shape = new GeoCons(RMin1, RMin2, RMax1, RMax2, DZ, SPhi, DPhi);
+    auto shape = make_intrusive<GeoCons>(RMin1, RMin2, RMax1, RMax2, DZ, SPhi, DPhi);
 
-    storeBuiltShape(shapeId, shape);
+    storeBuiltShape(shapeId, std::move(shape));
 
-    return;
+}
 }

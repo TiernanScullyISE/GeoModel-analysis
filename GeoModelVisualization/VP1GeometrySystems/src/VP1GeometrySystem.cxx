@@ -568,7 +568,7 @@ PVLink VP1GeometrySystem::Imp::getGeometryFromLocalDB()
       if (!db->checkIsDBOpen()) throw std::runtime_error ("Error, database is not open ");
 
       /* set the GeoModel reader */
-      GeoModelIO::ReadGeoModel readInGeo{db.get()};
+      GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
 
       /* build the GeoModel geometry */
       PVConstLink dbPhys = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory

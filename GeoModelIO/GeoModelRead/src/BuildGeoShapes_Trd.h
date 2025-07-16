@@ -13,17 +13,22 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_Trd_H
 #define GEOMODELREAD_BuildGeoShapes_Trd_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 #include <string>
 
-class BuildGeoShapes_Trd : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_Trd(const unsigned size):BuildGeoShapes("Trd", size){};
-  void buildShape(const DBRowEntry row) override;
+namespace GeoModelIO {
+
+class BuildGeoShapes_Trd : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoTrds */  
+      BuildGeoShapes_Trd(DBRowsList&& allTrdData);    
+   private:
+      void buildShape(const DBRowEntry row) override;
 };
 
+}
 #endif

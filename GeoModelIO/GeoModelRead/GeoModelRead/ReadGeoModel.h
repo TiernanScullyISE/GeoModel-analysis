@@ -42,83 +42,53 @@
 #include "GeoModelDBManager/definitions.h"
 
 #include "GeoModelKernel/GeoXF.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelKernel/GeoVSurface.h"
+#include "GeoModelKernel/GeoSerialTransformer.h"
+#include "GeoModelKernel/GeoSerialDenominator.h"
+#include "GeoModelKernel/GeoSerialIdentifier.h"
+#include "GeoModelKernel/GeoIdentifierTag.h"
+#include "GeoModelKernel/GeoNameTag.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelKernel/GeoVSurface.h"
 
 // C++ includes
 #include <deque>
 #include <map>
 #include <set>
 #include <string>
-#include <tuple>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <memory>
 
 // FWD declarations
-class GeoVPhysVol;
-class GeoPhysVol;
-class GeoFullPhysVol;
-class GeoRectSurface;
-class GeoTrapezoidSurface;
-class GeoAnnulusSurface;
-class GeoDiamondSurface;
-class GeoVSurface;
-class GeoVSurfaceShape;
-class GeoLogVol;
-class GeoShape;
-class GeoMaterial;
-class GeoElement;
-class GeoNameTag;
-class GeoSerialDenominator;
-class GeoSerialIdentifier;
-class GeoIdentifierTag;
-class GeoAlignableTransform;
-class GeoTransform;
-class GeoSerialTransformer;
-class GeoGraphNode;
-class GeoShapeSubtraction;
-class GeoBox;
-class GeoEllipticalTube;
-
-class BuildGeoShapes_Box;
-class BuildGeoShapes_EllipticalTube;
-class BuildGeoShapes_Tube;
-class BuildGeoShapes_Cons;
-class BuildGeoShapes_Para;
-class BuildGeoShapes_Trap;
-class BuildGeoShapes_Trd;
-class BuildGeoShapes_Tubs;
-class BuildGeoShapes_Torus;
-class BuildGeoShapes_TwistedTrap;
-class BuildGeoShapes_Pcon;
-class BuildGeoShapes_Pgon;
-class BuildGeoShapes_SimplePolygonBrep;
-class BuildGeoShapes_GenericTrap;
-class BuildGeoShapes_UnidentifiedShape;
-class BuildGeoVSurface;
-// type definitions
-typedef const GeoXF::Function& TRANSFUNCTION;
-// containers for boolean shapes' information
-typedef std::tuple<unsigned int /*shape ID*/, GeoShape*,
-                   unsigned int /*opA ID*/, unsigned int /*opB ID*/>
-    tuple_shapes_boolean_info;
-typedef std::tuple<std::string /*shape Type*/, unsigned /*shape ID*/, GeoShape*,
-                   std::string /*opA type*/, unsigned /*opA ID*/, std::string /*opB type*/, unsigned /*opB ID*/>
-    tuple_boolean_shapes_operands;
-
-typedef std::vector<tuple_shapes_boolean_info> type_shapes_boolean_info;
-typedef std::vector<tuple_boolean_shapes_operands> boolean_shapes_operands_info;
-
+#include "GeoModelRead/GeoIdObjMap.h"
+#include "GeoModelRead/BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoVSurface.h"
 
 
 namespace GeoModelIO {
-
+class IO;
 class ReadGeoModel {
    public:
-    ReadGeoModel(GMDBManager* db, unsigned long* progress = nullptr);
-    virtual ~ReadGeoModel();
+    friend class IO;
+    /** @brief constructor not taking the ownership of the GMDBManager 
+     *  @param db: Raw pointer to the GMDBManager */
+    [[deprecated("Please use the constructor parsing a shared pointer instead.")]]
+    explicit ReadGeoModel(GMDBManager* db);
+    /** @brief Constructor taking a shared pointer to the GMDBManager.
+        @param: Pointer to the GMDBManager */
+    explicit ReadGeoModel(std::shared_ptr<GMDBManager> db);
+    /** @brief Default move assignment */
+    ReadGeoModel& operator=(ReadGeoModel&& other) = default;
+    /** @brief Default move constructor */
+    ReadGeoModel(ReadGeoModel&& other) = default;
 
-    const GeoVPhysVol* buildGeoModel();
+    ~ReadGeoModel() = default;
 
+    PVConstLink buildGeoModel();
     /// Set the 'loglevel', that is the level of output messages.
     /// The loglevel is set to 0 by default, but it can be set
     /// to a larger value.
@@ -132,405 +102,203 @@ class ReadGeoModel {
     // (i.e. the last suffix), since the first part of the table name get added
     // automatically according to the data type it is templated on
     template <typename T, class N>
-    std::map<T, N> getPublishedNodes(
-        std::string publisherName = "" /*optional variable*/,
-                                     bool doCheckTable = false);
+    std::map<T, N> getPublishedNodes(std::string publisherName = "",
+                                     bool doCheckTable = false) const;
 
-    void printDBTable(const std::string& tableName) {
+    [[deprecated("Please use dbManager().printAllRecords() instead.")]]
+    void printDBTable(const std::string& tableName) const {
         m_dbManager->printAllRecords(tableName);
     }
-    void printAllDBTables() { m_dbManager->printAllDBTables(); }
-
-    void loadDB();
-    
-    unsigned long getNLogVols() { return m_logVols.size(); };
-    unsigned long getNPhysVols() { return m_physVols.size(); };
-    unsigned long getNFullPhysVols() { return m_fullPhysVols.size(); };
-    unsigned long getNMaterials() { return m_materials.size(); };
-    unsigned long getNElements() { return m_elements.size(); };
-    unsigned long getNTransforms() { return m_transforms.size(); };
-    unsigned long getNAlignableTransforms() {
-        return m_alignableTransforms.size();
-    };
-    unsigned long getNSerialDenominators() {
-        return m_serialDenominators.size();
-    };
-    unsigned long getNSerialIdentifiers() {
-        return m_serialIdentifiers.size();
-    };
-    unsigned long getNIdentifierTags() { return m_identifierTags.size(); };
-    unsigned long getNSerialTransformers() {
-        return m_serialTransformers.size();
-    };
-    unsigned long getNFunctions() { return m_functions.size(); };
-    unsigned long getNNameTags() { return m_nameTags.size(); };
-    unsigned long getNChildrenConnections() { return m_allchildren.size(); };
-    std::vector<std::vector<std::string>> getTableFromTableName_String(
-        const std::string_view tableName) {
+    [[deprecated("Please use dbManager().printAllDBTables() instead.")]]
+    void printAllDBTables() const { 
+        m_dbManager->printAllDBTables(); 
+    }
+    [[deprecated("Please use dbManager().getTableRecords_String() instead.")]]
+    std::vector<std::vector<std::string>> getTableFromTableName_String(const std::string_view tableName) {
         return m_dbManager->getTableRecords_String(tableName);
-    };
-    unsigned long getNShapes() { return m_shapes.size(); }; // TODO: to be removed later
-    unsigned long getNShapes_Box() { return m_shapes_Box.size(); };
-    unsigned long getNShapes_EllipticalTube() { return m_shapes_EllipticalTube.size(); };
-    unsigned long getNShapes_Cons() { return m_shapes_Cons.size(); };
-    unsigned long getNShapes_Para() { return m_shapes_Para.size(); };
-    unsigned long getNShapes_Pcon() { return m_shapes_Pcon.size(); };
-    unsigned long getNShapes_Pgon() { return m_shapes_Pgon.size(); };
-    unsigned long getNShapes_SimplePolygonBrep() { return m_shapes_SimplePolygonBrep.size(); };
-    unsigned long getNShapes_GenericTrap() { return m_shapes_GenericTrap.size(); };
-    unsigned long getNShapes_Trap() { return m_shapes_Trap.size(); };
-    unsigned long getNShapes_Trd() { return m_shapes_Trd.size(); };
-    unsigned long getNShapes_Tube() { return m_shapes_Tube.size(); };
-    unsigned long getNShapes_Tubs() { return m_shapes_Tubs.size(); };
-    unsigned long getNShapes_Torus() { return m_shapes_Torus.size(); };
-    unsigned long getNShapes_TwistedTrap() { return m_shapes_TwistedTrap.size(); };
-    unsigned long getNShapes_UnidentifiedShape() { return m_shapes_UnidentifiedShape.size(); };
-    unsigned long getNShapes_Shift() { return m_shapes_Shift.size(); };
-    unsigned long getNShapes_Union() { return m_shapes_Union.size(); };
-    unsigned long getNShapes_Intersection() { return m_shapes_Intersection.size(); };
-    unsigned long getNShapes_Subtraction() { return m_shapes_Subtraction.size(); };
+    }
 
+    /** @brief Returns the reference to the dbManager */
+    GMDBManager& dbManager() const;
+    /** @brief Returns the shared pointer to the dBManager */
+    std::shared_ptr<GMDBManager> dbManagerPtr() const;
+
+    /** @brief Returns a GeoShape of the specified shape type which is registered under the shapeId. If the
+     *         shape has not been built yet, it's attempted to construct it. If the shape is unknown an exception
+     *         is thrown.
+     * @param shapeId: Identifier of the shape to fetch
+     * @param shapeType: String encoding which factory should be queried to return the GeoShape. */
+    GeoIntrusivePtr<GeoShape> getBuiltShape(const unsigned shapeId, const std::string& shapeType) const;
+    /** @brief Returns the pointer to the ordinary transform which is registered under the 
+     *         corresponding ID. If not registered a nullptr is returned.
+     * @param id: Identifier of the transform to fetch. */
+    GeoIntrusivePtr<GeoTransform> getBuiltTransform(const unsigned id) const;
+    /** @brief Returns the pointer to the alignable transform which is registered under the 
+     *         corresponding ID. If not registered a nullptr is returned.
+     * @param id: Identifier of the transform to fetch. */
+    GeoIntrusivePtr<GeoAlignableTransform> getBuiltAlignableTransform(const unsigned id) const;
    private:
-    void buildAllShapes(); // TODO: OLD METHOD, TO BE REMOVED WHEN READY
-    void buildAllShapes_Box();
-    void buildAllShapes_EllipticalTube();
-    void buildAllShapes_Tube();
-    void buildAllShapes_Cons();
-    void buildAllShapes_Para();
-    void buildAllShapes_Trap();
-    void buildAllShapes_Trd();
-    void buildAllShapes_Tubs();
-    void buildAllShapes_Torus();
-    void buildAllShapes_TwistedTrap();
-    void buildAllShapes_UnidentifiedShape();
-    void buildAllShapes_Pcon();
-    void buildAllShapes_Pgon();
-    void buildAllShapes_SimplePolygonBrep();
-    void buildAllShapes_GenericTrap();
-    void buildAllShapes_Operators();
+    /** @brief Prepare the factories and load the neccessary tables from the database to construct the GeoModel tree
+     *         from SQLite. Called at the beginning of the GeoModelTree construction phase */
+    void loadDB();
+    /** @brief Setup a ShapeFactory of ShapeFactory_t type.
+     *  @param shapeType: Name under which the factory is later registered
+     *  @param primaryDataTable: Name of the SQLite table to fetch all data from */
+    template <typename ShapeFactory_t> void setupShapeFactory(const std::string& shapeType,
+                                                              const std::string& primaryDataTable);
+    /** @brief Setup a ShapeFactory of ShapeFactory_t type. Extension to cope with auxillary tables
+     *  @param shapeType: Name under which the factory is later registered
+     *  @param primaryDataTable: Name of the SQLite table to fetch all data from
+     *  @param auxillaryDataTable: Name of the SQLite table to fetch the auxillary data from */
+    template <typename ShapeFactory_t> void setupShapeFactory(const std::string& shapeType,
+                                                              const std::string& primaryDataTable,
+                                                              const std::string& auxilllaryDataTable);    
+    /** @brief Setups a GeohapeFactory of ShapeFactory_t type where the factory type needs to create
+     *         boolean volumes. In contrast, to the ordinary factories, the boolean shape constructors
+     *         also pass a reference to this GeoModelRead instance in order to build the operands of the
+     *         booleans on the fly
+     * @param shapeType: Name under which the factory is later registered
+     * @param primaryDataTable: Name of the SQLite table to fetch all instructions from. */
+    template <typename ShapeFactory_t> void setupBooleanFactory(const std::string& shapeType,
+                                                                const std::string& primaryDataTable);    
+    /** @brief Setups a virtual surface shape factory of ShapeFactory_t type. Likewise, the GeoShape
+     *         factories, the creates factory is centrally registered and called when the corresponding
+     *         virtual surface is assembled.
+     * @param surfaceType: Name of the surface type which is assembled by the factory
+     * @param dataTable: Name of the SQLite table to fetch all parameters to assemble the shapes */
+    template <typename SurfaceFactory_t> void setupSurfaceFactory(const std::string& surfaceType,
+                                                                  const std::string& dataTable);
 
-
+    /** @brief Factory method to construct (Full)PhysVols from the SQLite DB file. The corresponding
+     *         table is processed and the constructed & empty volumes are parsed into the memory cache
+     *  @param tableName: Name of the SQLite table containing all information to build the volumes
+     *  @param memCache: Refrence to the target memory cache where all volumes are stored. */
+    template <typename PhysVol_t>
+        void buildPhysVols(const std::string& tableName,
+                           GeoIdObjMap<GeoIntrusivePtr<PhysVol_t>>& memCache);
+    /** @brief Factory method to contruct (Alignable)Transforms from the SQLite DB file. The corresponding table
+     *         is processed and the constructed transforms are added to the cache map
+     * @param tableName: Name of the SQLite table containing the primary numbers of the transforms
+     *  @param memCache: Reference to the target memory cache where all transforms are stored. */
+    template <typename Transform_t>
+        void buildTransforms(const std::string& tableName,
+                             GeoIdObjMap<GeoIntrusivePtr<Transform_t>>& memCache);
+    /** @brief Loads the GeoElement data and constructs them in memory */
     void buildAllElements();
+    /** @brief Loads the Material data and constructs them in memory */
     void buildAllMaterials();
+    /** @brief Loads the logical volume data and constructs them in memory */
     void buildAllLogVols();
-    void buildAllPhysVols();
-    void buildAllFullPhysVols();
-    //  void buildAllFunctions(); // FIXME:
-    void buildAllTransforms();
-    void buildAllAlignableTransforms();
-    void buildAllSerialDenominators();
-    void buildAllSerialIdentifiers();
-    void buildAllIdentifierTags();
-    void buildAllSerialTransformers();
-    void buildAllNameTags();
-
+    /** @brief Builds the virtual surfaces */
     void buildAllVSurfaces();
-    void buildVSurface(const unsigned int id);
-    GeoVSurfaceShape* BuildWhichSurface(std::string_view shapeType, const unsigned int shapeId);
-
-    GeoVPhysVol* buildGeoModelPrivate();
-
-    GeoBox* buildDummyShape();
-
-    // void loopOverAllChildrenInBunches_String(); // OLD
-    void loopOverAllChildrenInBunches_VecVecData();
-    // void loopOverAllChildrenRecords(
-    //     std::vector<std::vector<std::string>> records);
-    void loopOverAllChildrenRecords(const DBRowsList& records);
-    void processParentChild(const std::vector<std::string>& parentchild);
+    /** @brief Builds all transforms */
+    void buildAllTransforms();
+    /** @brief Builds all alignable transforms */
+    void buildAllAlignableTransforms();
+    /** @brief Builds the serial demoniators */
+    void buildAllSerialDenominators();
+    /** @brief Builds the serial Identifiers */
+    void buildAllSerialIdentifiers();
+    /** @brief Builds the generic Identifiers */
+    void buildAllIdentifierTags();
+    /** @brief Builds the physical volume templates */
+    void buildAllPhysVols();
+    /** @brief Build the full physical volumes */
+    void buildAllFullPhysVols();
+    /** @brief Build the name tags */
+    void buildAllNameTags();
+    /** @brief Build all geo functions */
+    void buildAllGeoFunc();
+    /** @brief Build the serial transformers */
+    void buildAllSerialTransformers();
+    /** @brief Entry hook to start the construction of the geometry tree from the DB.
+     *         Returns the pointer to the world volume once finished. */
+    PVLink assembleWorld();
+    /** @brief Reads the child record table to fill the empty Full(Phys)Vols with 
+     *         transforms, Identifiers, name tags, serial transforms, other volumes or virtual surfaces */
+    void connectNodes();
+    /** @brief Process a single entry from the child record table to add a new object to a PhysVol */
     void processParentChild(const DBRowEntry& parentchild);
+    /** @brief fetches the world volume ID from the table and returns the corresponding PhysVol */
+    PVLink getRootVolume();
+    /** @brief Returns the constructed logical volume
+     *  @param id: Identifier as stored in the SQLite tables */
+    GeoIntrusivePtr<GeoLogVol> getBuiltLog(const unsigned int id) const;
+    /** @brief Returns the constructed GeoMaterial
+     *  @param id: Identifier as stored in the SQLite tables */
+    GeoIntrusivePtr<GeoMaterial> getBuiltMaterial(const unsigned int id) const;
+    /** @brief Returns the constructed GeoElement
+     *  @param id: Identifier as stored in the SQLite tables */
+    GeoIntrusivePtr<GeoElement> getBuiltElement(const unsigned int id) const;
+    /** @brief Returns the constructed GeoPhysVol
+     *  @param id: Identifier as stored in the SQLite tables */
+    PVLink getBuiltPhysVol(const unsigned int id) const;
+    /** @brief Returns the constructed GeoFullPhysVol
+     *  @param id: Identifier as stored in the SQLite tables */
+    GeoIntrusivePtr<GeoFullPhysVol> getBuiltFullPhysVol(const unsigned int id) const;
 
-    GeoVPhysVol* getRootVolume();
+    GeoIntrusivePtr<GeoSerialDenominator> getBuiltSerialDenominator(const unsigned int id) const;
 
-    GeoVPhysVol* buildVPhysVolInstance(const unsigned id,
-                                       const unsigned tableId,
-                                       const unsigned copyNumber);
-    GeoVPhysVol* buildVPhysVol(const unsigned id,
-                               const unsigned tableId,
-                               unsigned logVol_ID = 0);
+    GeoIntrusivePtr<GeoSerialIdentifier> getBuiltSerialIdentifier(const unsigned int id) const;
 
-    GeoLogVol* buildLogVol(const unsigned id);
-    
-    GeoShape* buildShape(const unsigned id,
-                         type_shapes_boolean_info* shapes_info_sub);
-    GeoShape *buildShapeOperator(const std::string_view shapeType, const DBRowEntry& row,
-                                 boolean_shapes_operands_info *shapes_info_sub);
+    GeoIntrusivePtr<GeoIdentifierTag> getBuiltIdentifierTag(const unsigned int id) const;
 
-    GeoMaterial* buildMaterial(const unsigned id);
-    GeoElement* buildElement(const unsigned id);
-    GeoAlignableTransform* buildAlignableTransform(const unsigned id);
-    GeoTransform* buildTransform(const unsigned int id);
-    GeoSerialTransformer* buildSerialTransformer(const unsigned id);
-    TRANSFUNCTION buildFunction(const unsigned id);
+    GeoIntrusivePtr<GeoNameTag> getBuiltNameTag(const unsigned int id) const;
 
-    void checkNodePtr(GeoGraphNode* nodePtr, const std::string& varName = "",
-                      const std::string& funcName = "",
-                      const std::string& funcSignature =
-                          "");  // TODO: to be moved to an utility class
-    void volAddHelper(GeoVPhysVol* vol, GeoGraphNode* volChild);
+    GeoIntrusivePtr<GeoSerialTransformer> getBuiltSerialTransformer(const unsigned int id) const;
 
-    // methods for shapes
-    std::string getShapeType(const unsigned shapeId);
-    bool isShapeOperator(const unsigned shapeId);
-    bool isShapeOperator(const std::string_view type);
-    bool isShapeBoolean(const unsigned shapeId);
-    bool isShapeBoolean(const std::string_view type);
-    void createBooleanShapeOperands(type_shapes_boolean_info* shapes_info_sub);
-    void createBooleanShapeOperands(boolean_shapes_operands_info* shapes_info_sub);
-    std::pair<unsigned, unsigned> getBooleanShapeOperands(
-        const unsigned shape);
-    std::tuple<std::string, unsigned int, std::string, unsigned> getBooleanShapeOperands(
-        const std::string_view shapeType, const unsigned shapeId);
-    GeoShape* addEmptyBooleanShapeForCompletion(
-        const unsigned shapeID, type_shapes_boolean_info* shapes_info_sub);
-    GeoShape* getBooleanReferencedShape(
-        const unsigned shapeID, type_shapes_boolean_info* shapes_info_sub);
-    GeoShape* addEmptyBooleanShapeForCompletion(
-        const std::string_view shapeType, const unsigned shapeID, boolean_shapes_operands_info* shapes_info_sub);
-    GeoShape* getBooleanReferencedShape(
-        const std::string_view shapeType, const unsigned shapeID, boolean_shapes_operands_info* shapes_info_sub);
+    GeoIntrusivePtr<GeoVSurface> getBuiltSurface(const unsigned int id) const;
 
-    // caching methods
-    // TODO: perhaps we could merge all those 'isBuiltYYY' methods in a single
-    // one, with the GeoModel class as a second argument ? (RMB)
-    bool isBuiltVSurface(const unsigned int shapeId);
-    bool isBuiltRectSurface(const unsigned int shapeId);
-    bool isBuiltTrapezoidSurface(const unsigned int shapeId);
-    bool isBuiltAnnulusSurface(const unsigned int shapeId);
-    bool isBuiltDiamondSurface(const unsigned int shapeId);
-    bool isBuiltShape(const unsigned id);
-    bool isBuiltShape_Operators_Shift(const unsigned id);
-    bool isBuiltShape_Operators_Subtraction(const unsigned id);
-    bool isBuiltShape_Operators_Intersection(const unsigned id);
-    bool isBuiltShape_Operators_Union(const unsigned id);
-    bool isBuiltShape(std::string_view shapeType, const unsigned id);
-    void storeBuiltShape(const unsigned, GeoShape* node);
-    void storeBuiltShape(const std::string_view type, const unsigned id, GeoShape *nodePtr);
-    GeoShape* getBuiltShape(const unsigned shapeId, std::string_view shapeType = "");
+    std::shared_ptr<const GeoXF::Function> getBuiltFunction(const unsigned int id) const;
 
-    void storeBuiltShapeOperators_Shift(const unsigned, GeoShape* node);
-    void storeBuiltShapeOperators_Subtraction(const unsigned, GeoShape* node);
-    void storeBuiltShapeOperators_Union(const unsigned, GeoShape* node);
-    void storeBuiltShapeOperators_Intersection(const unsigned, GeoShape* node);
-    void storeBuiltRectSurface(GeoRectSurface* nodePtr);
-    void storeBuiltTrapezoidSurface(GeoTrapezoidSurface* nodePtr);
-    void storeBuiltDiamondSurface(GeoDiamondSurface* nodePtr);
-    void storeBuiltAnnulusSurface(GeoAnnulusSurface* nodePtr);
-    void storeBuiltVSurface(GeoVSurface* nodePtr);
-    
-    bool isBuiltTransform(const unsigned id);
-    void storeBuiltTransform(GeoTransform* node);
-    GeoTransform* getBuiltTransform(const unsigned id);
+    PVLink getVPhysVol(const unsigned int id, const unsigned int tableId) const;
 
-    bool isBuiltAlignableTransform(const unsigned id);
-    void storeBuiltAlignableTransform(GeoAlignableTransform* node);
-    GeoAlignableTransform* getBuiltAlignableTransform(const unsigned id);
+    std::shared_ptr<GMDBManager> m_dbManager{};
+    bool m_timing{false};
 
-    // void storeVPhysVol(const unsigned int id, const unsigned int tableId,
-    // const unsigned int copyNumber, GeoGraphNode* node); GeoGraphNode*
-    // getVPhysVol(const unsigned int id, const unsigned int tableId, const
-    // unsigned int copyNumber);
-    void storeVPhysVol(const unsigned int id, const unsigned int tableId,
-                       GeoGraphNode* node);
-    GeoGraphNode* getVPhysVol(const unsigned int id,
-                              const unsigned int tableId);
+    PVLink m_world{};
 
-    bool isBuiltLog(const unsigned int id);
-    void storeBuiltLog(GeoLogVol* nodePtr);
-    GeoLogVol* getBuiltLog(const unsigned int id);
-
-    bool isBuiltMaterial(const unsigned int id);
-    void storeBuiltMaterial(GeoMaterial* nodePtr);
-    GeoMaterial* getBuiltMaterial(const unsigned int id);
-
-    bool isBuiltElement(const unsigned int id);
-    void storeBuiltElement(GeoElement* nodePtr);
-    GeoElement* getBuiltElement(const unsigned int id);
-
-    bool isBuiltFunction(const unsigned int id);
-    // void storeBuiltFunction(const unsigned int id, GeoXF::Function* nodePtr);
-    // // TODO: implement this GeoXF::Function* getBuiltFunction(const unsigned
-    // int id); // TODO: implement this
-
-    bool isBuiltPhysVol(const unsigned int id);
-    void storeBuiltPhysVol(GeoPhysVol* nodePtr);
-    GeoPhysVol* getBuiltPhysVol(const unsigned int id);
-
-    bool isBuiltFullPhysVol(const unsigned int id);
-    void storeBuiltFullPhysVol(GeoFullPhysVol* nodePtr);
-    GeoFullPhysVol* getBuiltFullPhysVol(const unsigned int id);
-
-    bool isBuiltSerialDenominator(const unsigned int id);
-    void storeBuiltSerialDenominator(GeoSerialDenominator* nodePtr);
-    GeoSerialDenominator* getBuiltSerialDenominator(const unsigned int id);
-
-    bool isBuiltSerialIdentifier(const unsigned int id);
-    void storeBuiltSerialIdentifier(GeoSerialIdentifier* nodePtr);
-    GeoSerialIdentifier* getBuiltSerialIdentifier(const unsigned int id);
-
-    bool isBuiltIdentifierTag(const unsigned int id);
-    void storeBuiltIdentifierTag(GeoIdentifierTag* nodePtr);
-    GeoIdentifierTag* getBuiltIdentifierTag(const unsigned int id);
-
-    bool isBuiltNameTag(const unsigned int id);
-    void storeBuiltNameTag(GeoNameTag* nodePtr);
-    GeoNameTag* getBuiltNameTag(const unsigned int id);
-
-    bool isBuiltSerialTransformer(const unsigned int id);
-    void storeBuiltSerialTransformer(GeoSerialTransformer* nodePtr);
-    GeoSerialTransformer* getBuiltSerialTransformer(const unsigned int id);
-
-    // Utility functions
-    std::vector<std::string> splitString(const std::string& s, char delimiter); // TODO: move to global helpers
-    void printStdVectorStrings(
-        const std::vector<std::string>& vec);  // TODO: move it to utility class or move to global helpers
-
-    // void printTransformationValues(QStringList t); // TODO: move to a Qt
-    // utility class QList<double> convertQstringListToDouble(QStringList
-    // listin); // TODO: move to a Qt utility class std::vector<std::string>
-    // toStdVectorStrings(QStringList qlist); // TODO: move to a Qt utility
-    // class QStringList toQStringList(std::vector<std::string> vec); // TODO:
-    // move to a Qt utility class void checkInputString(QString input); // TODO:
-    // move to an utility class
-
-    // input arguments
-    std::string _dbName;
-    GMDBManager* m_dbManager;
-    bool m_deepDebug;
-    bool m_debug;
-    bool m_timing;
-    bool m_runMultithreaded;
-    int m_runMultithreaded_nThreads;
-
-    // callback handles
-    unsigned long* m_progress;
-
-    //! builders
-    // std::unique_ptr<BuildGeoShapes_Box> m_builderShape_Box;
-    BuildGeoVSurface*   buildsurfTool{};
-    BuildGeoShapes_Box* m_builderShape_Box{};
-    BuildGeoShapes_EllipticalTube* m_builderShape_EllipticalTube{};
-    BuildGeoShapes_Tube* m_builderShape_Tube{};
-    BuildGeoShapes_Cons* m_builderShape_Cons{};
-    BuildGeoShapes_Para* m_builderShape_Para{};
-    BuildGeoShapes_Trap* m_builderShape_Trap{};
-    BuildGeoShapes_Trd* m_builderShape_Trd{};
-    BuildGeoShapes_Tubs* m_builderShape_Tubs{};
-    BuildGeoShapes_Torus* m_builderShape_Torus{};
-    BuildGeoShapes_TwistedTrap* m_builderShape_TwistedTrap{};
-    BuildGeoShapes_Pcon* m_builderShape_Pcon{};
-    BuildGeoShapes_Pgon* m_builderShape_Pgon{};
-    BuildGeoShapes_SimplePolygonBrep* m_builderShape_SimplePolygonBrep{};
-    BuildGeoShapes_GenericTrap* m_builderShape_GenericTrap{};
-    BuildGeoShapes_UnidentifiedShape* m_builderShape_UnidentifiedShape{};
-
-    //! containers to store the list of GeoModel nodes coming from the DB
-    std::vector<std::vector<std::string>> m_physVols;
-    std::vector<std::vector<std::string>> m_fullPhysVols;
-    std::vector<std::vector<std::string>> m_transforms;
-    std::vector<std::vector<std::string>> m_alignableTransforms;
-    std::vector<std::vector<std::string>> m_serialDenominators;
-    std::vector<std::vector<std::string>> m_serialIdentifiers;
-    std::vector<std::vector<std::string>> m_identifierTags;
-    std::vector<std::vector<std::string>> m_serialTransformers;
-    std::vector<std::vector<std::string>> m_nameTags;
-    // std::vector<std::vector<std::string>> m_materials;
-    // std::vector<std::vector<std::string>> m_elements;
-    std::vector<std::vector<std::string>> m_shapes;
-
-    DBRowsList m_elements;
-    DBRowsList m_materials;
-    DBRowsList m_materials_Data;
-    DBRowsList m_logVols;
-    DBRowsList m_allchildren;
-
-    // containers to store virtual surfaces
-    DBRowsList m_rectangle_surface;  // For Virtual Surface Shape
-    DBRowsList m_trapezoid_surface;
-    DBRowsList m_annulus_surface;
-    DBRowsList m_diamond_surface;
-    DBRowsList m_VSurface;           // For Virtual Surface Abstract Class
-
-    // containers to store shapes' parameters
-    DBRowsList m_shapes_Box;
-    DBRowsList m_shapes_EllipticalTube;
-    DBRowsList m_shapes_Tube;
-    DBRowsList m_shapes_Cons;
-    DBRowsList m_shapes_Para;
-    DBRowsList m_shapes_Trap;
-    DBRowsList m_shapes_Trd;
-    DBRowsList m_shapes_Tubs;
-    DBRowsList m_shapes_Torus;
-    DBRowsList m_shapes_TwistedTrap;
-    DBRowsList m_shapes_Pcon;
-    DBRowsList m_shapes_Pgon;
-    DBRowsList m_shapes_SimplePolygonBrep;
-    DBRowsList m_shapes_GenericTrap;
-    DBRowsList m_shapes_UnidentifiedShape;
-    
-    // containers to store shapes' data, 
-    // for those shapes with a variable number of build parameters
-    DBRowsList m_shapes_Pcon_data;
-    DBRowsList m_shapes_Pgon_data;
-    DBRowsList m_shapes_SimplePolygonBrep_data;
-    DBRowsList m_shapes_GenericTrap_data;
-
-    // containers to store shape operators / boolean shapes
-    DBRowsList m_shapes_Shift;
-    DBRowsList m_shapes_Subtraction;
-    DBRowsList m_shapes_Intersection;
-    DBRowsList m_shapes_Union;
-
-    // containers to store Functions and their related data
-    DBRowsList m_functions;
-    std::deque<double> m_funcExprData;
-
-
-    std::unordered_map<unsigned int, std::string>
-        m_tableID_toTableName;  // to look for node's type name starting from a
-                                // table ID
-    std::unordered_map<std::string, unsigned int>
-        m_tableName_toTableID;  // to look for table ID starting from node's
-                                // type name
-
-    // std::vector<std::string> m_root_vol_data;
-    std::pair<unsigned, unsigned> m_root_vol_data;
-
-    //! memory chaches
-    std::vector<GeoPhysVol*> m_memMapPhysVols;
-    std::vector<GeoFullPhysVol*> m_memMapFullPhysVols;
-    std::vector<GeoTransform*> m_memMapTransforms;
-    std::vector<GeoAlignableTransform*> m_memMapAlignableTransforms;
-    std::vector<GeoSerialDenominator*> m_memMapSerialDenominators;
-    std::vector<GeoSerialIdentifier*> m_memMapSerialIdentifiers;
-    std::vector<GeoIdentifierTag*> m_memMapIdentifierTags;
-    std::vector<GeoSerialTransformer*> m_memMapSerialTransformers;
-    std::vector<GeoNameTag*> m_memMapNameTags;
-    std::vector<GeoLogVol*> m_memMapLogVols;
-    std::vector<GeoMaterial*> m_memMapMaterials;
-    std::vector<GeoElement*> m_memMapElements;
-    std::vector<GeoRectSurface*> m_memMapRectSurface;
-    std::vector<GeoTrapezoidSurface*> m_memMapTrapezoidSurface;
-    std::vector<GeoAnnulusSurface*> m_memMapAnnulusSurface;
-    std::vector<GeoDiamondSurface*> m_memMapDiamondSurface;
-    std::vector<GeoVSurface*> m_memMapVSurface;
-    //  std::vector<GeoXF::Function*> m_memMapFunctions; // FIXME:
-    
-    // we need keys, because shapes are not built following the ID order
-    std::unordered_map<unsigned int, GeoShape*> m_memMapShapes; // OLD DB CACHE
-    std::unordered_map<unsigned int, GeoShape*> m_memMapShapes_Shift;  
-    std::unordered_map<unsigned int, GeoShape*> m_memMapShapes_Subtraction;  
-    std::unordered_map<unsigned int, GeoShape*> m_memMapShapes_Union;  
-    std::unordered_map<unsigned int, GeoShape*> m_memMapShapes_Intersection;  
-
-    // we need keys, to keep track of the volume's copyNumber
-    std::unordered_map<std::string, GeoGraphNode*> m_memMap;  
-
-    //! container to store unknown shapes
-    std::set<std::string> m_unknown_shapes;
-
-    /// Stores the loglevel, the level of output messages
-    unsigned m_loglevel;
+    // to look for table ID starting from node's type name
+    std::unordered_map<unsigned int, std::string> m_tableID_toTableName{};
+    // to look for node's type name starting from a table ID
+    std::unordered_map<std::string, unsigned int> m_tableName_toTableID{};  
+    std::pair<unsigned, unsigned> m_root_vol_data{};
+    /** @brief Container of all registered volume shape factories */
+    std::map<std::string, std::unique_ptr<BuildGeoShapes>> m_shapeFactories{};
+    /** @brief Container of all registeres surface shape factories */
+    std::map<std::string, std::unique_ptr<BuildGeoVSurface>> m_surfaceFactories{};
+    /** @brief List of all cached GeoPhysVol instances */
+    GeoIdObjMap<GeoIntrusivePtr<GeoPhysVol>> m_memMapPhysVols{};
+    /** @brief List of all cahced GeoFullPhysVol instances */
+    GeoIdObjMap<GeoIntrusivePtr<GeoFullPhysVol>> m_memMapFullPhysVols{};
+    /** @brief Cached non-alignable transforms */
+    GeoIdObjMap<GeoIntrusivePtr<GeoTransform>> m_memMapTransforms{};
+    /** @brief Cached alignable transforms */
+    GeoIdObjMap<GeoIntrusivePtr<GeoAlignableTransform>> m_memMapAlignableTransforms{};
+    /** @brief Cached logical volumes */
+    GeoIdObjMap<GeoIntrusivePtr<GeoLogVol>> m_memMapLogVols{};
+    /** @brief Cached Materials */
+    GeoIdObjMap<GeoIntrusivePtr<GeoMaterial>> m_memMapMaterials{};
+    /** @brief Cached Elements */
+    GeoIdObjMap<GeoIntrusivePtr<GeoElement>> m_memMapElements{};
+    /** @brief Cached Serial denominators */
+    GeoIdObjMap<GeoIntrusivePtr<GeoSerialDenominator>> m_memMapSerialDenominators{};
+    /** @brief Cached Serial Identifiers */
+    GeoIdObjMap<GeoIntrusivePtr<GeoSerialIdentifier>> m_memMapSerialIdentifiers{};
+    /** @brief Cached Identifier tags */
+    GeoIdObjMap<GeoIntrusivePtr<GeoIdentifierTag>> m_memMapIdentifierTags{};
+    /** @brief Cached name tags */
+    GeoIdObjMap<GeoIntrusivePtr<GeoNameTag>> m_memMapNameTags{};
+    /** @brief Cached virtual surfaces */
+    GeoIdObjMap<GeoIntrusivePtr<GeoVSurface>> m_memMapVSurface{};
+    /** @brief Cached serial transformers */
+    GeoIdObjMap<GeoIntrusivePtr<GeoSerialTransformer>> m_memMapSerialTransformers{};
+    /** @brief Cached function table */
+    GeoIdObjMap<std::shared_ptr<const GeoXF::Function>> m_memMapFunctions{};
+    /** @brief Stores the loglevel, the level of output messages */
+    unsigned m_loglevel{0};
+    /** @brief Swtich to toggle whether the maps are cleared as soon as they're no longer needed. */
+    bool m_autoClean{true};
 };
 
 } /* namespace GeoModelIO */
@@ -539,3 +307,4 @@ class ReadGeoModel {
 #include "ReadGeoModel.tpp"
 
 #endif /* GeoModelRead_ReadGeoModel_H_ */
+

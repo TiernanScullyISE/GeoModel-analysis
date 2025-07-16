@@ -15,8 +15,11 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Para::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Para::BuildGeoShapes_Para(DBRowsList&& allGeoParasData):
+  BuildGeoShapes{GeoPara::getClassType(), std::move(allGeoParasData)}{}
+void BuildGeoShapes_Para::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Para:shapeID");
@@ -31,9 +34,7 @@ void BuildGeoShapes_Para::buildShape(const DBRowEntry row)
   const double Theta = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "Para:Theta");
   const double Phi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[7], "Para:Phi");
 
-  GeoPara *shape = new GeoPara(XHalfLength, YHalfLength, ZHalfLength, Alpha, Theta,
-                               Phi);
-  storeBuiltShape(shapeId, shape);
-
-  return;
+  auto shape = make_intrusive<GeoPara>(XHalfLength, YHalfLength, ZHalfLength, Alpha, Theta, Phi);
+  storeBuiltShape(shapeId, std::move(shape));
+}
 }

@@ -15,8 +15,12 @@
 #include <vector>
 #include <iostream>
 
-void BuildGeoShapes_Tubs::buildShape(const DBRowEntry row)
-{
+namespace GeoModelIO {
+
+BuildGeoShapes_Tubs::BuildGeoShapes_Tubs(DBRowsList&& allTubsData):
+    BuildGeoShapes{GeoTubs::getClassType(), std::move(allTubsData)}{}
+
+void BuildGeoShapes_Tubs::buildShape(const DBRowEntry row) {
   // === get shape numeric data from the DB row
   // shape ID
   const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(row[0], "Tubs:shapeID");
@@ -29,9 +33,8 @@ void BuildGeoShapes_Tubs::buildShape(const DBRowEntry row)
   const double SPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[5], "Tubs:SPhi");
   const double DPhi = GeoModelHelpers::variantHelper::getFromVariant_Double(row[6], "Tubs:DPhi");
   
-  GeoShape *shape = new GeoTubs(RMin, RMax, ZHalfLength, SPhi, DPhi);
+  auto shape = make_intrusive<GeoTubs>(RMin, RMax, ZHalfLength, SPhi, DPhi);
 
-  storeBuiltShape(shapeId, shape);
-
-  return;
+  storeBuiltShape(shapeId, std::move(shape));
+}
 }

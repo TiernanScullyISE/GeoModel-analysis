@@ -52,8 +52,7 @@ int main(int argc, char *argv[])
     // write to the test DB
     std::string testDB = "test_io_unidentifiedshape.db";
     unsigned loglevel = 2;
-    const bool forceDelete = true;
-    GeoModelIO::IO::saveToDB(world, testDB, loglevel, forceDelete);
+    GeoModelIO::IO::saveToDB(world, testDB, loglevel, true);
 
     // load from the test DB
     PVConstLink world2 = GeoModelIO::IO::loadDB(testDB);

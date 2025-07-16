@@ -13,17 +13,21 @@
 #ifndef GEOMODELREAD_BuildGeoShapes_Para_H
 #define GEOMODELREAD_BuildGeoShapes_Para_H
 
-#include "BuildGeoShapes.h"
+#include "GeoModelRead/BuildGeoShapes.h"
 
 #include <vector>
 #include <variant>
 #include <string>
 
-class BuildGeoShapes_Para : public BuildGeoShapes
-{
-public:
-  BuildGeoShapes_Para(const unsigned size):BuildGeoShapes("Para", size){};
-  void buildShape(const DBRowEntry row) override;
-};
+namespace GeoModelIO {
 
+class BuildGeoShapes_Para : public BuildGeoShapes {
+    public:
+      /** @brief Constructor taking all defined entries in the database
+       *         to construct GeoParas */  
+       BuildGeoShapes_Para(DBRowsList&& allGeoParasData);
+    private:
+       void buildShape(const DBRowEntry row) override;
+};
+}
 #endif
