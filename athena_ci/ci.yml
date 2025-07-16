@@ -17,7 +17,7 @@ build_geomodel_athena:
     CCACHE_MAXSIZE: 10G
 
     ATLAS_LOCAL_ROOT_BASE: /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-    LCG_PLATFORM: x86_64-el9-gcc13-opt
+    LCG_PLATFORM: x86_64-el9-gcc14-opt
     ATHENA_GIT_REPO: https://gitlab.cern.ch/atlas/athena.git
     ATHENA_RELEASE: main
     ATHENA_REF: main
@@ -77,7 +77,7 @@ build_geomodel_athena:
     USER: nobody # the run workflow tests need this set
 
     ATLAS_LOCAL_ROOT_BASE: /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-    LCG_PLATFORM: x86_64-el9-gcc13-opt
+    LCG_PLATFORM: x86_64-el9-gcc14-opt
     ATHENA_GIT_REPO: https://gitlab.cern.ch/atlas/athena.git
     ATHENA_RELEASE: main
     ATHENA_REF: main
@@ -99,7 +99,7 @@ build_geomodel_athena:
     - sudo dnf install -y which
 
     - source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh || true
-    - asetup --restore || true
+    - asetup Athena,main,latest || true
     - lsetup git || true
 
     - echo "Cloning ${ATHENA_GIT_REPO} @ ${ATHENA_REF}"

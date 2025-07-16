@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}"   )" &> /dev/null && pwd 
 
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
 
-export LCG_PLATFORM=x86_64-el9-gcc13-opt
+export LCG_PLATFORM=x86_64-el9-gcc14-opt
 
 export ATHENA_GIT_REPO=https://gitlab.cern.ch/atlas/athena.git
 export ATHENA_RELEASE=main
