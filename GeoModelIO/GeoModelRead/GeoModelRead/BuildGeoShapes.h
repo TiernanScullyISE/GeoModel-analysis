@@ -29,6 +29,9 @@ class BuildGeoShapes {
 
 public:
   using GeoShapePtr = GeoIntrusivePtr<GeoShape>;
+
+  virtual ~BuildGeoShapes() = default;
+
   /** @brief Returns the shape which is registered in the database under the passed ID.
    *         If the shape is not built yet, then it is attempted to construct the shape.
    *  @param id: Database field identifier. */
@@ -56,7 +59,7 @@ protected:
                  DBRowsList&& primaryData,
                  DBRowsList&& auxillaryData);
 
-    // --- methods for caching GeoShape nodes ---
+  // --- methods for caching GeoShape nodes ---
   void storeBuiltShape(const unsigned id, GeoShapePtr&& nodePtr);
 private:
   std::string m_shapeType{};

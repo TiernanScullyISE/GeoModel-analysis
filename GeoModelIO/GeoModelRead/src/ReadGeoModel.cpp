@@ -744,7 +744,7 @@ void ReadGeoModel::buildAllGeoFunc(){
         TFPTR func = interpreter.interpret(expr, &sub_vector);
 
         if (!m_memMapFunctions.insert(std::make_pair(funcId, std::move(func)))) {
-            THROW_EXCEPTION("Failed to register "<<exp<<" under "<<funcId);
+            THROW_EXCEPTION("Failed to register "<<expr<<" under "<<funcId);
         }
     }
 }

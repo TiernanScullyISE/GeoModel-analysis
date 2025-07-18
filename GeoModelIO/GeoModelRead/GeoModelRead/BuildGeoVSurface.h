@@ -30,6 +30,9 @@ class BuildGeoVSurface {
       /** @param Standard constructor taking all database entries to construct the shapes
        *  @param surfaceRecords: R-value list of defining parameters. */
       BuildGeoVSurface(DBRowsList&& surfaceRecords);
+
+      virtual ~BuildGeoVSurface() = default;
+
       /** @brief Returns a surface shape which is registered under dbID in the surfaceRecords
        *         If the shape does not exist yet, it's attempted to construct it. The dbID 
        *         must not exceed the number of database records passed during class instance 
