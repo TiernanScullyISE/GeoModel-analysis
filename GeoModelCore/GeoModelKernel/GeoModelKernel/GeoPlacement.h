@@ -10,6 +10,7 @@
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 
 #include <optional>
+#include <shared_mutex>
 
 /** 
  *  @brief: Basic geo graphNode which contains placement information w.r.t. its mother volume
@@ -38,8 +39,8 @@ public:
 
   protected:
       virtual ~GeoPlacement() = default;
-  
   private:
+      mutable std::shared_mutex m_mutex{};
       const GeoVPhysVol* m_parentPtr{nullptr};
       bool m_uniqueParent{true};
 

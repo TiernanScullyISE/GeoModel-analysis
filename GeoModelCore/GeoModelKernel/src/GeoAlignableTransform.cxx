@@ -76,5 +76,6 @@ void GeoAlignableTransform::clearDelta(GeoVAlignmentStore* store) {
 }
 
 void GeoAlignableTransform::dockTo(GeoVPhysVol* parent) {
+  std::scoped_lock<std::mutex> guard(m_deltaMutex);
   m_parentList.push_back (parent);
 }

@@ -68,7 +68,6 @@ namespace GeoThreading{
     }
     std::unique_ptr<ThreadPool::IThreadTask> ThreadPool::nextTask() {
         std::unique_lock lock{m_mutex};
-
         TaskCont_t::iterator ready_task = std::ranges::find_if(m_queue,
                 [](const std::unique_ptr<IThreadTask>& task){
                     return task->ready();
@@ -85,17 +84,20 @@ namespace GeoThreading{
     unsigned ThreadPool::nThreads() const { return m_workers.size(); }
 
     void ThreadPool::drainQueue(){ 
-        while (unsigned int n = queue()) {
+        unsigned int n = queue();
+        do {
             PRINT_MSG("Wait until the last "<<n<<" tasks are launched. ");
             std::this_thread::sleep_for(threadSleep);
-        }
-        while (unsigned int n = std::ranges::count_if(m_workers,
-                [](const std::unique_ptr<ThreadWorker>& worker){
-                    return !worker->isIdle();
-                })) {
+        } while (n = queue());
+        // Wait until all threads are idle
+        n = m_workers.size();
+        do{
             PRINT_MSG("Wait until the last "<<n<<" tasks are finished. ");
             std::this_thread::sleep_for(threadSleep);
-        }
+        } while  (n = std::ranges::count_if(m_workers,
+                [](const std::unique_ptr<ThreadWorker>& worker){
+                    return !worker->isIdle();
+                }));
     }
 
     /************************************************************* 
@@ -127,10 +129,14 @@ namespace GeoThreading{
                 task->execute();
             }
         } while (!stop.stop_requested());
+        m_done = true;
     }
     void ThreadPool::ThreadWorker::stop() {
+        if (m_done) {
+            return; // Already stopped
+        }
         m_thread.request_stop();
-        while (!isIdle()) {
+        while (!m_done) {
             PRINT_MSG("Wait until the last task is finished before shutting down");
             std::this_thread::sleep_for(threadSleep);
         }

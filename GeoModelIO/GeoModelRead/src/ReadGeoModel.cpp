@@ -114,7 +114,7 @@ using namespace GeoGenfun;
 using namespace GeoXF;
 
 namespace {
-    constexpr std::size_t objectBatch = 2000;
+    constexpr std::size_t objectBatch = 5000;
 
     template <typename NodeType_t>
     void addGraphNode(const PVLink& appendTo, const GeoIntrusivePtr<NodeType_t>& addMe){
@@ -792,7 +792,7 @@ void ReadGeoModel::connectNodes() {
     for (std::size_t start = 0 ; start < records.size(); ){
         std::size_t end = std::min(start + objectBatch, records.size());
         /// Ensure that a parent volume is never chopped into two batches
-        for ( ; end < records.size() -1; ++end) {
+        for (bool newVol{false} ; !newVol && end < records.size() -1; ++end) {
             const DBRowEntry& currEnd{records[end]};
             const DBRowEntry& nextOne{records[end+1]};
 
@@ -800,10 +800,20 @@ void ReadGeoModel::connectNodes() {
                GeoModelHelpers::variantHelper::getFromVariant_Int(nextOne[1], "nextOne:parentID") ||
                GeoModelHelpers::variantHelper::getFromVariant_Int(currEnd[2], "currEnd:parentTableId") !=
                GeoModelHelpers::variantHelper::getFromVariant_Int(nextOne[2], "nextOne:parentTableId")){
-               break;
+               newVol = true;
             }
         }
         pool.appendTask([this, start,end, &records](){
+            if (m_loglevel >= 2) {
+                std::stringstream sstr{};
+                sstr<< " - processing records from " << start << " to " << end << std::endl;
+                for (std::size_t itr = start; itr < end; ++itr) {
+                    const DBRowEntry& record{records[itr]};
+                    sstr<<"["<<GeoModelHelpers::variantHelper::getFromVariant_Int(record[1], "record:parentID")
+                        <<";"<<GeoModelHelpers::variantHelper::getFromVariant_Int(record[2], "record:parentTableId") << "], ";
+                }
+                PRINT_MSG(sstr.str());
+            }
             for (std::size_t itr = start; itr < end; ++itr) {
                 processParentChild(records[itr]);
             }

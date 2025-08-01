@@ -10,6 +10,7 @@
 
 
 void GeoPlacement::dockTo(GeoVPhysVol* parent) {
+  std::unique_lock guard{m_mutex};
    if (!m_parentPtr && m_uniqueParent) {
       m_parentPtr = parent;
    } else {
@@ -20,9 +21,11 @@ void GeoPlacement::dockTo(GeoVPhysVol* parent) {
 
 
 bool GeoPlacement::isShared() const {
+  std::shared_lock guard{m_mutex};
   return !m_uniqueParent;
 }
 GeoIntrusivePtr<const GeoVPhysVol> GeoPlacement::getParent() const {
+  std::shared_lock guard{m_mutex};
   return GeoIntrusivePtr<const GeoVPhysVol>{m_parentPtr};
 }
 
@@ -31,7 +34,9 @@ GeoTrf::Transform3D GeoPlacement::getX(const GeoVAlignmentStore* store) const {
   //
   // Check we are not shared:
   //
-  if (isShared()) THROW_EXCEPTION("Transform requested from shared volume");
+  if (isShared()) {
+    THROW_EXCEPTION("Transform requested from shared volume");
+  }
   GeoTrf::Transform3D xform{GeoTrf::Transform3D::Identity()};
 
   if (!m_parentPtr) {

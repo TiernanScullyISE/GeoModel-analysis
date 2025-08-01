@@ -111,6 +111,8 @@ namespace GeoThreading {
                     std::jthread m_thread{[this](std::stop_token stop){launch(stop);}};
                     /** @brief flag indicating that the worker is sleeping */
                     std::atomic<bool> m_idle{true};
+                    /** @brief Flag indicating that the worker is done */
+                    std::atomic<bool> m_done{false};
 
             };
             /** @brief Singelton pointer */
