@@ -65,4 +65,8 @@ if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     add_executable(testGMSQLiteConnectionQuery tests/testGMSQLiteConnectionQuery.cpp)
     target_link_libraries(testGMSQLiteConnectionQuery GeoModelDBManager GTest::GTest GTest::Main SQLite::SQLite3 GeoModelKernel )
     add_test(NAME testGMSQLiteConnectionQuery COMMAND testGMSQLiteConnectionQuery)
+    #
+    add_executable(testCreateValidDBFile tests/testCreateValidDBFile.cpp)
+    target_link_libraries(testCreateValidDBFile GeoModelDBManager  GTest::GTest GTest::Main GeoModelIOHelpers GeoModelKernel )
+    add_test(NAME testCreateValidDBFile COMMAND testCreateValidDBFile)
 endif()

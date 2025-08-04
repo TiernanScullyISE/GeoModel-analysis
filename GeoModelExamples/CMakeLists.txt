@@ -7,7 +7,6 @@
 
 # Set up the project.
 project( "GeoModelExamples" VERSION 4.1.0 LANGUAGES CXX )
-
 # Getting-started examples
 add_subdirectory( KitchenSinkPlugin )
 add_subdirectory( MinimalPlugin )
