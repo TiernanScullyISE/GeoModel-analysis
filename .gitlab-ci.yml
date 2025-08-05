@@ -42,6 +42,8 @@ workflow:
     - export PATH="/opt/homebrew/opt/expat/bin:$PATH" # to make CMake use expat from Homebrew instead of the one in /usr/lib
     - export CXXFLAGS="-I/opt/homebrew/opt/expat/include"
     - export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
+  variables:
+    GIT_STRATEGY: clone
     
 
 # Base template for all Ubuntu jobs
