@@ -17,6 +17,7 @@ stages:
 variables:
   # also, 'CMAKE_EXTRA_FLAGS' will be specified by specific jobs when needed, and used by job templates like 'geomodel-job'
   GIT_SUBMODULE_STRATEGY: recursive
+  HOMEBREW_NO_AUTO_UPDATE: 1 #this speeds up the jobs on the macOS build machine
 
 workflow:
   rules:
@@ -136,12 +137,12 @@ mac-gm-examples:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES=TRUE
 
-#mac-gm-gmg4:
-#  <<: *macos-job
-#  <<: *geomodel-job
-#  stage: step-A
-#  variables:
-#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
+mac-gm-gmg4:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
 
 #mac-gm-examples-gmg4:
 #  <<: *macos-job
