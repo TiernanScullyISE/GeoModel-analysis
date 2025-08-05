@@ -136,12 +136,12 @@ mac-gm-examples:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_EXAMPLES=TRUE
 
-mac-gm-gmg4:
-  <<: *macos-job
-  <<: *geomodel-job
-  stage: step-A
-  variables:
-    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
+#mac-gm-gmg4:
+#  <<: *macos-job
+#  <<: *geomodel-job
+#  stage: step-A
+#  variables:
+#    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_GEOMODELG4=TRUE
 
 #mac-gm-examples-gmg4:
 #  <<: *macos-job
