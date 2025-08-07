@@ -43,6 +43,7 @@ workflow:
     - export CXXFLAGS="-I/opt/homebrew/opt/expat/include"
     - export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
   variables:
+    GIT_STRATEGY: none
     HOMEBREW_NO_AUTO_UPDATE: 1 #this speeds up the jobs on the macOS build machine
     
 
