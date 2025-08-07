@@ -17,7 +17,7 @@ stages:
 variables:
   # also, 'CMAKE_EXTRA_FLAGS' will be specified by specific jobs when needed, and used by job templates like 'geomodel-job'
   GIT_SUBMODULE_STRATEGY: recursive
-  HOMEBREW_NO_AUTO_UPDATE: 1 #this speeds up the jobs on the macOS build machine
+  
 
 workflow:
   rules:
@@ -43,7 +43,8 @@ workflow:
     - export CXXFLAGS="-I/opt/homebrew/opt/expat/include"
     - export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
   variables:
-    GIT_STRATEGY: clone
+    GIT_STRATEGY: empty
+    HOMEBREW_NO_AUTO_UPDATE: 1 #this speeds up the jobs on the macOS build machine
     
 
 # Base template for all Ubuntu jobs
