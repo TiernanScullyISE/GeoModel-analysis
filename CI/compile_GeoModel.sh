@@ -33,13 +33,13 @@ echo "export ROOT_INCLUDE_PATH=\"${INSTALL_DIR}/include:${ROOT_INCLUDE_PATH}\""
 echo "export PATH=\"${INSTALL_DIR}/bin:${PATH}\""
 
 
-echo "cmake ${CMAKE_CONFIG_FLAGS} \
+echo "cmake --fresh ${CMAKE_CONFIG_FLAGS} \
     -DCMAKE_CXX_FLAGS=\"${CMAKE_EXTRA_FLAGS}\" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
      ${SOURCE_DIR}"
 
-cmake ${CMAKE_CONFIG_FLAGS} \
+cmake --fresh ${CMAKE_CONFIG_FLAGS} \
     -DCMAKE_CXX_FLAGS="${CMAKE_EXTRA_FLAGS}" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
