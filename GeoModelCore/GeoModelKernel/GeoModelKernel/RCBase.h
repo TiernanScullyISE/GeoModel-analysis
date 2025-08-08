@@ -54,4 +54,5 @@ class RCBase {
     //  The reference count
     mutable std::atomic<unsigned> m_count{0};
 };
+
 #endif

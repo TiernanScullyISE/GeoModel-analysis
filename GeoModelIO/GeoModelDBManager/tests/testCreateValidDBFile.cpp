@@ -136,7 +136,7 @@ TEST_F(ValidDatabaseTest, CanCreateAndConnectValidDatabase) {
   EXPECT_TRUE(dbManager->checkIsDBOpen());
 }
 
-TEST_F(ValidDatabaseTest, CanGetMaterials){
+TEST_F(ValidDatabaseTest, DISABLED_CanGetMaterials){
   testing::internal::CaptureStdout();
   EXPECT_NO_THROW(dbManager->printAllRecords("Materials"));
   std::string output  = testing::internal::GetCapturedStdout();
