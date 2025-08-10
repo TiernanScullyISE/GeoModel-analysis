@@ -56,6 +56,7 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
+      - .gitlab-ci.yml
       - CI/*
       - ATLASExtensions/**/*
       - FSL/**/*
@@ -530,12 +531,7 @@ tests-ubuntu:
   stage: test
   needs: ["ubu-gm-all"]
   script:
-    - mv build ../
-    - cd ../build
-    - ctest --verbose > ${CI_PROJECT_DIR}/CTest.log && cat ${CI_PROJECT_DIR}/CTest.log
-    - pwd
-    - ls -l
-    - cp -r Testing ${CI_PROJECT_DIR}/TestsOutput #move the test output folder to the main project folder, otherwise 'artifacts' cannot pick it
+    - ${CI_PROJECT_DIR}/CI/runUnitTests.sh
   artifacts:
     paths:
       - TestsOutput
