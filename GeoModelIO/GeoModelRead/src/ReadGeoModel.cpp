@@ -95,19 +95,17 @@
 
 #include <chrono>  /* system_clock */
 #include <ctime>   /* std::time */
-#include <future>
+
 #include <memory>
 #include <mutex>
 #include <stdexcept>
-#include <thread>
 #include <unordered_map>
 #include <unordered_set>
-#include <variant>
 #include <vector>
+#include <format>
 
 // mutexes for synchronized access to containers and output streams in
 // multi-threading mode
-std::mutex muxVPhysVol;
 std::mutex muxCout;
 
 using namespace GeoGenfun;
@@ -131,6 +129,8 @@ namespace {
     struct NoDeleter{
         void operator()(GMDBManager*){}
     };
+
+    using UnpackData_t = GeoModelHelpers::variantHelper;
     
 }
 
@@ -359,12 +359,12 @@ void ReadGeoModel::buildAllSerialDenominators() {
     if (m_loglevel >= 1){
         PRINT_MSG("Building all SerialDenominator nodes...");
     }
-    std::vector<std::vector<std::string>> serialDenoms = m_dbManager->getTableFromNodeType_String("GeoSerialDenominator");
-    for (const std::vector<std::string>& values : serialDenoms) {
+    const DBRowsList serialDenoms = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialDenominator");
+    for (const DBRowEntry& values : serialDenoms) {
         assert(values.size() >= 2);
-        const unsigned int nodeID = std::stoi(values[0]);
+        const unsigned int nodeID = UnpackData_t::getFromVariant_Int(values[0], "GeoSerialDenominator::nodeID");
         // // RMB: not used at the moment, commented to avoid warnings
-        const std::string& baseName = values[1];
+        const std::string& baseName = UnpackData_t::getFromVariant_String(values[1], "GeoSerialDenominator::baseName");
         auto nodePtr = make_intrusive<GeoSerialDenominator>(baseName);
         if(!m_memMapSerialDenominators.insert(std::make_pair(nodeID, std::move(nodePtr)))){
             THROW_EXCEPTION("Failed to register "<<baseName<<" under ID: "<<nodeID);
@@ -381,12 +381,12 @@ void ReadGeoModel::buildAllSerialIdentifiers() {
     if (m_loglevel >= 1) {
         PRINT_MSG("Building all SerialIdentifier nodes...");
     }
-    std::vector<std::vector<std::string>> serialsIds = m_dbManager->getTableFromNodeType_String("GeoSerialIdentifier");
+    const DBRowsList serialsIds = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialIdentifier");
     for (const auto& serialValues : serialsIds) {
         assert(serialValues.size() >= 2);
-        const unsigned int nodeID = std::stoi(serialValues[0]);
+        const unsigned int nodeID = UnpackData_t::getFromVariant_Int(serialValues[0], "GeoSerialIdentifier:nodeID");
         // // RMB: not used at the moment, commented to avoid warnings
-        const int baseId = std::stoi(serialValues[1]);
+        const int baseId = UnpackData_t::getFromVariant_Int(serialValues[1], "GeoSerialIdentifier::baseID");
         auto nodePtr = make_intrusive<GeoSerialIdentifier>(baseId);
         if (!m_memMapSerialIdentifiers.insert(std::make_pair(nodeID, nodePtr))){
             THROW_EXCEPTION("Failed to register serial Identifier: "<<baseId<<" under ID: "<<nodeID);
@@ -403,11 +403,11 @@ void ReadGeoModel::buildAllIdentifierTags() {
     if (m_loglevel >= 1) {
         PRINT_MSG("Building all IdentifierTag nodes...");
     }
-    const std::vector<std::vector<std::string>> idTags{m_dbManager->getTableFromNodeType_String("GeoIdentifierTag")};
+    const DBRowsList idTags{m_dbManager->getTableFromNodeType_VecVecData("GeoIdentifierTag")};
     for (const auto& idValues : idTags) {
         assert(idValues.size() >=2);
-        const unsigned int nodeID = std::stoi(idValues[0]);
-        const int identifier = std::stoi(idValues[1]);
+        const unsigned int nodeID = UnpackData_t::getFromVariant_Int(idValues[0], "GeoIdentifierTag::nodeID");
+        const int identifier      = UnpackData_t::getFromVariant_Int(idValues[1], "GeoIdentifierTag::identifier");
         auto nodePtr = make_intrusive<GeoIdentifierTag>(identifier);
         if (!m_memMapIdentifierTags.insert(std::make_pair(nodeID, nodePtr))) {
             THROW_EXCEPTION("Failed to register identifier "<<identifier<<" under: "<<nodeID);
@@ -424,11 +424,11 @@ void ReadGeoModel::buildAllNameTags() {
     if (m_loglevel >= 1) {
         PRINT_MSG("Building all NameTag nodes...");
     }
-    const std::vector<std::vector<std::string>> nameTagDB = m_dbManager->getTableFromNodeType_String("GeoNameTag");
+    const DBRowsList nameTagDB = m_dbManager->getTableFromNodeType_VecVecData("GeoNameTag");
     for (const auto& entry : nameTagDB) {
         assert(entry.size() >= 2);
-        const unsigned int nodeID = std::stoi(entry[0]);
-        const std::string& baseName = entry[1];
+        const unsigned int nodeID = UnpackData_t::getFromVariant_Int(entry[0], "GeoNameTag::nodeID");
+        const std::string& baseName = UnpackData_t::getFromVariant_String(entry[1], "GeoNameTag::baseName");
         auto nodePtr = make_intrusive<GeoNameTag>(baseName);
         if (!m_memMapNameTags.insert(std::make_pair(nodeID, nodePtr))) {
             THROW_EXCEPTION("Failed to regitert name tag "<<baseName<<" under ID: "<<nodeID);
@@ -446,11 +446,11 @@ void ReadGeoModel::buildAllElements() {
     }
     const DBRowsList elements = m_dbManager->getTableFromNodeType_VecVecData("GeoElement");
     for (const DBRowEntry& values : elements) {
-        const unsigned elId = GeoModelHelpers::variantHelper::getFromVariant_Int(values[0], "Element:ID");
-        std::string elName = GeoModelHelpers::variantHelper::getFromVariant_String(values[1], "Element:name");
-        std::string elSymbol = GeoModelHelpers::variantHelper::getFromVariant_String(values[2], "Element:symbol");
-        double elZ = GeoModelHelpers::variantHelper::getFromVariant_Double(values[3], "Element:Z");
-        double elA = GeoModelHelpers::variantHelper::getFromVariant_Double(values[4], "Element:A");
+        const unsigned elId = UnpackData_t::getFromVariant_Int(values[0], "Element:ID");
+        std::string elName = UnpackData_t::getFromVariant_String(values[1], "Element:name");
+        std::string elSymbol = UnpackData_t::getFromVariant_String(values[2], "Element:symbol");
+        double elZ = UnpackData_t::getFromVariant_Double(values[3], "Element:Z");
+        double elA = UnpackData_t::getFromVariant_Double(values[4], "Element:A");
         if (m_loglevel >= 2) {
             PRINT_MSG("\tElement - ID:" << elId << ", name:" << elName
                     << ", symbol:" << elSymbol << ", Z:" << elZ << ", A:" << elA
@@ -475,11 +475,11 @@ void ReadGeoModel::buildAllMaterials() {
     const DBRowsList materials = m_dbManager->getTableFromNodeType_VecVecData("GeoMaterial");
     const DBRowsList materials_Data = m_dbManager->getTableFromTableName_VecVecData("Materials_Data");
     for (const DBRowEntry& values : materials) {
-         const unsigned int matId = GeoModelHelpers::variantHelper::getFromVariant_Int(values[0], "Material:id");
-         const std::string matName = GeoModelHelpers::variantHelper::getFromVariant_String(values[1], "Material:matName");
-         const double matDensity = GeoModelHelpers::variantHelper::getFromVariant_Double(values[2], "Material:matDensity");
-         const unsigned dataStart = GeoModelHelpers::variantHelper::getFromVariant_Int(values[3], "Material:dataStart");
-         const unsigned dataEnd = GeoModelHelpers::variantHelper::getFromVariant_Int(values[4], "Material:dataEnd");
+         const unsigned int matId = UnpackData_t::getFromVariant_Int(values[0], "Material:id");
+         const std::string matName = UnpackData_t::getFromVariant_String(values[1], "Material:matName");
+         const double matDensity = UnpackData_t::getFromVariant_Double(values[2], "Material:matDensity");
+         const unsigned dataStart = UnpackData_t::getFromVariant_Int(values[3], "Material:dataStart");
+         const unsigned dataEnd = UnpackData_t::getFromVariant_Int(values[4], "Material:dataEnd");
 
         if (m_loglevel >= 3) {
             PRINT_MSG("\tbuildMaterial() : Material - ID:" << matId << ", name:" << matName
@@ -493,8 +493,8 @@ void ReadGeoModel::buildAllMaterials() {
 
         /// Assign the elements
         for (const DBRowEntry& matRow : matElements) {
-            const unsigned elId = GeoModelHelpers::variantHelper::getFromVariant_Int(matRow[1], "MatElement:id");
-            double elFraction = GeoModelHelpers::variantHelper::getFromVariant_Double(matRow[2], "MatElement:fraction");
+            const unsigned elId = UnpackData_t::getFromVariant_Int(matRow[1], "MatElement:id");
+            double elFraction = UnpackData_t::getFromVariant_Double(matRow[2], "MatElement:fraction");
             GeoIntrusivePtr<GeoElement> el = getBuiltElement(elId);
             assert(el);
             mat->add(el, elFraction);
@@ -520,12 +520,12 @@ void ReadGeoModel::buildAllVSurfaces() {
     }
     const DBRowsList vSurfaces = m_dbManager->getTableFromNodeType_VecVecData("GeoVSurface");
     for (const DBRowEntry& surfaceEntry : vSurfaces) {
-        const unsigned surfId = GeoModelHelpers::variantHelper::getFromVariant_Int(surfaceEntry[0], "surfaceID");
+        const unsigned surfId = UnpackData_t::getFromVariant_Int(surfaceEntry[0], "surfaceID");
         if (m_loglevel >= 3) {
            PRINT_MSG("buildVSurface(), testing VSurface id: " << surfId << "...");
         }
-        const std::string shapeType = GeoModelHelpers::variantHelper::getFromVariant_String(surfaceEntry[1], "VSurf_shapeType");
-        const unsigned int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(surfaceEntry[2], "VSurf_shapeID");
+        const std::string shapeType = UnpackData_t::getFromVariant_String(surfaceEntry[1], "VSurf_shapeType");
+        const unsigned int shapeId = UnpackData_t::getFromVariant_Int(surfaceEntry[2], "VSurf_shapeID");
         
         const auto factory_itr = m_surfaceFactories.find(shapeType);
         if (factory_itr == m_surfaceFactories.end()){
@@ -562,12 +562,12 @@ void ReadGeoModel::buildAllLogVols() {
             for (std::size_t itr = start; itr<end; ++itr){
                 const DBRowEntry& values{logVols[itr]};
                 // --- get the parameters to build the GeoLogVol node
-                const unsigned id = GeoModelHelpers::variantHelper::getFromVariant_Int(values[0], "LogVol_id");
+                const unsigned id = UnpackData_t::getFromVariant_Int(values[0], "LogVol_id");
                 // get the name of the LogVol
-                const std::string logVolName = GeoModelHelpers::variantHelper::getFromVariant_String(values[1], "LogVol_name");
+                const std::string logVolName = UnpackData_t::getFromVariant_String(values[1], "LogVol_name");
                 // get the ID and the type of the referenced GeoShape node
-                const int shapeId = GeoModelHelpers::variantHelper::getFromVariant_Int(values[2], "LogVol_shapeID");
-                const std::string shapeType = GeoModelHelpers::variantHelper::getFromVariant_String(values[3], "LogVol_shapeType");
+                const int shapeId = UnpackData_t::getFromVariant_Int(values[2], "LogVol_shapeID");
+                const std::string shapeType = UnpackData_t::getFromVariant_String(values[3], "LogVol_shapeType");
                 GeoIntrusivePtr<GeoShape> shape = getBuiltShape(shapeId, shapeType);
                 if (!shape) {
                     THROW_EXCEPTION("ERROR!! While building the LogVol '"<<logVolName<< "', shape of type '" 
@@ -575,7 +575,7 @@ void ReadGeoModel::buildAllLogVols() {
                 }
                 // build the referenced GeoMaterial node
                 // const unsigned int matId = std::stoi(values[3]);
-                const int matId = GeoModelHelpers::variantHelper::getFromVariant_Int(values[4], "LogVol_MaterialID");
+                const int matId = UnpackData_t::getFromVariant_Int(values[4], "LogVol_MaterialID");
 
                 if (m_loglevel >= 3) {
                    PRINT_MSG("Material Id:"<<matId);
@@ -610,16 +610,18 @@ void ReadGeoModel::buildAllLogVols() {
 template <typename PhysVol_t>
     void ReadGeoModel::buildPhysVols(const std::string& tableName,                          
                                      GeoIdObjMap<GeoIntrusivePtr<PhysVol_t>>& memCache) {
-        const std::vector<std::vector<std::string>> volRecords = m_dbManager->getTableFromNodeType_String(tableName);
+        const DBRowsList volRecords = m_dbManager->getTableFromNodeType_VecVecData(tableName);
         auto& pool{GeoThreading::ThreadPool::getPool()};
         for (std::size_t start =0 ; start < volRecords.size() ;) {
             const std::size_t end = std::min(start + objectBatch, volRecords.size());
             pool.appendTask([start, end,this, &volRecords, &memCache, &tableName](){
                 for (std::size_t itr = start; itr < end;++itr) {
-                    const std::vector<std::string>& volRecord{volRecords[itr]};
+                    const DBRowEntry& volRecord{volRecords[itr]};
                     assert(volRecord.size() >= 2);
-                    const unsigned volID = std::stoi(volRecord[0]);
-                    const unsigned logVolID = std::stoi(volRecord[1]);
+                    const unsigned volID    = UnpackData_t::getFromVariant_Int(volRecord[0], 
+                                                                               std::format("{}_volID", tableName));
+                    const unsigned logVolID = UnpackData_t::getFromVariant_Int(volRecord[1], 
+                                                                               std::format("{}_logVolID", tableName));
 
                     // GET LOGVOL
                     GeoIntrusivePtr<GeoLogVol> logVol = getBuiltLog(logVolID);
@@ -728,14 +730,14 @@ void ReadGeoModel::buildAllGeoFunc(){
     std::deque<double> funcExprData = m_dbManager->getTableFromTableName_DequeDouble("FuncExprData");
 
     for (const DBRowEntry& funcEntry : functions) {
-        const unsigned funcId = GeoModelHelpers::variantHelper::getFromVariant_Int(funcEntry[0], "Function::id");
-        std::string expr = GeoModelHelpers::variantHelper::getFromVariant_String(funcEntry[1], "Function::expression");
+        const unsigned funcId = UnpackData_t::getFromVariant_Int(funcEntry[0], "Function::id");
+        std::string expr = UnpackData_t::getFromVariant_String(funcEntry[1], "Function::expression");
         if (expr.empty()) {
             THROW_EXCEPTION("FATAL ERROR!! Function expression is empty!! Aborting...");
         }
 
-        const unsigned dataStart = GeoModelHelpers::variantHelper::getFromVariant_Int(funcEntry[2], "Function::parsStart");
-        const unsigned dataEnd   = GeoModelHelpers::variantHelper::getFromVariant_Int(funcEntry[3], "Function::parsEnd");
+        const unsigned dataStart = UnpackData_t::getFromVariant_Int(funcEntry[2], "Function::parsStart");
+        const unsigned dataEnd   = UnpackData_t::getFromVariant_Int(funcEntry[3], "Function::parsEnd");
         assert(dataStart > 0 && dataEnd <= funcExprData.size());
         std::deque<double> sub_vector(funcExprData.begin() + (dataStart-1),
                                       funcExprData.begin() + (dataEnd) );
@@ -752,14 +754,14 @@ void ReadGeoModel::buildAllSerialTransformers() {
     if (m_loglevel >= 2) {
         PRINT_MSG("Building all SerialTransformers...");
     }
-    std::vector<std::vector<std::string>> serialTransformers = m_dbManager->getTableFromNodeType_String("GeoSerialTransformer");
+    DBRowsList serialTransformers = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialTransformer");
 
     for (const auto& serialTrfEntry : serialTransformers) {
-        const unsigned int serialID = std::stoi(serialTrfEntry[0]);
-        const unsigned int functionId = std::stoi(serialTrfEntry[1]);
-        const unsigned int physVolId = std::stoi(serialTrfEntry[2]);
-        const unsigned int physVolTableId = std::stoi(serialTrfEntry[3]);
-        const unsigned int copies = std::stoi(serialTrfEntry[4]);
+        const unsigned int serialID   = UnpackData_t::getFromVariant_Int(serialTrfEntry[0], "GeoSerialTransformer::serialID");
+        const unsigned int functionId = UnpackData_t::getFromVariant_Int(serialTrfEntry[1], "GeoSerialTransformer::functionId");
+        const unsigned int physVolId  = UnpackData_t::getFromVariant_Int(serialTrfEntry[2], "GeoSerialTransformer::physVolId");
+        const unsigned int physVolTableId = UnpackData_t::getFromVariant_Int(serialTrfEntry[3], "GeoSerialTransformer::physVolTableId");
+        const unsigned int copies = UnpackData_t::getFromVariant_Int(serialTrfEntry[4], "GeoSerialTransformer::copies");
 
         auto func = getBuiltFunction(functionId); 
         if (!func) {
@@ -796,10 +798,10 @@ void ReadGeoModel::connectNodes() {
             const DBRowEntry& currEnd{records[end]};
             const DBRowEntry& nextOne{records[end+1]};
 
-            if(GeoModelHelpers::variantHelper::getFromVariant_Int(currEnd[1], "currEnd:parentID") !=
-               GeoModelHelpers::variantHelper::getFromVariant_Int(nextOne[1], "nextOne:parentID") ||
-               GeoModelHelpers::variantHelper::getFromVariant_Int(currEnd[2], "currEnd:parentTableId") !=
-               GeoModelHelpers::variantHelper::getFromVariant_Int(nextOne[2], "nextOne:parentTableId")){
+            if(UnpackData_t::getFromVariant_Int(currEnd[1], "currEnd:parentID") !=
+               UnpackData_t::getFromVariant_Int(nextOne[1], "nextOne:parentID") ||
+               UnpackData_t::getFromVariant_Int(currEnd[2], "currEnd:parentTableId") !=
+               UnpackData_t::getFromVariant_Int(nextOne[2], "nextOne:parentTableId")){
                newVol = true;
             }
         }
@@ -809,8 +811,8 @@ void ReadGeoModel::connectNodes() {
                 sstr<< " - processing records from " << start << " to " << end << std::endl;
                 for (std::size_t itr = start; itr < end; ++itr) {
                     const DBRowEntry& record{records[itr]};
-                    sstr<<"["<<GeoModelHelpers::variantHelper::getFromVariant_Int(record[1], "record:parentID")
-                        <<";"<<GeoModelHelpers::variantHelper::getFromVariant_Int(record[2], "record:parentTableId") << "], ";
+                    sstr<<"["<<UnpackData_t::getFromVariant_Int(record[1], "record:parentID")
+                        <<";"<<UnpackData_t::getFromVariant_Int(record[2], "record:parentTableId") << "], ";
                 }
                 PRINT_MSG(sstr.str());
             }
@@ -830,17 +832,17 @@ void ReadGeoModel::processParentChild(const DBRowEntry& parentchild) {
     }
 
     // get the parent's details
-    const unsigned int parentId = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[1], "ParentChild:parentID");
-    const unsigned int parentTableId = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[2], "ParentChild:parentTableId"); 
-    const unsigned int parentCopyN = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[3], "ParentChild:parentID"); 
+    const unsigned int parentId = UnpackData_t::getFromVariant_Int(parentchild[1], "ParentChild:parentID");
+    const unsigned int parentTableId = UnpackData_t::getFromVariant_Int(parentchild[2], "ParentChild:parentTableId"); 
+    const unsigned int parentCopyN = UnpackData_t::getFromVariant_Int(parentchild[3], "ParentChild:parentID"); 
 
     // get the child's position in the parent's children list
     // const unsigned int position = parentchild[4]; // unused, at the moment
 
     // get the child's details
-    const unsigned int childTableId = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[5], "ParentChild:parentID"); 
-    const unsigned int childId = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[6], "ParentChild:childID"); 
-    const unsigned int childCopyN = GeoModelHelpers::variantHelper::getFromVariant_Int(parentchild[7], "ParentChild:childCopyN"); 
+    const unsigned int childTableId = UnpackData_t::getFromVariant_Int(parentchild[5], "ParentChild:parentID"); 
+    const unsigned int childId = UnpackData_t::getFromVariant_Int(parentchild[6], "ParentChild:childID"); 
+    const unsigned int childCopyN = UnpackData_t::getFromVariant_Int(parentchild[7], "ParentChild:childCopyN"); 
 
     std::string childNodeType = m_tableID_toTableName[childTableId];
 
