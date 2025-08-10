@@ -34,7 +34,7 @@ workflow:
     - macos
   rules:
     - if: '$CI_PROJECT_ROOT_NAMESPACE == "GeoModelDev"'
-  allow_failure: true
+  #allow_failure: true
   timeout: 30 minutes
   before_script:
     - brew tap davidchall/hep
@@ -42,6 +42,7 @@ workflow:
     - export PATH="/opt/homebrew/opt/expat/bin:$PATH" # to make CMake use expat from Homebrew instead of the one in /usr/lib
     - export CXXFLAGS="-I/opt/homebrew/opt/expat/include"
     - export LDFLAGS="-L/opt/homebrew/opt/expat/lib"
+    - source ${CI_PROJECT_DIR}/CI/setupGeoModel.sh
   variables:
     GIT_STRATEGY: fetch
     HOMEBREW_NO_AUTO_UPDATE: 1 #this speeds up the jobs on the macOS build machine
