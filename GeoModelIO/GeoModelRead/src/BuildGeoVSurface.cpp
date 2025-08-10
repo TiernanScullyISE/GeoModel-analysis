@@ -26,7 +26,7 @@ GeoIntrusivePtr<GeoVSurfaceShape>
     }
     const DBRowEntry& entry = m_surfaceRecords[dbID -1];
     buildSurface(entry);
-    if (m_memCache.size() == m_surfaceRecords.size()) {
+    if (false && m_memCache.size() == m_surfaceRecords.size()) {
         m_surfaceRecords = DBRowsList{};
     }
     return m_memCache.get(dbID);

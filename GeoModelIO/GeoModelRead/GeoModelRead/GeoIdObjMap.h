@@ -11,6 +11,8 @@
 #include <vector>
 #include <ranges>
 #include <algorithm>
+#include <cassert>
+
 namespace GeoModelIO{
     /** @brief Helper container to store arbitrary elements by an Identifier. 
      *         Read & write access to the container are thread-safe. The container 
@@ -41,15 +43,22 @@ namespace GeoModelIO{
                  * @brief id: Identifier of the object of interest */
                 ObjType get(const Key_t id) const{
                     std::shared_lock lock{m_mutex};
-                    const auto itr = m_map.find(id);
-                    return itr != m_map.end() ? itr->second : ObjType{};
+                    return m_map.size() > id ? m_map[id] : ObjType{};
                 }
                 /** @brief Inserts a new object under the Identifier id.
                  *         Returns whether the insert was a new one
                  *  @param newElem: Identifier - Obj pair to store. */
                 bool insert(std::pair<Key_t, ObjType>&& newElem) {
                     std::unique_lock lock{m_mutex};
-                    return m_map.insert(std::move(newElem)).second;
+                    if (m_map.size() <= newElem.first) {
+                        m_map.resize(newElem.first + 1);
+                    }
+                    assert(m_map.size() > newElem.first);
+                    if (m_map[newElem.first]  || !newElem.second) {
+                        return false;
+                    }
+                    m_map[newElem.first] = std::move(newElem.second);
+                    return true;
                 }
                 /** @brief Returns the current size of the map */
                 std::size_t size() const {
@@ -61,9 +70,9 @@ namespace GeoModelIO{
                     std::shared_lock lock{m_mutex};
                     std::vector<Key_t> toRet{};
                     toRet.reserve(size());
-                    std::ranges::for_each(m_map, [&toRet](const auto& elem) { 
-                            toRet.push_back(elem.first); 
-                    });
+                    for (Key_t k = 0; k < size(); ++k) {
+                        if (m_map[k]) toRet.push_back(k);
+                    }
                     return toRet;
                 }
                 /** @brief Clears the map content */
@@ -78,7 +87,7 @@ namespace GeoModelIO{
                 }
             private:
                 mutable std::shared_mutex m_mutex{};
-                std::unordered_map<Key_t, ObjType> m_map{};
+                std::vector<ObjType> m_map{};
         };
 }
 

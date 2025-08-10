@@ -58,8 +58,8 @@ BuildGeoShapes::GeoShapePtr
     buildShape(entry);
     /// All shapes have been converted -> free up memory
     if (m_memMapShapes.size() == m_primaryData.size()) {
-        m_primaryData = DBRowsList{};        
-        m_auxillaryData = DBRowsList{};
+        // m_primaryData = DBRowsList{};
+        // m_auxillaryData = DBRowsList{};
         std::cout<<"All "<<m_memMapShapes.size()<<" "<<m_shapeType<<" have been built. "<<std::endl;
     }
     auto retObj = m_memMapShapes.get(id);
