@@ -21,6 +21,7 @@ build_geomodel_athena:
     ATHENA_GIT_REPO: https://gitlab.cern.ch/atlas/athena.git
     ATHENA_RELEASE: main
     ATHENA_REF: main
+    ACTS_GIT_REPO: https://github.com/acts-project/acts.git
 
 
   cache:
@@ -38,10 +39,12 @@ build_geomodel_athena:
       # - athena-build
       - athena-install
       - .asetup.save
-    expire_in: 4 hours
+    expire_in: 8 hours
 
   before_script:
     - sudo dnf install -y jq
+    - git config --global --add safe.directory ${CI_PROJECT_DIR}
+
 
   script:
     - git config --global user.name gitlab
@@ -50,7 +53,7 @@ build_geomodel_athena:
     - echo $CI_MERGE_REQUEST_IID
     - export HEADERS_CHANGED=$(curl -s https://gitlab.cern.ch/api/v4/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes | jq -r .changes[].new_path | grep -e "\.h$" > /dev/null ; printf $?)
     - export IS_MERGE_REQUEST=$([ $CI_PIPELINE_SOURCE = "merge_request_event" ]; printf $?)
-    - athena_ci/athena_build.sh
+    - CI/Athena/athena_build.sh
 
 
 .run_base:
@@ -106,7 +109,7 @@ build_geomodel_athena:
     - git clone ${ATHENA_GIT_REPO} -b ${ATHENA_REF}
     - | 
         pushd athena 
-        ../athena_ci/apply_patches.sh
+        ${CI_PROJECT_DIR}/CI/Athena/apply_patches.sh
         popd
 
     - source athena-install/setup.sh

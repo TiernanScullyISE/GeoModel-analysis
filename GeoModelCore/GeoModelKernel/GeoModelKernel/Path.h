@@ -19,11 +19,12 @@ class Path
 {
  public:
   Path();
-  Path(const Path< T > &right);
-  ~Path();
+  Path(const Path<T> &right) = default;
+  Path(Path<T> &&right) = default;
+  ~Path() = default;
 
-  Path< T > & operator=(const Path< T > &right);
-
+  Path<T> & operator=(const Path<T> &right) = default;
+  Path<T> & operator=(Path<T> &&right) = default;
   //	Pops the last node from the stack.
   const T * pop ();
   
@@ -55,31 +56,12 @@ inline Path<T>::Path()
   m_nodeList.reserve(2);
 }
 
-template <class T>
-inline Path<T>::Path(const Path<T> &right)
-  : m_nodeList(right.m_nodeList)
-{
-}
 
-template <class T>
-inline Path<T>::~Path()
-{
-}
-
-template <class T>
-inline Path<T> & Path<T>::operator=(const Path<T> &right)
-{
-  if (this != &right)
-    {
-      m_nodeList = right.m_nodeList;
-    }
-  return *this;
-}
 
 template <class T>
 inline const T * Path<T>::pop ()
 {
-  if (m_nodeList.size () == 0)
+  if (m_nodeList.empty())
     {
       return nullptr;
     }

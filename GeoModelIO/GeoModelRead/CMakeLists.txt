@@ -36,3 +36,16 @@ install(TARGETS GeoModelRead
 install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelRead
    COMPONENT Development )
+
+if (${GEOMODEL_BUILD_TESTING})
+   add_executable( ReadGeoStabilityTest util/ReadStabilityTest.cxx )
+   target_link_libraries( ReadGeoStabilityTest PRIVATE 
+                                    GeoModelCore::GeoModelKernel
+                                    GeoModelIO::GeoModelRead 
+                                    GeoModelIO::GeoModelDBManager )
+   install( TARGETS ReadGeoStabilityTest
+            EXPORT ${PROJECT_NAME}-export
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT Runtime )
+
+endif()

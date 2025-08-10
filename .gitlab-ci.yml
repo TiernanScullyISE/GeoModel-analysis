@@ -539,4 +539,4 @@ tests-ubuntu:
     expire_in: 1 month
   
 include:
-  - athena_ci/ci.yml
+  - CI/Athena/ci.yml

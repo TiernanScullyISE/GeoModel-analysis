@@ -87,42 +87,33 @@ else
     fi
 fi
 
-LCG_VERSION_NUMBER=$(sed -n "s/.*LCG_VERSION_NUMBER=\(\S*\)$/\1/p" ${ATHENA_SOURCE}/Projects/Athena/build_externals.sh)
-LCG_VERSION_POSTFIX=$(sed -n "s/.*LCG_VERSION_POSTFIX=\"\(\S*\)\"$/\1/p" ${ATHENA_SOURCE}/Projects/Athena/build_externals.sh)
-LCG_RELEASE="LCG_${LCG_VERSION_NUMBER}${LCG_VERSION_POSTFIX}"
+BUILD_EXT="${ATHENA_SOURCE}/Projects/Athena/build_externals.sh"
 
+LCG_VERSION_NUMBER=$(sed -n "s/.*LCG_VERSION_NUMBER=\(\S*\)$/\1/p" ${BUILD_EXT})
+LCG_VERSION_POSTFIX=$(sed -n "s/.*LCG_VERSION_POSTFIX=\"\(\S*\)\"$/\1/p" ${BUILD_EXT})
+LCG_RELEASE="LCG_${LCG_VERSION_NUMBER}${LCG_VERSION_POSTFIX}"
+ACTS_RELEASE=$(grep -oP 'acts/archive/refs/tags/\K[^/]+(?=\.tar\.gz)' ${BUILD_EXT})
+
+sed -i "s#-DATLAS_GEOMODEL_SOURCE=\"URL;https://gitlab.cern.ch/GeoModelDev/GeoModel[^\"]*\"#-DATLAS_GEOMODEL_SOURCE=\"GIT_REPOSITORY;${CI_REPOSITORY_URL};GIT_TAG;${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}\"#" "${BUILD_EXT}"
+echo "Replaced ATLAS_GEOMODEL_SOURCE with GeoModel git repository and tag ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}."
+
+echo "Extracted ACTS tag: ${ACTS_RELEASE}"
 echo "LCG_RELEASE: ${LCG_RELEASE}"
 echo "LCG_PLATFORM: ${LCG_PLATFORM}"
+
 
 lsetup "views ${LCG_RELEASE} ${LCG_PLATFORM}" || true
 
 export 
 
-if [ "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" == "main" ];then
-    heading "Rebase the GeoModel code base w.r.t. main"
-    cd ${CI_PROJECT_DIR}
-
-    fill_line "-"
-    echo "Changes w.r.t to main before rebase"
-    fill_line "-"
-    git fetch origin
-    git diff HEAD origin/main
-    git status
-#    git rebase origin/main
-#    fill_line "-"
-#    echo "Changes w.r.t to main after rebase"
-#    fill_line "-"
-
-#    git diff HEAD origin/main
-
-fi
-
+#cat  ${BUILD_EXT}
 cd ${BUILD_DIR}
+
 
 heading "Configure GeoModel"
 
 gm_install_dir=$PWD/geomodel-install
-cmake -S "${SCRIPT_DIR}/.." -B geomodel-build \
+cmake -S "${CI_PROJECT_DIR}/" -B geomodel-build \
   -GNinja \
   -DCMAKE_MAKE_PROGRAM="$NINJA" \
   -DCMAKE_CXX_FLAGS="$EXTRA_FLAGS" \
@@ -137,9 +128,6 @@ cmake --build geomodel-build
 echo "Installing GeoModel"
 cmake --install geomodel-build > gm_install.log
 
-heading "Setup Athena"
-
-asetup Athena,${ATHENA_RELEASE},latest --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.0.1 || true
 
 
 n=10
@@ -154,7 +142,57 @@ popd > /dev/null
 echo
 fill_line "="
 
-export CMAKE_PREFIX_PATH="${gm_install_dir}:$CMAKE_PREFIX_PATH"
+
+
+
+heading "Download Acts"
+git clone ${ACTS_GIT_REPO} -b ${ACTS_RELEASE} acts
+
+heading "Configure Acts"
+echo "cmake -S "acts" -B acts-build "
+echo "  -GNinja "
+echo "  -DCMAKE_MAKE_PROGRAM=\"${NINJA}\" "
+echo "  -DCMAKE_LIBRARY_PATH=\"${gm_install_dir}/lib64:${LD_LIBRARY_PATH}:${CMAKE_LIBRARY_PATH}\"" \
+echo "  -DCMAKE_INCLUDE_PATH=\"${gm_install_dir}/include:${ROOT_INCLUDE_PATH}:${CPLUS_INCLUDE_PATH}:${C_INCLUDE_PATH}\"" \
+echo "  -DCMAKE_CXX_FLAGS="$EXTRA_FLAGS" "
+echo "  -DACTS_BUILD_PLUGIN_JSON:BOOL=ON "
+echo "  -DACTS_BUILD_PLUGIN_GEOMODEL:BOOL=ON "
+echo "  -DACTS_BUILD_FATRAS:BOOL=ON "
+echo "  -DACTS_USE_SYSTEM_NLOHMANN_JSON:BOOL=ON "
+echo "  -DCMAKE_PREFIX_PATH=${gm_install_dir} "
+echo "  -DCMAKE_BUILD_TYPE=Release "
+echo "  -DGEOMODEL_BUILD_TOOLS=ON"
+
+
+cmake -S "acts" -B acts-build \
+  -GNinja \
+  -DCMAKE_MAKE_PROGRAM="${NINJA}" \
+  -DCMAKE_LIBRARY_PATH="${gm_install_dir}/lib64:${LD_LIBRARY_PATH}:${CMAKE_LIBRARY_PATH}" \
+  -DCMAKE_INCLUDE_PATH="${gm_install_dir}/include:${ROOT_INCLUDE_PATH}:${CPLUS_INCLUDE_PATH}:${C_INCLUDE_PATH}" \
+  -DCMAKE_CXX_FLAGS="$EXTRA_FLAGS" \
+  -DACTS_BUILD_PLUGIN_JSON:BOOL=ON \
+  -DACTS_BUILD_PLUGIN_GEOMODEL:BOOL=ON \
+  -DACTS_BUILD_FATRAS:BOOL=ON \
+  -DACTS_USE_SYSTEM_NLOHMANN_JSON:BOOL=ON \
+   -DCMAKE_INSTALL_PREFIX=$gm_install_dir \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DGEOMODEL_BUILD_TOOLS=ON
+
+
+
+
+
+heading "Build Acts"
+
+cmake --build acts-build
+
+echo "Installing Acts"
+cmake --install acts-build > acts_install.log
+
+heading "Setup Athena"
+
+asetup Athena,${ATHENA_RELEASE},latest --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.0.1 || true
+
 
 heading "Configure Athena"
 
