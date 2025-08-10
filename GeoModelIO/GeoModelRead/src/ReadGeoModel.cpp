@@ -644,21 +644,29 @@ template <typename PhysVol_t>
 template <typename Transform_t> 
     void ReadGeoModel::buildTransforms(const std::string& tableName,
                                       GeoIdObjMap<GeoIntrusivePtr<Transform_t>>& memCache) {
-    const std::vector<std::vector<std::string>> trfRecords = m_dbManager->getTableFromNodeType_String(tableName);
+    const DBRowsList trfRecords = m_dbManager->getTableFromNodeType_VecVecData(tableName);
     auto& pool = GeoThreading::ThreadPool::getPool();
     for (std::size_t start = 0; start < trfRecords.size(); ) {
         std::size_t end = std::min(start + objectBatch, trfRecords.size());
         pool.appendTask([&trfRecords, &memCache, &tableName, start, end](){
             for (std::size_t itr = start; itr < end; ++itr) {
-                const std::vector<std::string>& values{trfRecords[itr]};
+                const DBRowEntry& values{trfRecords[itr]};
                 assert(values.size() >=13);
                 /// The first element in the vector is the index of the transform
                 // get the 12 matrix elements
-                const double xx{std::stod(values[1])}, xy{std::stod(values[2])}, xz{std::stod(values[3])};
-                const double yx{std::stod(values[4])}, yy{std::stod(values[5])}, yz{std::stod(values[6])};
-                const double zx{std::stod(values[7])}, zy{std::stod(values[8])}, zz{std::stod(values[9])};
+                const double xx{UnpackData_t::getFromVariant_Double(values[1], std::format("{:}:xx", tableName))}, 
+                             xy{UnpackData_t::getFromVariant_Double(values[2], std::format("{:}:xy", tableName))}, 
+                             xz{UnpackData_t::getFromVariant_Double(values[3], std::format("{:}:xz", tableName))};
+                const double yx{UnpackData_t::getFromVariant_Double(values[4], std::format("{:}:yx", tableName))}, 
+                             yy{UnpackData_t::getFromVariant_Double(values[5], std::format("{:}:yy", tableName))}, 
+                             yz{UnpackData_t::getFromVariant_Double(values[6], std::format("{:}:yz", tableName))};
+                const double zx{UnpackData_t::getFromVariant_Double(values[7], std::format("{:}:zx", tableName))}, 
+                             zy{UnpackData_t::getFromVariant_Double(values[8], std::format("{:}:zy", tableName))}, 
+                             zz{UnpackData_t::getFromVariant_Double(values[9], std::format("{:}:zz", tableName))};
                 /// Translational part
-                const double dx{std::stod(values[10])}, dy{std::stod(values[11])}, dz{std::stod(values[12])};
+                const double dx{UnpackData_t::getFromVariant_Double(values[10], std::format("{:}:dx", tableName))}, 
+                             dy{UnpackData_t::getFromVariant_Double(values[11], std::format("{:}:dy", tableName))}, 
+                             dz{UnpackData_t::getFromVariant_Double(values[12], std::format("{:}:dz", tableName))};
 
                 GeoTrf::Transform3D txf{GeoTrf::Transform3D::Identity()};
                 // build the rotation matrix with the first 9 elements
@@ -669,7 +677,7 @@ template <typename Transform_t>
                 txf(0, 3) = dx; txf(1, 3) = dy; txf(2, 3) = dz;
 
                 auto newTrf = make_intrusive<Transform_t>(std::move(txf));
-                const unsigned id = std::stoi(values[0]);
+                const unsigned id = UnpackData_t::getFromVariant_Int(values[0], std::format("{:}:id", tableName));
                 if (!memCache.insert(std::make_pair(id, newTrf))) {
                     THROW_EXCEPTION("Failed to insert new transform "
                                   <<GeoTrf::toString(newTrf->getTransform())<<" from table "<<tableName);
