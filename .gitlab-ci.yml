@@ -50,9 +50,12 @@ workflow:
 # Base template for all Ubuntu jobs
 .ubuntu-template-job-default: &ubuntu-job
   image: gitlab-registry.cern.ch/geomodeldev/ubuntu-geant4-image:main-base
+  before_script:
+    - source ${CI_PROJECT_DIR}/CI/setupGeoModel.sh
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
+      - CI/*
       - ATLASExtensions/**/*
       - FSL/**/*
       - FullSimLight/**/*
@@ -540,3 +543,43 @@ tests-ubuntu:
   
 include:
   - CI/Athena/ci.yml
+
+
+CopyDB_R3-ATLAS:
+  stage: step-A
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
+  tags:
+    - cvmfs
+  script:
+    - cp /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV02.db  GeoDB.db
+  artifacts:
+    paths:
+      - GeoDB.db
+    expire_in: 1 day
+
+CopyDB_R4-ATLAS:
+  stage: step-A
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
+  tags:
+    - cvmfs
+  script:
+    - cp /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db GeoDB.db
+  artifacts:
+    paths:
+      - GeoDB.db
+    expire_in: 1 day
+
+TestRead_R3-ATLAS:
+  <<: *ubuntu-job
+  stage: test
+  needs: ["ubu-gm-all", CopyDB_R3-ATLAS]
+  script:
+    - ReadGeoStabilityTest --geoFile GeoDB.db --nTrials 100
+
+TestRead_R4-ATLAS:
+  <<: *ubuntu-job
+  stage: test
+  needs: ["ubu-gm-all", CopyDB_R4-ATLAS]
+  script:
+    - ReadGeoStabilityTest --geoFile GeoDB.db --nTrials 100
+ 

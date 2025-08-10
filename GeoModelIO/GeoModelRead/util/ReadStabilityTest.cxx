@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
         if (the_arg == "--geoFile" && arg + 1 < argc) {
             dbFile = argv[arg+1];
             ++arg;
-        } else if (the_arg == "--nTrials" && argc + 1 < argc) {
+        } else if (the_arg == "--nTrials" && arg + 1 < argc) {
             nTrials = atoi(argv[arg+1]);
             ++arg;
         } else {
