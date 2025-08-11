@@ -10,6 +10,10 @@ ctest --verbose > ${CI_PROJECT_DIR}/CTest.log
 exit_code=$?
 echo "exit_code=${exit_code}"
 
+# move the test output folder to the main project folder, 
+# otherwise 'artifacts' cannot pick it
+cp -r Testing ${CI_PROJECT_DIR}/TestsOutput 
+
 cat ${CI_PROJECT_DIR}/CTest.log
 
 echo "pwd"
