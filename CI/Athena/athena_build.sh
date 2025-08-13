@@ -64,7 +64,7 @@ if [[ ! -d "${ATHENA_SOURCE}"  ]]; then
     echo "Cloning Athena: ${ATHENA_GIT_REPO} @ ${ATHENA_REF}"
     git clone ${ATHENA_GIT_REPO} -b ${ATHENA_REF} ${ATHENA_SOURCE}
     pushd "${ATHENA_SOURCE}"
-    $SCRIPT_DIR/apply_patches.sh
+    ${SCRIPT_DIR}/apply_patches.sh
     popd
 
 else 
@@ -86,26 +86,31 @@ else
         echo "Keeping Athena checkout as is"
     fi
 fi
-
+set +e 
+heading "Setup LCG & al. "
 BUILD_EXT="${ATHENA_SOURCE}/Projects/Athena/build_externals.sh"
+echo "BUILD_EXT=${ATHENA_SOURCE}/Projects/Athena/build_externals.sh"
 
 LCG_VERSION_NUMBER=$(sed -n "s/.*LCG_VERSION_NUMBER=\(\S*\)$/\1/p" ${BUILD_EXT})
 LCG_VERSION_POSTFIX=$(sed -n "s/.*LCG_VERSION_POSTFIX=\"\(\S*\)\"$/\1/p" ${BUILD_EXT})
 LCG_RELEASE="LCG_${LCG_VERSION_NUMBER}${LCG_VERSION_POSTFIX}"
-ACTS_RELEASE=$(grep -oP 'acts/archive/refs/tags/\K[^/]+(?=\.tar\.gz)' ${BUILD_EXT})
 
-sed -i "s#-DATLAS_GEOMODEL_SOURCE=\"URL;https://gitlab.cern.ch/GeoModelDev/GeoModel[^\"]*\"#-DATLAS_GEOMODEL_SOURCE=\"GIT_REPOSITORY;${CI_REPOSITORY_URL};GIT_TAG;${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}\"#" "${BUILD_EXT}"
-echo "Replaced ATLAS_GEOMODEL_SOURCE with GeoModel git repository and tag ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}."
-
-echo "Extracted ACTS tag: ${ACTS_RELEASE}"
 echo "LCG_RELEASE: ${LCG_RELEASE}"
 echo "LCG_PLATFORM: ${LCG_PLATFORM}"
 
+ACTS_RELEASE=$(grep -oP 'acts/archive/refs/tags/\K[^/]+(?=\.tar\.gz)' ${BUILD_EXT})
+echo "Extracted ACTS tag: ${ACTS_RELEASE}"
+
+heading "Patch the exernals build"
+sed -i "s#-DATLAS_GEOMODEL_SOURCE=\"URL;https://gitlab.cern.ch/GeoModelDev/GeoModel[^\"]*\"#-DATLAS_GEOMODEL_SOURCE=\"GIT_REPOSITORY;${CI_REPOSITORY_URL};GIT_TAG;${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}\"#" "${BUILD_EXT}"
+echo "Replaced ATLAS_GEOMODEL_SOURCE with GeoModel git repository and tag ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}."
+
+cat ${BUILD_EXT}
 
 lsetup "views ${LCG_RELEASE} ${LCG_PLATFORM}" || true
 
 export 
-
+set -e
 #cat  ${BUILD_EXT}
 cd ${BUILD_DIR}
 
