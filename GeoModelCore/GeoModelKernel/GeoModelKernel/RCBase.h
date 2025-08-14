@@ -14,6 +14,7 @@
  *  and decrease the reference count of an object.  When
  *  the reference count decreases to zero, the object deletes itself
  */
+ 
 
 #ifndef GEOMODELKERNEL_RCBASE_H
 #define GEOMODELKERNEL_RCBASE_H

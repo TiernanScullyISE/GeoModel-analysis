@@ -98,7 +98,11 @@ LCG_RELEASE="LCG_${LCG_VERSION_NUMBER}${LCG_VERSION_POSTFIX}"
 echo "LCG_RELEASE: ${LCG_RELEASE}"
 echo "LCG_PLATFORM: ${LCG_PLATFORM}"
 
-ACTS_RELEASE=$(grep -oP 'acts/archive/refs/tags/\K[^/]+(?=\.tar\.gz)' ${BUILD_EXT})
+
+# Extract the ACTS URL line
+acts_url=$(grep -oP 'https?://[^ ]*acts[^ ]*\.tar\.gz' "${BUILD_EXT}")
+# Extract the version from the filename (e.g., acts-43.0.1.tar.gz)
+ACTS_RELEASE=$(echo "$acts_url" | grep -oP '/v[0-9]+\.[0-9]+\.[0-9]+' | head -n1 | sed 's|/||g')
 echo "Extracted ACTS tag: ${ACTS_RELEASE}"
 
 heading "Patch the exernals build"
