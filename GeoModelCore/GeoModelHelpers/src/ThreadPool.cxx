@@ -88,16 +88,16 @@ namespace GeoThreading{
         do {
             PRINT_MSG("Wait until the last "<<n<<" tasks are launched. ");
             std::this_thread::sleep_for(threadSleep);
-        } while (n = queue());
+        } while ((n = queue()));
         // Wait until all threads are idle
         n = m_workers.size();
         do{
             PRINT_MSG("Wait until the last "<<n<<" tasks are finished. ");
             std::this_thread::sleep_for(threadSleep);
-        } while  (n = std::ranges::count_if(m_workers,
+        } while ((n = std::ranges::count_if(m_workers,
                 [](const std::unique_ptr<ThreadWorker>& worker){
                     return !worker->isIdle();
-                }));
+                })));
     }
 
     /************************************************************* 
