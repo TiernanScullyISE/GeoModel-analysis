@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOSHAPEUNION_H
@@ -7,7 +7,7 @@
 
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
-#include "GeoModelKernel/PersistifierFwd.h"
+
 
 class GeoShapeUnion : public GeoShape
 {
@@ -80,10 +80,6 @@ class GeoShapeUnion : public GeoShape
 
   static const std::string s_classType;
   static const ShapeType s_classTypeID;
-
-  //    For I/O only!
-  GeoShapeUnion() = default;
-  friend Persistifier;
 
 };
 

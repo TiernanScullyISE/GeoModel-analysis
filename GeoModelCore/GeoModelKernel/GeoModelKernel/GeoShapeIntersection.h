@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOSHAPEINTERSECTION_H
@@ -7,7 +7,6 @@
 
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
-#include "GeoModelKernel/PersistifierFwd.h"
 
 
 class GeoShapeIntersection : public GeoShape
@@ -80,10 +79,6 @@ class GeoShapeIntersection : public GeoShape
 
   static const std::string s_classType;
   static const ShapeType s_classTypeID;
-
-  //    For I/O only!
-  GeoShapeIntersection() = default;
-  friend Persistifier;
 };
 
 

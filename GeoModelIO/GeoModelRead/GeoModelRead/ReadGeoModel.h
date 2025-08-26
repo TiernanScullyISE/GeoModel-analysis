@@ -37,7 +37,6 @@
 
 
 // GeoModel includes
-#include "GeoModelKernel/PersistifierFwd.h"
 #include "GeoModelDBManager/GMDBManager.h"
 #include "GeoModelDBManager/definitions.h"
 
