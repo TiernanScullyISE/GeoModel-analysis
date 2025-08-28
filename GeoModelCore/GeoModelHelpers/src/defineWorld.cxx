@@ -55,15 +55,26 @@ GeoIntrusivePtr<GeoPhysVol> resizeGeoWorld(GeoIntrusivePtr<GeoPhysVol> world,
     double xworld=0.,yworld=0.,zworld=0.;
         
     // loop over all children volumes
-    for (unsigned int i=0; i<nChild; i++) {
-        PVConstLink childVol = world->getChildVol(i);
+    std::array<GeoTrf::Vector3D, 8> vv{};
+    for (auto i = 0; i < nChild; ++i) {
+      GeoTrf::Transform3D trans = world->getXToChildVol(i);
+      PVConstLink childVol = world->getChildVol(i);
         childVol->getLogVol()->getShape()->extent(xmin, ymin, zmin, xmax, ymax, zmax);
-       
-        xworld=std::max({xworld,std::abs(xmin),std::abs(xmax)});
-        yworld=std::max({yworld,std::abs(ymin),std::abs(ymax)});
-        zworld=std::max({zworld,std::abs(zmin),std::abs(zmax)});        
+        vv[0] = trans * GeoTrf::Vector3D(xmin, ymin, zmin);
+        vv[1] = trans * GeoTrf::Vector3D(xmax, ymin, zmin);
+        vv[2] = trans * GeoTrf::Vector3D(xmin, ymax, zmin);
+        vv[3] = trans * GeoTrf::Vector3D(xmax, ymax, zmin);
+        vv[4] = trans * GeoTrf::Vector3D(xmin, ymin, zmax);
+        vv[5] = trans * GeoTrf::Vector3D(xmax, ymin, zmax);
+        vv[6] = trans * GeoTrf::Vector3D(xmin, ymax, zmax);
+        vv[7] = trans * GeoTrf::Vector3D(xmax, ymax, zmax);
+        for (auto k = 0; k < 8; ++k)
+        {
+          xworld = std::max(xworld, std::abs(vv[k].x()));
+          yworld = std::max(yworld, std::abs(vv[k].y()));
+          zworld = std::max(zworld, std::abs(vv[k].z()));
+        }
     }
-
     GeoIntrusivePtr<GeoPhysVol> resizedWorld{createGeoWorld(xworld, yworld, zworld)};
     for (unsigned int ch = 0; ch < world->getNChildNodes(); ++ch) {
         const GeoGraphNode * node = *(world->getChildNode(ch));
