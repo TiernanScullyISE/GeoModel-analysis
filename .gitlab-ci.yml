@@ -34,6 +34,22 @@ workflow:
     - macos
   rules:
     - if: '$CI_PROJECT_ROOT_NAMESPACE == "GeoModelDev"'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+      - .gitlab-ci.yml
+      - CI/*
+      - ATLASExtensions/**/*
+      - FSL/**/*
+      - FullSimLight/**/*
+      - GeoModelCore/**/*
+      - GeoModelExamples/**/*
+      - GeoModelG4/**/*
+      - GeoModelIO/**/*
+      - GeoModelTools/**/*
+      - GeoModelVisualization/**/*
+      - cmake/**/*
+      - CMakeLists.txt
+
   #allow_failure: true
   timeout: 30 minutes
   before_script:
