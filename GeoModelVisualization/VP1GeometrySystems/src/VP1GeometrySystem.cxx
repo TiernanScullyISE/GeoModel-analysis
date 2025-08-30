@@ -1585,7 +1585,7 @@ void VP1GeometrySystem::saveTrees() {
   }
   world->exec(&dumpGeoModelGraph);
   dumpGeoModelGraph.saveToDB();
-  world->unref();
+  //  world->unref();
 }
 
 //_____________________________________________________________________________________
