@@ -23,6 +23,7 @@
 #include <iostream>
 #include <map>
 #include <fstream>
+#include <format>
 #include <cstdlib> // EXIT_FAILURE
 
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
   // FIXME: TODO: this check should go in the 'GMDBManager' constructor.
   std::ifstream infile(path.c_str());
     if ( ! infile.good() ) {
-      std::cout << "\n\tERROR!! The '" << path << "' file does not exists already!! Please, check.\n";
+      std::cerr << "\n\tERROR!! The '" << path << "' file does not exists already!! Please, check.\n";
       exit(EXIT_FAILURE);
   }
   infile.close();
@@ -57,11 +58,25 @@ int main(int argc, char *argv[])
     std::cout << "OK! Database is open!\n";
   }
   else {
-    std::cout << "Database is not open!\n";
-    // return;
-    throw;
+    std::cerr << "Database is not open!\n";
+    exit(EXIT_FAILURE);
   }
 
+  //check for a table we know doesn't exist
+  if (db->checkTableFromDB("PublishedFullPhysVols_HelloToyExample")) {
+    std::cout<<"We find the table that we expected - good!"<<std::endl;
+  }
+  else {
+    std::cerr<<"Uh oh, we don't find the expected table - bad!"<<std::endl;
+    exit(EXIT_FAILURE);
+  }
+  if(!db->checkTableFromDB("PublishedFullPhysVols_ByeByeToyExample")) {
+    std::cout<<"We don't find the table that we didn't expect - good!"<<std::endl;
+  }
+  else {
+    std::cerr<<"Uh oh, we found a table which doesn't exist - bad!"<<std::endl;
+    exit(EXIT_FAILURE);
+  }
   
   /* setup the GeoModel reader */
   GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
@@ -91,12 +106,6 @@ int main(int argc, char *argv[])
   std::map<unsigned int, GeoFullPhysVol*> mapFPV = readInGeo.getPublishedNodes<unsigned int, GeoFullPhysVol*>("HelloToyExample");
   std::map<std::string, GeoAlignableTransform*> mapAXF = readInGeo.getPublishedNodes<std::string, GeoAlignableTransform*>("HelloToyExample");
 
-  //check for a table we know doesn't exist
-  if (db->checkTableFromDB("PublishedFullPhysVols_HelloToyExample")) std::cout<<"We find the table that we expected - good!"<<std::endl;
-  else std::cout<<"Uh oh, we don't find the expected table - bad!"<<std::endl;
-  if(!db->checkTableFromDB("PublishedFullPhysVols_ByeByeToyExample")) std::cout<<"We don't find the table that we didn't expect - good!"<<std::endl;
-  else std::cout<<"Uh oh, we found a table which doesn't exist - bad!"<<std::endl;  
-
   //Now test via the specific accessors with additional checks
   std::map<unsigned int, GeoFullPhysVol*> mapFPV_test = readInGeo.getPublishedNodes<unsigned int, GeoFullPhysVol*>("ByeByeToyExample",true);
   std::map<std::string, GeoAlignableTransform*> mapAXF_test = readInGeo.getPublishedNodes<std::string, GeoAlignableTransform*>("ByeByeToyExample",true);
@@ -110,14 +119,14 @@ int main(int argc, char *argv[])
   for ( auto const& [key, xf] : mapAXF ) 
   {
     if (0 == ii)
-      std::cout << "[key type (compiler's code): '" << typeid(key).name() << "']\n";
+      std::cout << "[key type (compiler's code): '" << typeid(key).name() << "']\n\n";
     if (ii < 3)
     {
 
-      std::cout << "\n\t--> key: " << key
+      std::cout << std::format("{:>10}","--> key: ") << key
                 << " - AlignableTransform*: " << xf
                 << std::endl;
-      std::cout << "\txf:: "<<GeoTrf::toString(xf->getTransform());
+      std::cout << std::format("{:>10}","xf: ")<<GeoTrf::toString(xf->getTransform()) << std::endl;
     }
     ++ii;
   }
@@ -131,17 +140,17 @@ int main(int argc, char *argv[])
       // GeoTrf::Transform3D xf = vol->getAbsoluteTransform(); // crashes
 
       if (0 == ii)
-        std::cout << "[key type (compiler's code): '" << typeid(key).name() << "']\n";
+        std::cout << "[key type (compiler's code): '" << typeid(key).name() << "']\n\n";
       if (ii < 3)
       {
-        std::cout << "\n\t--> key: " << key
+        std::cout << std::format("{:>10}","--> key: ") << key
                   << " - GeoFullPhysVol*: " << vol
                   << std::endl;
       }
       ++ii;
   }
 
-  std::cout << "Everything done." << std::endl;
+  std::cout << "\nEverything done." << std::endl;
 
   return 0;
 }

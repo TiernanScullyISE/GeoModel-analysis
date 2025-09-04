@@ -7,6 +7,9 @@
 
 # Set up the project.
 project( "GeoModelExamples" VERSION 4.1.0 LANGUAGES CXX )
+
+set(GMEXAMPLES_INSTALL_BINDIR  ${CMAKE_INSTALL_BINDIR}/GeoModelExamples )
+
 # Getting-started examples
 add_subdirectory( KitchenSinkPlugin )
 add_subdirectory( MinimalPlugin )

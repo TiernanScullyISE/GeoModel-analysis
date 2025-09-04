@@ -5,10 +5,6 @@
 # author: Riccardo Maria BIANCHI @ CERN - Aug, 2020
 ################################################################################
 
-
-#project(HelloToy)
-
-# Compile with C++17
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -22,13 +18,18 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Populate a CMake variable with the sources
-set(SRCS step1_create_store_geo_and_publish_nodes.cpp )
-set(SRCS_READ step2_read_geo_and_published_nodes.cpp )
+set(SRCS_WRITE step1_create_store_geo_and_publish_nodes.cpp )
+set(SRCS_READ  step2_read_geo_and_published_nodes.cpp )
 
-# Tell CMake to create the 'helloToy' executable
-add_executable( helloToy_step1_write ${SRCS} )
-add_executable( helloToy_step2_read ${SRCS_READ} )
+# Create the executables
+add_executable( helloToy_step1_write ${SRCS_WRITE} )
+add_executable( helloToy_step2_read  ${SRCS_READ}  )
 
 # Link all needed libraries
 target_link_libraries( helloToy_step1_write GeoModelCore::GeoModelKernel GeoModelIO::GeoModelWrite GeoModelCore::GeoModelHelpers )
 target_link_libraries( helloToy_step2_read  GeoModelCore::GeoModelKernel GeoModelIO::GeoModelRead )
+
+# Install the executables
+install( TARGETS helloToy_step1_write DESTINATION ${GMEXAMPLES_INSTALL_BINDIR} )
+install( TARGETS helloToy_step2_read  DESTINATION ${GMEXAMPLES_INSTALL_BINDIR} )
+
