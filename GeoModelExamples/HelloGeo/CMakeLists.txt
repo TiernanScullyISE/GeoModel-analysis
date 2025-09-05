@@ -19,8 +19,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Populate a CMake variable with the sources
 set(SRCS main.cpp )
 
-# Tell CMake to create the helloworld executable
+# Tell CMake to create the hellogeo executable
 add_executable( hellogeo ${SRCS} )
 
 # Link all needed libraries
 target_link_libraries( hellogeo GeoModelCore::GeoModelKernel)
+
+# Install the executable
+install( TARGETS hellogeo DESTINATION ${GMEXAMPLES_INSTALL_BINDIR} )

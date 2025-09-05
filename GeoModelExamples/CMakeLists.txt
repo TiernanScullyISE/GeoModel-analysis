@@ -25,7 +25,6 @@ add_subdirectory( HelloGeo )
 # add_subdirectory( HelloGeoRead )
 # add_subdirectory( HelloGeoReadNodeAction )
 # add_subdirectory( SharedNodes )
-add_subdirectory( HelloToyWrite )
 
 #add_subdirectory( HelloDummyMaterial )
 add_subdirectory( HelloToy )
