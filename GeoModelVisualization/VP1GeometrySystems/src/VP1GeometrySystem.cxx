@@ -846,7 +846,7 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
     world->add(pVMutable);
     world->exec(&dumpGeoModelGraph);
     dumpGeoModelGraph.saveToDB();
-    world->unref();
+    //world->unref();
     return;
 
   }
