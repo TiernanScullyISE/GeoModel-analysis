@@ -15,6 +15,7 @@
 #include <G4String.hh>
 #include <map>
 #include <mutex>
+#include <filesystem>
 
 //----------------------------------------------------------------------//
 
@@ -102,7 +103,7 @@ public:
      void SetSteppingAction(GenerateHitsStep* stepact){step = stepact;}
      
      //Set file
-     void assignfile(H5::H5File &filename){file = &filename;}
+     void assignfile(H5::H5File *filename){file = filename;}
      
      //Set DataType
      void assignDataType(H5::CompType &data_type){datatype = &data_type;}
@@ -174,17 +175,26 @@ public:
      GenerateHitsEvent* event;
      static H5::CompType datatype;
      static std::string path;
-     static H5::H5File file;
+     static H5::H5File *file;
      
 
  };
 
 std::string GenerateHitsRun::path = "hits.h5";
-H5::H5File GenerateHitsRun::file = H5::H5File(path, H5F_ACC_TRUNC);
+H5::H5File *GenerateHitsRun::file{nullptr};
 H5::CompType GenerateHitsRun::datatype = sizeof(Hit);
 
-GenerateHitsRun::GenerateHitsRun(){}
-GenerateHitsRun::~GenerateHitsRun(){}
+GenerateHitsRun::GenerateHitsRun(){
+  if (!file) {
+    std::filesystem::path hitsPath(path);
+    if (std::filesystem::exists(hitsPath)) std::filesystem::remove(hitsPath);
+    file=new H5::H5File(path, H5F_ACC_TRUNC);
+  }
+}
+GenerateHitsRun::~GenerateHitsRun(){
+  delete file;
+  file=nullptr;
+}
 
 
 void GenerateHitsRun::BeginOfRunAction(const G4Run*)
