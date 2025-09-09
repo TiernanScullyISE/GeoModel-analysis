@@ -55,6 +55,8 @@ namespace GeoThreading {
             unsigned queue() const;
             /** @brief Returns the number of threads in the pool */
             unsigned nThreads() const;
+            /** @brief Returns the number of workers currently processing a task */
+            unsigned busyWorkers() const;
             /** @brief Drains the queue. The method waits until all current tasks
              *         in the queue are moved to a thread worker and then waits until
              *         all thread workers have finished executing their tasks */

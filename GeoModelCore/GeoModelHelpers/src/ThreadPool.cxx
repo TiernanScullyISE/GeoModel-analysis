@@ -9,6 +9,7 @@
 #include <ranges>
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 namespace{
     constexpr unsigned logLevel = 0;
@@ -66,6 +67,12 @@ namespace GeoThreading{
         std::shared_lock lock{m_mutex};
         return m_queue.size();
     }
+    unsigned ThreadPool::busyWorkers() const {
+        return std::ranges::count_if(m_workers,
+                [](const std::unique_ptr<ThreadWorker>& worker){
+                    return !worker->isIdle();
+                });   
+    }
     std::unique_ptr<ThreadPool::IThreadTask> ThreadPool::nextTask() {
         std::unique_lock lock{m_mutex};
         TaskCont_t::iterator ready_task = std::ranges::find_if(m_queue,
@@ -94,10 +101,7 @@ namespace GeoThreading{
         do{
             PRINT_MSG("Wait until the last "<<n<<" tasks are finished. ");
             std::this_thread::sleep_for(threadSleep);
-        } while ((n = std::ranges::count_if(m_workers,
-                [](const std::unique_ptr<ThreadWorker>& worker){
-                    return !worker->isIdle();
-                })));
+        } while ((n = busyWorkers()));
     }
 
     /************************************************************* 
@@ -136,12 +140,9 @@ namespace GeoThreading{
             return; // Already stopped
         }
         m_thread.request_stop();
-        while (!m_done) {
-            PRINT_MSG("Wait until the last task is finished before shutting down");
-            std::this_thread::sleep_for(threadSleep);
-        }
         PRINT_MSG("Shutdown thread: "<<m_thread.get_id()<<", "<<m_thread.joinable());
         m_thread.join();
+        assert(m_done == true);
     }
     bool ThreadPool::ThreadWorker::isIdle() const { return m_idle; }
 }

@@ -62,8 +62,9 @@ TEST_F(ThreadPoolTest, QueueSizeDecreasesAfterDraining) {
             }
         });
     }
-
-    EXPECT_EQ(pool.queue(), nTests);
+    std::this_thread::sleep_for(10ms);
+    EXPECT_EQ(pool.busyWorkers(), pool.nThreads());
+    EXPECT_EQ(pool.queue() + pool.busyWorkers(), nTests);
     keepOnHold = false;
     pool.drainQueue();
     EXPECT_EQ(pool.queue(), 0);
