@@ -241,7 +241,7 @@ class GMDBManager {
      * will be saved in the default table.
      */
     bool addListOfPublishedAlignableTransforms(
-        const std::vector<std::vector<std::string>> &records,
+        DBRowsList& records,
         const std::string& suffix = "");
 
     /**
@@ -250,11 +250,11 @@ class GMDBManager {
      * table 'PublishedFullPhysVols".
      * @parameter suffix Optional parameter. If provided, the list of records
      * will be saved in a new table named 'PublishedFullPhysVols-suffix'.
-     * @note The 'suffix' parameter is optional. If not provided, the records
-     * will be saved in the default table.
+     * @note The 'suffix' parameter is optional. If provided, the records will * be saved in a table with the suffix in its name. If not provided, the 
+     * records will be saved in the default table.
      */
     bool addListOfPublishedFullPhysVols(
-        const std::vector<std::vector<std::string>> &records,
+        DBRowsList& records,
         const std::string& suffix = "");
 
     // bool addRootVolume(const std::vector<std::string> &values);

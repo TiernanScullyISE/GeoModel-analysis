@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // author: Riccardo.Maria.Bianchi@cern.ch, 2017
@@ -31,6 +31,9 @@
 //              instead of strings/TEXT
 // - Oct 2024 - Riccardo Maria Bianchi, <riccardo.maria.bianchi@cern.ch>,
 //              Support for the EllipticalTube shape was added.
+// - Sep 2025 - riccardo.maria.bianchi@cern.ch,
+//              removed old relics of vector<vector<string>> and moved 
+//              all methods to the new variant-based data types.
 //
 
 
@@ -106,7 +109,6 @@ unsigned int WriteGeoModel::getChildPosition(const unsigned int& parentId,
 
 unsigned int WriteGeoModel::setVolumeCopyNumber(const unsigned int& volId,
                                                 const std::string& volType) {
-    // JFB Commented out: qDebug() << "WriteGeoModel::setVolumeCopyNumber()";
     const unsigned int tableId = getIdFromNodeType(volType);
     std::string key =
         std::to_string(tableId) + ":" + std::to_string(volId);  // INT
@@ -252,7 +254,7 @@ void WriteGeoModel::handleVPhysVolObjects(const GeoVPhysVol* vol) {
 
     if (!m_rootVolumeFound) {
         if (len > 1) {
-            doGetParentNode = true;  // TODO: is that needed????
+            doGetParentNode = true;  // TODO: is that still needed????
         } else {
             isRootVolume = true;
             m_rootVolumeFound = true;
@@ -268,20 +270,14 @@ void WriteGeoModel::handleVPhysVolObjects(const GeoVPhysVol* vol) {
     // of the parent of the SerialTransformer is returned, which is wrong.
     if (m_unconnectedTree) {
         doGetParentNode = false;
-        // qDebug() << "Handling an unconnected tree: we skip the parent-finding
-        // step...";
+        // std::cout << "Handling an unconnected tree: we skip the parent-finding
+        // step...\n";
         //  now, we reset the status,
         //  otherwise all the children of the first referenced, unconnected
         //  volume will be treated as unconnected as well
-        // qDebug() << "setting 'unconnected' to: false";
+        // std::cout << "setting 'unconnected' to: false\n";
         m_unconnectedTree = false;
     }
-
-    // // get the parent volume
-    // QStringList parentList = getParentNode(); // you can use that, but you
-    // have to modify it to get len-2, instead of len-1, for VPhysVol nodes
-    // QString parentId = parentList[0];
-    // QString parentType = parentList[1];
 
     // get the parent volume, if this is not the Root volume or an unconnected
     // sub-tree
@@ -291,49 +287,30 @@ void WriteGeoModel::handleVPhysVolObjects(const GeoVPhysVol* vol) {
     std::string volTypeStr = "0";
 
     if (doGetParentNode) {
-        //        bool isShared = vol->isShared();
-        // qDebug() << "is this node shared?" << isShared;
-
-        // if (isShared)
         parentNode = upperVol;
-        // else
-        //     parentNode = dynamic_cast<const GeoVPhysVol*>(
-        //     &(*(vol->getParent() ))); // this cannot be trust for shared
-        //     nodes
-        // qDebug() << "parentNode address" << parentNode;
-
         if (parentNode) {
             std::string parentAddress = getAddressStringFromPointer(parentNode);
-            // JFB Commented out: qDebug() << "==> parent's address:" <<
-            // parentNode;
-
             if (isAddressStored(parentAddress))
                 parentId = getStoredIdFromAddress(parentAddress);
-            //		else
-            //			qFatal("FATAL ERROR!!! - The parent node of this
-            // child should has been stored in the DB already, but it was not
-            // found!!");
-
-            // qDebug() << "==> parent's LogVol name:" <<
-            // QString::fromStdString(parentNode->getLogVol()->getName());
         } else {
-            // qDebug() << "NULL parent node!! --> this node appeared
+            // TODO: check if this if/else is still relevant
+            // "NULL parent node!! --> this node appeared
             // unconnected.";
         }
     }
 
     // counting children
     //  unsigned int nChildren = vol->getNChildVols();
-    // qDebug() << "number of child physical volumes:" << nChildren;
-    // qDebug() << "[number of PhysVol and SerialTransformer child nodes:" <<
-    // vol->getNChildVolAndST() << "]";
+    // std::cout << "number of child physical volumes:" << nChildren << "\n";
+    // std::cout << "[number of PhysVol and SerialTransformer child nodes:" <<
+    // vol->getNChildVolAndST() << "]\n";
 
     //// for debug
     // GeoCountVolAction cv;
     // cv.setDepthLimit(1);
     // vol->exec(&cv);
     // int nChildCount = cv.getCount();
-    // qDebug() << "number of child volumes:" << nChildCount;
+    // std::cout << "number of child volumes:" << nChildCount << "\n";
 
     // check if this object has been stored already
     if (!isAddressStored(address)) {
@@ -413,9 +390,9 @@ void WriteGeoModel::handleVPhysVolObjects(const GeoVPhysVol* vol) {
     }
 
     if (isRootVolume || parentId == 0) {
-        // qDebug() << "This is the RootVolume or the volume has 'NULL' parent
+        // std::cout << "This is the RootVolume or the volume has 'NULL' parent
         // (unconnected subtree?) - So, we do not store the child position for
-        // this volume!";
+        // this volume!\n";
     } else {
         // store the parent-child relationship in the DB
         std::string parentType = getGeoTypeFromVPhysVol(parentNode);
@@ -763,7 +740,6 @@ std::vector<std::string> WriteGeoModel::getParentNode() {
 
 //__________________________________________________________________
 std::pair<std::string, unsigned> WriteGeoModel::storeShape(const GeoShape* shape) {
-    //  QString shapeType = QString::fromStdString(shape->type());
     std::string shapeType = shape->type();
 
     // LArCustomShape is deprecated.  Write it out as a GeoUnidentifiedShape;
@@ -791,13 +767,8 @@ std::pair<std::string, unsigned> WriteGeoModel::storeShape(const GeoShape* shape
     }
     else
     {
-        std::cout << "\nWARNING! The shape '" << shapeType
-                  << "' has not been ported to the new DB schema yet, so the old schema will be used to dump it.\n"
-                  << std::endl;
-        std::string shapePars = getShapeParameters(shape);
-        // store the shape in the DB and returns the ID
-        unsigned shapeID = storeObj(shape, shapeType, shapePars);
-        return std::pair<std::string, unsigned>{shapeType, shapeID};
+        THROW_EXCEPTION("The shape '" << shapeType
+                                      << "' has not been ported to the new DB schema yet!")
     }
     return std::pair<std::string, unsigned>{}; // you should not get here
 }
@@ -815,9 +786,6 @@ unsigned int WriteGeoModel::storeMaterial(const GeoMaterial* mat) {
     if (0 == numElements) {
         THROW_EXCEPTION("ERROR!!! The material '" << matName << "' has zero elements!");
     }
-
-    // std::string matElements;
-    // std::vector<std::string> matElementsList;
 
     DBRowEntry matData_ElementFraction;
     DBRowsList matData_List;
@@ -842,9 +810,6 @@ unsigned int WriteGeoModel::storeMaterial(const GeoMaterial* mat) {
         // the material: (element, fraction)
         matData_ElementFraction.push_back(elementId);
         matData_ElementFraction.push_back(elementFraction);
-
-        // matElementsList.push_back(std::to_string(elementId) + ":" +
-        //                           elementFraction);  // INT+string
 
         // Add the (element,fraction) 
         // to the list of all elements for the given material
@@ -974,10 +939,8 @@ unsigned int WriteGeoModel::storeTranform(const GeoTransform* node) {
 }
 
 //_______________________________________________________________________
-void WriteGeoModel::handleReferencedVPhysVol(const GeoVPhysVol* vol) {
-    // qDebug() << "PhysVol's LogVol name:" <<
-    // QString::fromStdString(vol->getLogVol()->getName());
-
+void WriteGeoModel::handleReferencedVPhysVol(const GeoVPhysVol* vol) 
+{
     // get the address string for the current volume
     std::string address = getAddressStringFromPointer(vol);
 
@@ -999,47 +962,43 @@ void WriteGeoModel::handleReferencedVPhysVol(const GeoVPhysVol* vol) {
 
         if (isAddressStored(parentAddress))
             parentId = getStoredIdFromAddress(parentAddress);
-        //		else
-        //			qFatal("FATAL ERROR!!! - The parent node of this
+        // else: "FATAL ERROR!!! - The parent node of this
         // child should has been stored in the DB already, but it was not
-        // found!!");
-
-        // qDebug() << "--> parent's LogVol name:" <<
-        // QString::fromStdString(parentNode->getLogVol()->getName());
+        // found!!";
     } else {
-        // qDebug() << "NULL parent node!! --> it seems to be an unconnected
-        // subtree."; qDebug() << "setting 'unconnected' to: true";
+        // "NULL parent node!! --> it seems to be an unconnected
+        // subtree. So, we are setting 'unconnected' to: true".
         m_unconnectedTree = true;
     }
 
     // for Debug
     // // counting children
     // unsigned int nChildren = vol->getNChildVols();
-    // qDebug() << "number of child physical volumes:" << nChildren;
-    // qDebug() << "[number of PhysVol and SerialTransformer child nodes:" <<
-    // vol->getNChildVolAndST() << "]";
+    // std::cout << "number of child physical volumes:" << nChildren << std::endl;
+    // std::cout << "[number of PhysVol and SerialTransformer child nodes:" <<
+    // vol->getNChildVolAndST() << "]\n";
     //
     // GeoCountVolAction cv;
     // cv.setDepthLimit(1);
     // vol->exec(&cv);
     // int nChildCount = cv.getCount();
-    // qDebug() << "number of child volumes:" << nChildCount;
+    // std::cout << "number of child volumes:" << nChildCount << std::endl;
 
     // check if this object has been stored already
     if (!isAddressStored(address)) {
-        // qDebug() << "This is a new root PhysVol node of an 'unconnected'
-        // tree, so we start another action on it to dump it into the DB...";
+        // std::cout << "This is a new root PhysVol node of an 'unconnected'
+        // tree, so we start another action on it to dump it into the DB...\n";
 
         // Dump the tree volumes into the DB
         vol->exec(this);  // TODO: check if the new action overwrites the id of
                           // the volumes already in the DB...!!!
 
     } else {
-        // qDebug() << "The referenced volume has been stored already.
-        // Skipping...";
+        // std::cout << "The referenced volume has been stored already.
+        // Skipping...\n"; // DEBUG MSG
     }
     // at the end, we make sure we reset the status
-    // qDebug() << "setting 'unconnected' to: false";
+    // std::cout << "setting 'unconnected' to: false\n"; // DEBUG MSG
     m_unconnectedTree = false;
 }
 
@@ -1380,63 +1339,6 @@ std::pair<DBRowEntry, DBRowsList> WriteGeoModel::getShapeParametersV(const GeoSh
 }
 
 
-// OLD VERSIONS!!!! TO BE REMOVED WHEN ALL SHAPES ARE MIGRATED!! 
-// Get shape parameters
-std::string WriteGeoModel::getShapeParameters(const GeoShape* shape) {
-    const std::string shapeType = shape->type();
-
-    std::string shapePars = "";
-    std::vector<std::string> pars;
-
-    if (false) {}
-    else if (shapeType == "TessellatedSolid") {
-        const GeoTessellatedSolid* shapeIn =
-            dynamic_cast<const GeoTessellatedSolid*>(shape);
-        // get number of facets
-        const size_t nFacets = shapeIn->getNumberOfFacets();
-        pars.push_back("nFacets=" + std::to_string(nFacets));  // size_t
-        // loop over the facets
-        for (size_t i = 0; i < nFacets; ++i) {
-            GeoFacet* facet = shapeIn->getFacet(i);
-            // get GeoFacet actual implementation
-            if (dynamic_cast<GeoTriangularFacet*>(facet))
-                pars.push_back("TRI");
-            else if (dynamic_cast<GeoQuadrangularFacet*>(facet))
-                pars.push_back("QUAD");
-            // get vertex type (ABSOLUTE/RELATIVE)
-            GeoFacet::GeoFacetVertexType facetVertexType =
-                facet->getVertexType();
-            if (facetVertexType == GeoFacet::ABSOLUTE)
-                pars.push_back("vT=ABSOLUTE");
-            if (facetVertexType == GeoFacet::RELATIVE)
-                pars.push_back("vT=RELATIVE");
-            // get number of vertices and loop over them
-            const size_t nVertices = facet->getNumberOfVertices();
-            pars.push_back("nV=" + std::to_string(nVertices));  // size_t
-            for (size_t i = 0; i < nVertices; ++i) {
-                GeoFacetVertex facetVertex = facet->getVertex(i);
-                pars.push_back("xV=" +
-                               GeoStrUtils::to_string_with_precision(facetVertex[0]));
-                pars.push_back("yV=" +
-                               GeoStrUtils::to_string_with_precision(facetVertex[1]));
-                pars.push_back("zV=" +
-                               GeoStrUtils::to_string_with_precision(facetVertex[2]));
-            }
-        }
-    } 
-    else {
-        std::string errMsg = "GeoModelWrite -- ERROR!!! - Shape '" + shapeType 
-                  + "' needs to be persistified!!";
-        std::cout << "\n\nobject to be persistified:" << std::endl;
-        GeoStrUtils::printStdVectorStrings(m_objectsNotPersistified);
-        THROW_EXCEPTION(errMsg);
-    }
-
-    shapePars = GeoStrUtils::chainUp(pars,";");
-
-    return shapePars;
-}
-
 std::vector<double> WriteGeoModel::getTransformParameters(
     GeoTrf::Transform3D tr) {
     std::vector<double> vec;
@@ -1554,20 +1456,7 @@ unsigned int WriteGeoModel::storeObj(const GeoElement* pointer,
     return elementId;
 }
 
-unsigned int WriteGeoModel::storeObj(const GeoShape* pointer,
-                                     const std::string& shapeName,
-                                     const std::string& parameters) {
-    std::string address = getAddressStringFromPointer(pointer);
 
-    unsigned int shapeId;
-    if (!isAddressStored(address)) {
-        shapeId = addShape(shapeName, parameters);
-        storeAddress(address, shapeId);
-    } else {
-        shapeId = getStoredIdFromAddress(address);
-    }
-    return shapeId;
-}
 std::pair<std::string, unsigned> WriteGeoModel::storeObj(const GeoShape* pointer,
                                      const std::string& shapeName,
                                      DBRowEntry& parameters,
@@ -1625,8 +1514,8 @@ unsigned int WriteGeoModel::storeObj(const GeoPhysVol* pointer,
 
     unsigned int physvolId;
     if (!isAddressStored(address)) {
-        physvolId = addPhysVol(logvolId, parentId,
-                               isRootVolume);  // FIXME: remove parentInfo
+        physvolId = addPhysVol(logvolId,
+                               isRootVolume);  
 
         storeAddress(address, physvolId);
     } else {
@@ -1643,7 +1532,7 @@ unsigned int WriteGeoModel::storeObj(const GeoFullPhysVol* pointer,
 
     unsigned int physvolId;
     if (!isAddressStored(address)) {
-        physvolId = addFullPhysVol(logvolId, parentId,
+        physvolId = addFullPhysVol(logvolId,
                                    isRootVolume);  // FIXME: remove parent info!
 
         storeAddress(address, physvolId);
@@ -1683,7 +1572,7 @@ unsigned int WriteGeoModel::storeObj(const GeoVSurfaceShape* pointer, const std:
          //if (shapeData.size() > 0)
         //{
             // Store the node's additional data
-            // Rectangualr Virtual Surface now doesn't need to do this
+            // Rectangular Virtual Surface now doesn't need to do this
         //    std::pair<unsigned, unsigned> dataRows = addShapeData(shapeName, shapeData); //TODO: need to be revised for more complicated surfaces in future
         //    unsigned dataStart = dataRows.first;
         //    unsigned dataEnd = dataRows.second;
@@ -1957,7 +1846,6 @@ std::vector<unsigned> WriteGeoModel::addExprData(
     // from a new row with respect to what we currently have
     
     for (const auto& num : exprData) {
-        // std::cout << "num: " << GeoModelIO::GeoStrUtils::to_string_with_precision(num) << std::endl; // DEBUG MSG
         container->push_back(num);
     }
     unsigned dataEnd =
@@ -2006,9 +1894,8 @@ std::pair<unsigned, unsigned> WriteGeoModel::addMaterialData(const DBRowsList& m
 unsigned int WriteGeoModel::addMaterial(const std::string& name,
                                         const double& density,
                                         const unsigned &dataStart,
-                                        const unsigned &dataEnd) {
-    // std::vector<std::vector<std::string>>* container = &m_materials;
-    // std::vector<std::string> values;
+                                        const unsigned &dataEnd)
+{
     DBRowsList* container = &m_materials;
     DBRowEntry values;
     values.push_back(name);
@@ -2018,56 +1905,47 @@ unsigned int WriteGeoModel::addMaterial(const std::string& name,
     return addRecord(container, values);
 }
 
-
-
 unsigned int WriteGeoModel::addElement(const std::string& name,
                                        const std::string& symbol,
                                        const double& elZ, const double& elA) {
-    // std::vector<std::vector<std::string>>* container = &m_elements;
-    // std::vector<std::string> values;
-    // values.insert(values.begin(), {name, symbol, CppHelper::to_string_with_precision(elZ),
-    //                                CppHelper::to_string_with_precision(elA)});
-    
     DBRowsList* container = &m_elements;
     DBRowEntry values;
     values.push_back(name);
     values.push_back(symbol);
     values.push_back(elZ);
     values.push_back(elA);
-    
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addNameTag(const std::string& name) {
-    std::vector<std::vector<std::string>>* container = &m_nameTags;
-    std::vector<std::string> values;
+    DBRowsList* container = &m_nameTags;
+    DBRowEntry values;
     values.push_back(name);
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addSerialDenominator(const std::string& baseName) {
-    std::vector<std::vector<std::string>>* container = &m_serialDenominators;
-    std::vector<std::string> values;
+    DBRowsList* container = &m_serialDenominators;
+    DBRowEntry values;
     values.push_back(baseName);
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addSerialIdentifier(const int& baseId) {
-    std::vector<std::vector<std::string>>* container = &m_serialIdentifiers;
-    std::vector<std::string> values;
-    values.push_back(std::to_string(baseId));
+    DBRowsList* container = &m_serialIdentifiers;
+    DBRowEntry values;
+    values.push_back(baseId);
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addIdentifierTag(const int& identifier) {
-    std::vector<std::vector<std::string>>* container = &m_identifierTags;
-    std::vector<std::string> values;
-    values.push_back(std::to_string(identifier));
+    DBRowsList* container = &m_identifierTags;
+    DBRowEntry values;
+    values.push_back(identifier);
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addFunction(const std::string& expression, const unsigned &dataStart, const unsigned &dataEnd) {
-    // std::vector<std::vector<std::string>>* container = &m_functions;
     DBRowsList* container = &m_functions;
     DBRowEntry values;
     values.push_back(expression);
@@ -2078,21 +1956,21 @@ unsigned int WriteGeoModel::addFunction(const std::string& expression, const uns
 
 unsigned int WriteGeoModel::addAlignableTransform(
     const std::vector<double>& params) {
-    std::vector<std::vector<std::string>>* container = &m_alignableTransforms;
-    std::vector<std::string> values;
+    DBRowsList* container = &m_alignableTransforms;
+    DBRowEntry values;
     values.reserve(params.size());
 for (const double& par : params) {
-        values.push_back(GeoStrUtils::to_string_with_precision(par));
+        values.push_back(par);
     }
     return addRecord(container, values);
 }
 
 unsigned int WriteGeoModel::addTransform(const std::vector<double>& params) {
-    std::vector<std::vector<std::string>>* container = &m_transforms;
-    std::vector<std::string> values;
+    DBRowsList* container = &m_transforms;
+    DBRowEntry values;
     values.reserve(params.size());
 for (const double& par : params) {
-        values.push_back(GeoStrUtils::to_string_with_precision(par));
+        values.push_back(par);
     }
     return addRecord(container, values);
 }
@@ -2109,24 +1987,14 @@ unsigned int WriteGeoModel::getIdFromNodeType(const std::string& nodeType) {
 unsigned int WriteGeoModel::addSerialTransformer(const unsigned int& funcId,
                                                  const unsigned int& physvolId,
                                                  const std::string& volType,
-                                                 const unsigned int& copies) {
-    std::vector<std::vector<std::string>>* container = &m_serialTransformers;
+                                                 const unsigned int& copies)
+{
     const unsigned int volTypeID = getIdFromNodeType(volType);
-
-    std::vector<std::string> values;
+    DBRowsList* container = &m_serialTransformers;
+    DBRowEntry values;
     values.insert(values.begin(),
-                  {std::to_string(funcId), std::to_string(physvolId),
-                   std::to_string(volTypeID), std::to_string(copies)});  // INT
-
-    return addRecord(container, values);
-}
-
-unsigned int WriteGeoModel::addShape(const std::string& type,
-                                     const std::string& parameters) {
-    std::vector<std::vector<std::string>>* container = &m_shapes;
-    std::vector<std::string> values;
-    values.push_back(type);
-    values.push_back(parameters);
+                  {funcId, physvolId,
+                   volTypeID, copies});
     return addRecord(container, values);
 }
 
@@ -2220,33 +2088,26 @@ unsigned int WriteGeoModel::addShape(const std::string &type,
 }
 
 unsigned int WriteGeoModel::addPhysVol(const unsigned int& logVolId,
-                                       const unsigned int& /*parentPhysVolId*/,
                                        const bool& isRootVolume) {
-    std::vector<std::vector<std::string>>* container = &m_physVols;
-    std::vector<std::string> values;
-    values.push_back(std::to_string(logVolId));  // INT
+    DBRowsList* container = &m_physVols;
+    DBRowEntry values;
+    values.push_back(logVolId);  // INT
     unsigned int idx = addRecord(container, values);
     if (isRootVolume) {
-        // std::vector<std::string> rootValues;
-        // rootValues.insert(rootValues.begin(),
-        //                   {std::to_string(idx), "GeoPhysVol"});  // INT
         std::pair<std::string, unsigned> rootValues{"GeoPhysVol", idx};
         m_rootVolume = rootValues;
     }
     return idx;
 }
 
-unsigned int WriteGeoModel::addFullPhysVol(
-    const unsigned int& logVolId, const unsigned int& /*parentPhysVolId*/,
-    const bool& isRootVolume) {
-    std::vector<std::vector<std::string>>* container = &m_fullPhysVols;
-    std::vector<std::string> values;
-    values.push_back(std::to_string(logVolId));  // INT
+unsigned int WriteGeoModel::addFullPhysVol(const unsigned int &logVolId,
+                                           const bool &isRootVolume)
+{
+    DBRowsList* container = &m_fullPhysVols;
+    DBRowEntry values;
+    values.push_back(logVolId);
     unsigned int idx = addRecord(container, values);
     if (isRootVolume) {
-        // std::vector<std::string> rootValues;
-        // rootValues.insert(rootValues.begin(),
-        //                   {std::to_string(idx), "GeoFullPhysVol"});  // INT
         std::pair<std::string, unsigned> rootValues{"GeoFullPhysVol", idx};
         m_rootVolume = rootValues;
     }
@@ -2312,18 +2173,12 @@ void WriteGeoModel::addChildPosition(const unsigned int& parentId,
                                      const std::string& childType,
                                      const unsigned int& childCopyN)
 {
-    // std::vector<std::vector<std::string>>* container = &m_childrenPositions;
     DBRowsList* container = &m_childrenPositions;
 
     const unsigned int parentTableID = getIdFromNodeType(parentType);
     const unsigned int childTableID = getIdFromNodeType(childType);
 
-    // std::vector<std::string> values;
     DBRowEntry values;
-
-    //  values << parentId.toString() << parentTableID <<
-    //  QString::number(parentCopyN) << QString::number(childPos) <<
-    //  childTableID << childId.toString() << QString::number(childCopyN);
     values.insert(values.begin(),
                   {parentId, parentTableID,
                    parentCopyN, childPos,
@@ -2370,35 +2225,34 @@ void WriteGeoModel::saveToDB(std::vector<GeoPublisher*>& publishers) {
     
     m_dbManager->addRecordsToTable("FuncExprData", m_exprData);
 
-    m_dbManager->addListOfRecords("GeoShape", m_shapes); // OLD version, with shape's parameters as strings
-    m_dbManager->addListOfRecords("GeoBox", m_shapes_Box); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoEllipticalTube", m_shapes_EllipticalTube); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTube", m_shapes_Tube); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoCons", m_shapes_Cons); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoPara", m_shapes_Para); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTrap", m_shapes_Trap); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTrd", m_shapes_Trd); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTubs", m_shapes_Tubs); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTorus", m_shapes_Torus); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoTwistedTrap", m_shapes_TwistedTrap); // new version, with shape's parameters as numbers
+    m_dbManager->addListOfRecords("GeoBox", m_shapes_Box); 
+    m_dbManager->addListOfRecords("GeoEllipticalTube", m_shapes_EllipticalTube); 
+    m_dbManager->addListOfRecords("GeoTube", m_shapes_Tube); 
+    m_dbManager->addListOfRecords("GeoCons", m_shapes_Cons); 
+    m_dbManager->addListOfRecords("GeoPara", m_shapes_Para); 
+    m_dbManager->addListOfRecords("GeoTrap", m_shapes_Trap); 
+    m_dbManager->addListOfRecords("GeoTrd", m_shapes_Trd); 
+    m_dbManager->addListOfRecords("GeoTubs", m_shapes_Tubs); 
+    m_dbManager->addListOfRecords("GeoTorus", m_shapes_Torus); 
+    m_dbManager->addListOfRecords("GeoTwistedTrap", m_shapes_TwistedTrap); 
     
     // store shapes' data // TODO: maybe this should be encapsulated with shapes? 
     // FIXME: To do this, I moved addListOfRecordsToTable() from private to public, maybe I could add a method to store shapes with data and put back that into private
-    m_dbManager->addListOfRecords("GeoPcon", m_shapes_Pcon); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoPgon", m_shapes_Pgon); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoSimplePolygonBrep", m_shapes_SimplePolygonBrep); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoGenericTrap", m_shapes_GenericTrap); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecordsToTable("Shapes_Pcon_Data", m_shapes_Pcon_Data); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecordsToTable("Shapes_Pgon_Data", m_shapes_Pgon_Data); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecordsToTable("Shapes_SimplePolygonBrep_Data", m_shapes_SimplePolygonBrep_Data); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecordsToTable("Shapes_GenericTrap_Data", m_shapes_GenericTrap_Data); // new version, with shape's parameters as numbers
+    m_dbManager->addListOfRecords("GeoPcon", m_shapes_Pcon); 
+    m_dbManager->addListOfRecords("GeoPgon", m_shapes_Pgon); 
+    m_dbManager->addListOfRecords("GeoSimplePolygonBrep", m_shapes_SimplePolygonBrep); 
+    m_dbManager->addListOfRecords("GeoGenericTrap", m_shapes_GenericTrap); 
+    m_dbManager->addListOfRecordsToTable("Shapes_Pcon_Data", m_shapes_Pcon_Data); 
+    m_dbManager->addListOfRecordsToTable("Shapes_Pgon_Data", m_shapes_Pgon_Data); 
+    m_dbManager->addListOfRecordsToTable("Shapes_SimplePolygonBrep_Data", m_shapes_SimplePolygonBrep_Data); 
+    m_dbManager->addListOfRecordsToTable("Shapes_GenericTrap_Data", m_shapes_GenericTrap_Data); 
 
-    m_dbManager->addListOfRecords("GeoShapeShift", m_shapes_Shift); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoShapeIntersection", m_shapes_Intersection); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoShapeSubtraction", m_shapes_Subtraction); // new version, with shape's parameters as numbers
-    m_dbManager->addListOfRecords("GeoShapeUnion", m_shapes_Union); // new version, with shape's parameters as numbers
+    m_dbManager->addListOfRecords("GeoShapeShift", m_shapes_Shift); 
+    m_dbManager->addListOfRecords("GeoShapeIntersection", m_shapes_Intersection); 
+    m_dbManager->addListOfRecords("GeoShapeSubtraction", m_shapes_Subtraction); 
+    m_dbManager->addListOfRecords("GeoShapeUnion", m_shapes_Union); 
 
-    m_dbManager->addListOfRecords("GeoUnidentifiedShape", m_shapes_UnidentifiedShape); // new version, with shape's parameters as numbers
+    m_dbManager->addListOfRecords("GeoUnidentifiedShape", m_shapes_UnidentifiedShape); 
 
     m_dbManager->addListOfRecords("RectangleSurface", m_rectangle_surface); 
     m_dbManager->addListOfRecords("TrapezoidSurface", m_trapezoid_surface);
@@ -2422,19 +2276,6 @@ void WriteGeoModel::saveToDB(std::vector<GeoPublisher*>& publishers) {
     }
 
     // save auxiliary data stored through WriteGeoModel directly
-    /*
-    if ( m_auxiliaryTablesStr.size() ) {
-             std::cout << "\nINFO: Custom tables to store auxiliary data have
-    been added, "
-                << "so we create these custom tables in the DB:"
-                << std::endl;
-       for ( auto& tableData : m_auxiliaryTablesStr ) {
-            std::cout << "\tsaving table: " << tableData.first << std::endl;
-            m_dbManager->createCustomTable( tableData.first,
-    (tableData.second).first, (tableData.second).second,
-    m_auxiliaryTablesStrData[ tableData.first ] );
-       }
-    }*/
     if (m_auxiliaryTablesVar.size()) {
         if (m_loglevel >= 0) {
             std::cout << "\nINFO: Custom tables to store auxiliary data have "
@@ -2488,18 +2329,18 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     std::map<GeoAlignableTransform*, std::any> mapAXF =
         store->getPublishedAXF();
     storeRecordPublishedNodes<std::map<GeoAlignableTransform*, std::any>>(
-        mapAXF, &m_publishedAlignableTransforms_String);
+        mapAXF, &m_publishedAlignableTransforms);
 
     // loop over the published GeoVFullPhysVol nodes
     std::map<GeoVFullPhysVol*, std::any> mapFPV = store->getPublishedFPV();
     storeRecordPublishedNodes<std::map<GeoVFullPhysVol*, std::any>>(
-        mapFPV, &m_publishedFullPhysVols_String);
+        mapFPV, &m_publishedFullPhysVols);
 
     // save the list of matching published nodes to the DB
     std::string storeName = store->getName();
     if (mapAXF.size() > 0) {
         m_dbManager->addListOfPublishedAlignableTransforms(
-            m_publishedAlignableTransforms_String, storeName);
+            m_publishedAlignableTransforms, storeName);
     } else {
         std::cout << "\nGeoModelWrite -- WARNING! A pointer to a GeoPublisher "
                      "was provided, but no GeoAlignableTransform nodes have "
@@ -2509,7 +2350,7 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     }
     if (mapFPV.size() > 0) {
         m_dbManager->addListOfPublishedFullPhysVols(
-            m_publishedFullPhysVols_String, storeName);
+            m_publishedFullPhysVols, storeName);
     } else {
         std::cout << "\nGeoModelWrite -- WARNING! A pointer to a GeoPublisher "
                      "was provided, but no GeoFullPhysVol nodes have been "
@@ -2519,14 +2360,14 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     }
 
     // clear the caches
-    m_publishedAlignableTransforms_String.clear();
-    m_publishedFullPhysVols_String.clear();
+    m_publishedAlignableTransforms.clear();
+    m_publishedFullPhysVols.clear();
 }
 
 template <typename TT>
 void WriteGeoModel::storeRecordPublishedNodes(
     const TT storeMap,
-    std::vector<std::vector<std::string>>* cachePublishedNodes) {
+    DBRowsList* cachePublishedNodes) {
     // NOTE: We store all keys as strings, independently of their original
     // format.
     //       However, we store the original format as well,
@@ -2537,31 +2378,29 @@ void WriteGeoModel::storeRecordPublishedNodes(
         auto& keyType = key.type();
 
         // get key type and convert to std::string to store into the cache
-        std::string keyStr;
+        DBRecordEntry keyEntry;
         std::string keyTypeStr;
+        std::string keyStr; // for debug only
         if (typeid(std::string) == keyType) {
             keyTypeStr = "string";
+            keyEntry = std::any_cast<std::string>(key);
             keyStr = std::any_cast<std::string>(key);
         } else if (typeid(int) == keyType) {
             keyTypeStr = "int";
-            keyStr = std::to_string(std::any_cast<int>(key)); // INT
+            keyEntry = std::any_cast<int>(key); // INT
+            keyStr = std::to_string(std::any_cast<int>(key));
         } else if (typeid(unsigned) == keyType) {
             keyTypeStr = "uint";
-            keyStr = std::to_string(std::any_cast<unsigned>(key)); // INT
+            keyEntry = std::any_cast<unsigned>(key); // INT
+            keyStr = std::to_string(std::any_cast<unsigned>(key));
         } else {
-            std::cout
-                << "ERROR! The type of the key used to publish FPV and AXF "
-                   "nodes is not 'std::string', nor 'int', nor 'unsigned int'. "
-                   "Format not supported, at the moment..\n"
-                << "If in doubt, please ask to 'geomodel-developers@cern.ch'. "
-                   "Exiting...\n\n";
-            exit(EXIT_FAILURE);
+            THROW_EXCEPTION("ERROR! The type of the key used to publish FPV and AXF nodes is not 'std::string', nor 'int', nor 'unsigned int'.  The format you are trying to use is not supported, at the moment...\n If in doubt, please ask to geomodel-developers@cern.ch'.")
         }
 
         // check if address is stored already; and get the ID associated with
         // it. NOTE: All of the addresses should be stored already, at this
         // stage.
-        //       If not, there's a serious bug!
+        // If not, there's a serious bug!
         unsigned int volID = 0;
         std::string volStr = getAddressStringFromPointer(vol);
         if (isAddressStored(volStr)) {
@@ -2575,15 +2414,16 @@ void WriteGeoModel::storeRecordPublishedNodes(
 
         // debug msg
         if (m_loglevel >= 2) {
-            std::cout << vol << "::" << keyStr << " [" << keyTypeStr << "] --> "
+            std::cout << vol << "::" << keyStr 
+                      << " [" << keyTypeStr << "] --> " 
                       << volID << std::endl;
         }
 
         // prepare the vector containing the pieces of information to be stored
         // in the DB table
-        std::vector<std::string> values;
-        values.push_back(keyStr);
-        values.push_back(std::to_string(volID)); // INT
+        DBRowEntry values;
+        values.push_back(keyEntry);
+        values.push_back(volID); // INT
         values.push_back(keyTypeStr);  // TODO: store the key type in a metadata
                                        // table, not in the records' table; so
                                        // it can be stored once only.

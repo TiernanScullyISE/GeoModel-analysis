@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -27,6 +27,9 @@
  *              instead of strings/TEXT
  * - Oct 2024 - Riccardo Maria Bianchi, <riccardo.maria.bianchi@cern.ch>,
  *              Support for the EllipticalTube shape was added.
+ * - Sep 2025 - riccardo.maria.bianchi@cern.ch,
+ *              removed old relics of vector<vector<string>> and moved 
+ *              all methods to the new variant-based data types.
  */
 
 #ifndef GeoModelWrite_WriteGeoModel_H
@@ -163,7 +166,7 @@ class WriteGeoModel : public GeoNodeAction {
     unsigned long getNChildrenConnections() {
         return m_childrenPositions.size();
     };
-    unsigned long getNShapes() { return m_shapes.size(); }; // TODO: to be removed later
+    // unsigned long getNShapes() { return m_shapes.size(); }; // TODO: to be removed later
     unsigned long getNShapes_Box() { return m_shapes_Box.size(); };
     unsigned long getNShapes_EllipticalTube() { return m_shapes_EllipticalTube.size(); };
     unsigned long getNShapes_Cons() { return m_shapes_Cons.size(); };
@@ -221,8 +224,8 @@ class WriteGeoModel : public GeoNodeAction {
     unsigned int storeObj(const GeoElement *pointer, const std::string &name,
                           const std::string &symbol, const double &elZ,
                           const double &elA);
-    unsigned int storeObj(const GeoShape *pointer, const std::string &type,
-                          const std::string &parameters);
+    // unsigned int storeObj(const GeoShape *pointer, const std::string &type,
+    //                       const std::string &parameters);
     std::pair<std::string, unsigned> storeObj(const GeoShape *pointer, const std::string &type,
                                             DBRowEntry &parameters,
                                             const DBRowsList &shapeData);
@@ -256,7 +259,7 @@ class WriteGeoModel : public GeoNodeAction {
                           const std::vector<double> &parameters);
     unsigned int storeObj(const GeoNameTag *pointer, const std::string &name);
 
-    // void storeExprData(const unsigned funcId, std::deque<double> exprData);
+    // void storeExprData(const unsigned funcId, std::deque<double> exprData); // TODO:
     std::vector<unsigned> addExprData(const std::deque<double> &exprData) ;
 
     unsigned int addRecord(std::vector<std::vector<std::string>> *container,
@@ -284,8 +287,8 @@ class WriteGeoModel : public GeoNodeAction {
                                       const std::string& volType,
                                       const unsigned &copies);
     
-    unsigned int addShape(const std::string &type,
-                          const std::string &parameters);
+    // unsigned int addShape(const std::string &type,
+    //                       const std::string &parameters);
     unsigned int addShape(const std::string &type,
                           const DBRowEntry &parameters);
     std::pair<unsigned, unsigned> addShapeData(const std::string& type,
@@ -295,10 +298,8 @@ class WriteGeoModel : public GeoNodeAction {
     unsigned int addSerialIdentifier(const int &baseId);
     unsigned int addIdentifierTag(const int &identifier);
     unsigned int addPhysVol(const unsigned int &logVolId,
-                            const unsigned int &parentPhysVolId,
                             const bool &isRootVolume);
     unsigned int addFullPhysVol(const unsigned int &logVolId,
-                                const unsigned int &parentPhysVolId,
                                 const bool &isRootVolume);
     unsigned int addLogVol(const std::string &name, const unsigned int &shapeId,
                            std::string_view shapeType, const unsigned int &materialId);
@@ -337,7 +338,7 @@ class WriteGeoModel : public GeoNodeAction {
         GeoTrf::Transform3D);  // TODO: to be moved to Eigen (GeoTrf) and to be
                                // moved to an Utility class, so we can use it
                                // from TransFunctionRecorder as well.
-    std::string getShapeParameters(const GeoShape *);
+    // std::string getShapeParameters(const GeoShape *);
     std::pair<DBRowEntry,
               DBRowsList>
     getShapeParametersV(const GeoShape *, const bool data = false);
@@ -348,9 +349,12 @@ class WriteGeoModel : public GeoNodeAction {
 
     void storePublishedNodes(GeoPublisher *store);
     template <typename TT>
+    // void storeRecordPublishedNodes(
+    //     const TT storeMap,
+    //     std::vector<std::vector<std::string>> *cachePublishedNodes);
     void storeRecordPublishedNodes(
         const TT storeMap,
-        std::vector<std::vector<std::string>> *cachePublishedNodes);
+        DBRowsList *cachePublishedNodes);
 
     void storePublishedAuxiliaryData(GeoPublisher *store);
 
@@ -376,28 +380,22 @@ class WriteGeoModel : public GeoNodeAction {
     // (for example, one used in a GeoSerialTransformer)
     bool m_unconnectedTree;
 
-    // chaches in the new DB schema
-    DBRowsList m_logVols;
-
     // caches for GeoModel nodes to be saved into the DB
-    // std::vector<std::vector<std::string>> m_logVols;
-    std::vector<std::vector<std::string>> m_physVols;
-    std::vector<std::vector<std::string>> m_fullPhysVols;
-    // std::vector<std::vector<std::string>> m_materials;
-    // std::vector<std::vector<std::string>> m_elements;
-    std::vector<std::vector<std::string>> m_transforms;
-    std::vector<std::vector<std::string>> m_alignableTransforms;
-    std::vector<std::vector<std::string>> m_serialDenominators;
-    std::vector<std::vector<std::string>> m_serialIdentifiers;
-    std::vector<std::vector<std::string>> m_identifierTags;
-    std::vector<std::vector<std::string>> m_serialTransformers;
-    std::vector<std::vector<std::string>> m_nameTags;
-    std::vector<std::vector<std::string>> m_shapes;
-
+    DBRowsList m_logVols;
+    DBRowsList m_physVols;
+    DBRowsList m_fullPhysVols;
+    DBRowsList m_nameTags;
+    DBRowsList m_identifierTags;
+    DBRowsList m_serialIdentifiers;
+    DBRowsList m_serialDenominators;
+    DBRowsList m_transforms;
+    DBRowsList m_alignableTransforms;
+    DBRowsList m_serialTransformers;
+    // Elements and Material (with data)
     DBRowsList m_elements;
     DBRowsList m_materials;
     DBRowsList m_materials_Data;
-
+    // Shapes
     DBRowsList m_shapes_Box;
     DBRowsList m_shapes_EllipticalTube;
     DBRowsList m_shapes_Tube;
@@ -408,52 +406,46 @@ class WriteGeoModel : public GeoNodeAction {
     DBRowsList m_shapes_Tubs;
     DBRowsList m_shapes_Torus;
     DBRowsList m_shapes_TwistedTrap;
-    
+    // Shapes with data
     DBRowsList m_shapes_Pcon;
-    DBRowsList m_shapes_Pgon;
-    DBRowsList m_shapes_SimplePolygonBrep;
-    DBRowsList m_shapes_GenericTrap;
     DBRowsList m_shapes_Pcon_Data;
+    DBRowsList m_shapes_Pgon;
     DBRowsList m_shapes_Pgon_Data;
+    DBRowsList m_shapes_SimplePolygonBrep;
     DBRowsList m_shapes_SimplePolygonBrep_Data;
+    DBRowsList m_shapes_GenericTrap;
     DBRowsList m_shapes_GenericTrap_Data;
-
+    // an unidentified shape
+    DBRowsList m_shapes_UnidentifiedShape;
+    // boolean operator nodes
     DBRowsList m_shapes_Shift;
     DBRowsList m_shapes_Intersection;
     DBRowsList m_shapes_Subtraction;
     DBRowsList m_shapes_Union;
-
-    DBRowsList m_shapes_UnidentifiedShape;
-
+    // Surface nodes
     DBRowsList m_rectangle_surface;  // For Virtual Surface Shape
     DBRowsList m_trapezoid_surface;
     DBRowsList m_annulus_surface;
     DBRowsList m_diamond_surface;
     DBRowsList m_VSurface;           // For Virtual Surface Abstract Class
-    
-    // std::vector<std::vector<std::string>> m_functions;
+    // Functions and functions' data
     DBRowsList m_functions; // operators used in Function's expression
-
-    // caches for additional data to be saved into the DB
     DBRowEntry m_exprData; // numbers used in Function's expression
-
+    
     // caches for Metadata to be saved into the DB
-    // std::vector<std::string> m_rootVolume;
     std::pair<std::string, unsigned> m_rootVolume;
 
-    // std::vector<std::vector<std::string>> m_childrenPositions;
+    // All the connections between nodes
     DBRowsList m_childrenPositions;
 
-    std::vector<std::vector<std::string>> m_publishedAlignableTransforms_String;
-    std::vector<std::vector<std::string>> m_publishedFullPhysVols_String;
+    // Published lists of FullPhysVol and AlignableTransform nodes
+    // (They are used later, in the ReadoutGeometry)
+    DBRowsList m_publishedAlignableTransforms;
+    DBRowsList m_publishedFullPhysVols;
 
     // cache to store custom tables to store auxiliary data in the DB:
     // ---> map( tableName, columnsNames, columnsTypes )
-    // std::unordered_map<std::string, std::pair<std::vector<std::string>,
-    // std::vector<std::string>>> m_auxiliaryTablesStr;
     AuxTableDefs m_auxiliaryTablesVar;
-    // std::unordered_map<std::string, std::vector<std::vector<std::string>>>
-    // m_auxiliaryTablesStrData;
     AuxTableData m_auxiliaryTablesVarData;
 
     // cache to store the node that could not have persistified.
@@ -467,7 +459,7 @@ class WriteGeoModel : public GeoNodeAction {
     bool m_inspect{0};
 
     /// Stores the loglevel, the verbosity of the output messages
-  unsigned m_loglevel{0};
+    unsigned m_loglevel{0};
 };
 
 } /* namespace GeoModelIO */

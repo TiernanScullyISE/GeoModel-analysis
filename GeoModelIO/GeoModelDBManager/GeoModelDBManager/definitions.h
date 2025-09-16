@@ -7,6 +7,11 @@
  *  Author:     Riccardo Maria BIANCHI @ CERN
  *  Created on: May, 2024
  *
+ *  Updated: 
+ *  - Sep 2025, riccardo.maria.bianchi@cern.ch
+ *    Added data type for published FPV and AXF records
+ *            
+ *
  */
 
 

@@ -664,7 +664,7 @@ bool GMDBManager::addListOfChildrenPositions(
 }
 
 bool GMDBManager::addListOfPublishedAlignableTransforms(
-    const std::vector<std::vector<std::string>>& records,
+    DBRowsList& records,
     const std::string& suffix /* optional parameter */) {
     std::string tableName =
         "PublishedAlignableTransforms";  // default table name
@@ -689,7 +689,7 @@ bool GMDBManager::addListOfPublishedAlignableTransforms(
 }
 
 bool GMDBManager::addListOfPublishedFullPhysVols(
-    const std::vector<std::vector<std::string>>& records,
+    DBRowsList& records,
     const std::string& suffix /* optional parameter */) {
     std::string tableName = "PublishedFullPhysVols";  // default table name
     std::string nodeType = "GeoFullPhysVol";

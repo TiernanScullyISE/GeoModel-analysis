@@ -193,7 +193,6 @@ class IO {
         unsigned long nidentifiertags = dump.getNIdentifierTags();
         unsigned long nnametags = dump.getNNameTags();
          // get shapes
-        unsigned long nshapes = dump.getNShapes(); // TODO: to be removed later
         unsigned long nshapes_box = dump.getNShapes_Box();
         unsigned long nshapes_cons = dump.getNShapes_Cons();
         unsigned long nshapes_para = dump.getNShapes_Para();
@@ -219,14 +218,12 @@ class IO {
         mmap["Alignable"] = nalignables;
         mmap["Function"] = nfunctions;
         mmap["SerialTransformer"] = nserialtransformers;
-        mmap["Shape"] = nshapes;
         mmap["SerialDenominator"] = nserialdenominators;
         mmap["ChildrenConnections"] = nchildrenconnections;
         mmap["Transform"] = ntransforms;
         mmap["SerialIdentifier"] = nserialidentifiers;
         mmap["IdentifierTag"] = nidentifiertags;
         mmap["NameTag"] = nnametags;
-        mmap["Shape"] = nshapes;
         mmap["Shape_Box"] = nshapes_box;
         mmap["Shape_Cons"] = nshapes_cons;
         mmap["Shape_Para"] = nshapes_para;
