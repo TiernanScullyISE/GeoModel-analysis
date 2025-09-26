@@ -86,6 +86,7 @@ add_subdirectory(GXHepVis)
 add_subdirectory(VP1GuideLineSystems)
 add_subdirectory(GXHitDisplaySystems)
 add_subdirectory(GXTrackDisplaySystems)
+add_subdirectory(GmGraphBrowser)
 
 # Create and install the version description of the project.
 include( WriteBasicConfigVersionFile )

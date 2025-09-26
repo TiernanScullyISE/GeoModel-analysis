@@ -1,0 +1,37 @@
+.\" Manpage for fsl.
+.\" Contact geomodel-core-team@cern.ch to correct errors or typos.
+.TH man 1 "01 Nov 2024" "6.5" "gmgraphbrowser man page"
+.SH NAME
+gmgraphbrowser \- browse a geomodel geometry graph.
+.SH SYNOPSIS
+
+gmgraphbrowser DbFile [AltDbFile]
+
+.SH DESCRIPTION
+gmgraphbrowser is a an application that allows to browse a geometry
+graph interactively.  It reports any type of GeoModel graph node and
+prints relevant information for each type of node.  For physical volumes
+and full physical volumes, the material is printed.  For nametags and
+serial denominators the name (or base name) is printed. For identifier
+tags and serial identifiers, the index or base index is printed. Each
+type of node is displayed with a different color.  In case of shared
+instances the share count is displayed in the third column. 
+
+If two files are specified on the command line, two geometry trees are
+displayed side-by-side. 
+
+.\" ====================================================================
+.SH "SEE ALSO"
+.\" ====================================================================
+.
+gmcat(1), gmclash(1), gmstatistics(1), gmex(1), fullSimLight(1), fsl(1)
+
+
+.IR "geomodel.web.cern.ch"
+is the location of the main documentation for the GeoModel Tools Suite. 
+
+
+.SH AUTHOR
+.MT boudreau@\:pitt\:.edu
+Joe Boudreau
+.ME .

@@ -32,6 +32,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     include( SetupXercesC )
     # Find the base GeoModel packages, which must be installed on the target system already
     find_package( GeoModelCore REQUIRED ${GeoModel_VERSION} )
+    
     find_package( GeoModelIO REQUIRED ${GeoModel_VERSION} ) 
     # Print Build Info on screen
     include( PrintBuildInfo )

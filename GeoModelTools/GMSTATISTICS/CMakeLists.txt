@@ -27,5 +27,5 @@ install( TARGETS gmstatistics
 
 
 install( FILES ${MANPAGES}
-   DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
+   DESTINATION ${CMAKE_INSTALL_PREFIX}/share/man/man1
    COMPONENT Runtime )
