@@ -11,8 +11,6 @@ stages:
   - post-deploy
   - test
 
-
-
 # List global variables
 variables:
   # also, 'CMAKE_EXTRA_FLAGS' will be specified by specific jobs when needed, and used by job templates like 'geomodel-job'
@@ -24,7 +22,6 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
-    - if: $CI_COMMIT_BRANCH
 
 # TEMPLATES FOR BUILDING ON DIFFERENT PLATFORMS
 
@@ -33,7 +30,6 @@ workflow:
   tags:
     - macos
   rules:
-    - if: '$CI_PROJECT_ROOT_NAMESPACE == "GeoModelDev"'
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
       - .gitlab-ci.yml
@@ -560,6 +556,8 @@ include:
 
 CopyDB_R3-ATLAS:
   stage: step-A
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
   tags:
     - cvmfs
@@ -572,6 +570,8 @@ CopyDB_R3-ATLAS:
 
 CopyDB_R4-ATLAS:
   stage: step-A
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
   tags:
     - cvmfs
