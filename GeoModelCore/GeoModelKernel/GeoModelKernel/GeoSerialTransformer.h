@@ -25,6 +25,8 @@ class GeoSerialTransformer : public GeoGraphNode
   //	Executes a GeoNodeAction.
   virtual void exec (GeoNodeAction *action) const;
 
+  constexpr bool typeQuery(GeoGraphNodeType in) const final { return in == GeoGraphNodeType::NodeEndpoint; }
+
   //	Returns the transformation field itself.
   const GeoXF::Function * getFunction () const{
       return m_function.get();

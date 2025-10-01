@@ -25,6 +25,12 @@
 class GeoNodeAction;
 class GeoVPhysVol;
 
+enum class GeoGraphNodeType{
+  UNKNOWN, NodeEndpoint, GeoTransform
+};
+
+
+
 class GeoGraphNode : public RCBase {
  public:
   GeoGraphNode () = default;
@@ -39,6 +45,9 @@ class GeoGraphNode : public RCBase {
   //	take some actions, such as adding the parent volume to a
   //	list.
   virtual void dockTo (GeoVPhysVol* );
+
+  //    Ability to Query the type of the node for specific logic cases
+  virtual constexpr bool typeQuery(GeoGraphNodeType in) const { return in == GeoGraphNodeType::UNKNOWN; }
   
  protected:
   virtual ~GeoGraphNode() = default;

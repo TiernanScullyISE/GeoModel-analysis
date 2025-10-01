@@ -32,6 +32,8 @@ class GeoTransform : public GeoGraphNode {
 
     ///	Executes a GeoNodeAction.
     virtual void exec(GeoNodeAction *action) const override final;
+
+    constexpr bool typeQuery(GeoGraphNodeType in) const final { return in == GeoGraphNodeType::GeoTransform; }
   
  protected:
     virtual ~GeoTransform()  = default;

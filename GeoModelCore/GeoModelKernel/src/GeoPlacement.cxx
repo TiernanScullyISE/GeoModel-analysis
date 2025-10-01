@@ -52,20 +52,12 @@ GeoTrf::Transform3D GeoPlacement::getX(const GeoVAlignmentStore* store) const {
 
     // If this happens, we are done, compute & return--------------------//
     //                                                                   //
-    if (dynamic_cast<const GeoVPhysVol *>(*current)) break;              //
+    if ((*current)->typeQuery(GeoGraphNodeType::NodeEndpoint)) break;    //
     //-------------------------------------------------------------------//
 
-    // If this happens, we are done, compute & return--------------------//
-    //                                                                   //
-    if (dynamic_cast<const GeoVSurface *>(*current)) break;              //
-    //-------------------------------------------------------------------//
+    const GeoTransform *xf = (*current)->typeQuery(GeoGraphNodeType::GeoTransform) ?
+                             static_cast<const GeoTransform *> (*current) : nullptr;
 
-    // If this happens, we are done, compute & return--------------------//
-    //                                                                   //
-    if (dynamic_cast<const GeoSerialTransformer *>(*current)) break;     //
-    //-------------------------------------------------------------------//
-
-    const GeoTransform *xf = dynamic_cast<const GeoTransform *> (*current);
     
     //-------------------------------------------------------------------//
     // If this happens, accumulate into transform                        //
@@ -96,21 +88,12 @@ GeoTrf::Transform3D GeoPlacement::getDefX(const GeoVAlignmentStore* store) const
 
     // If this happens, we are done, compute & return--------------------//
     //                                                                   //
-    if (dynamic_cast<const GeoVPhysVol *>(*current)) break;              //
+    if ((*current)->typeQuery(GeoGraphNodeType::NodeEndpoint)) break;
     //-------------------------------------------------------------------//
 
-    // If this happens, we are done, compute & return--------------------//
-    //                                                                   //
-    if (dynamic_cast<const GeoVSurface *>(*current)) break;              //
-    //-------------------------------------------------------------------//
+    const GeoTransform *xf = (*current)->typeQuery(GeoGraphNodeType::GeoTransform) ?
+                             static_cast<const GeoTransform *> (*current) : nullptr;
 
-    // If this happens, we are done, compute & return--------------------//
-    //                                                                   //
-    if (dynamic_cast<const GeoSerialTransformer *>(*current)) break;     //
-    //-------------------------------------------------------------------//
-
-    const GeoTransform *xf = dynamic_cast<const GeoTransform *> (*current);
-    
     //-------------------------------------------------------------------//
     // If this happens, accumulate into transform                        //
     if (xf) xform  = xf->getDefTransform(store)*xform;                   //

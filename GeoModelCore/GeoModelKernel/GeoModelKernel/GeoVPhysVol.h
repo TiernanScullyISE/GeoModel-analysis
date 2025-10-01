@@ -27,7 +27,7 @@ class GeoVPhysVol: public GeoPlacement {
 
     GeoVPhysVol(const GeoLogVol* LogVol);
   
-
+    constexpr bool typeQuery(GeoGraphNodeType in) const final { return in == GeoGraphNodeType::NodeEndpoint; }
 
     /// Returns the index of a specific daughter volume.
     std::optional<unsigned int> indexOf(const PVConstLink& daughter) const;

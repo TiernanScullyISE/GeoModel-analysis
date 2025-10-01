@@ -44,6 +44,8 @@ class GeoVSurface : public GeoPlacement, public GeoNodePositioning {
     const GeoVSurfaceShape* getShape () const {
         return m_surfaceshape;
     }
+
+    constexpr bool typeQuery(GeoGraphNodeType in) const final { return in == GeoGraphNodeType::NodeEndpoint; }
     
     //  Justify whether the point is on the surface
     bool isOnSurface(const double Px, const double Py, const double Pz) const;
