@@ -70,6 +70,17 @@ GMDBManager::GMDBManager(const std::string& path)
     m_dbpath(path), 
     m_d(new Imp(this)) {
 
+#ifdef __APPLE__
+  // The apple sqlite implementation comes (we think) via Xcode.  It seems
+  // (we think) not to have been build with "serialized" thread model
+  // activated so we have to force it at runtime. 
+  {
+    int exit=sqlite3_config(SQLITE_CONFIG_SERIALIZED);
+    if (exit!=SQLITE_OK) {
+      std::cout << "Error configuring sqlite for multithreaded IO" <<std::endl;
+    }
+  }
+#endif  
     // FIXME: TODO: we should check the existence of the file, otherwise SQLite
     // will create a new file from scratch
 
