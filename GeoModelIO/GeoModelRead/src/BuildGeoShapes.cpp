@@ -14,6 +14,7 @@
 #include "GeoModelKernel/throwExcept.h"
 #include "GeoModelHelpers/GeoShapeSorter.h"
 
+#include "guardedPrint.h"
 #include <vector>
 #include <iostream>
 
@@ -60,19 +61,22 @@ BuildGeoShapes::GeoShapePtr
     if (m_memMapShapes.size() == m_primaryData.size()) {
         // m_primaryData = DBRowsList{};
         // m_auxillaryData = DBRowsList{};
-        std::cout<<"All "<<m_memMapShapes.size()<<" "<<m_shapeType<<" have been built. "<<std::endl;
+        if (!m_printed) {
+            m_printed = true;
+            PRINT_MSG("All "<<m_memMapShapes.size()<<" "<<m_shapeType<<" have been built. ");
+        }
     }
     auto retObj = m_memMapShapes.get(id);
     if (!retObj) {
-        std::cout<<__FILE__<<":"<<__LINE__<<"No shape of type "<<m_shapeType<<" is registered for "<<id<<std::endl;
+        PRINT_ERR_MSG("No shape of type "<<m_shapeType<<" is registered for "<<id<<".");
     }
     return retObj;
 }
 
 void BuildGeoShapes::printBuiltShapes() const {    
     for (const unsigned id : m_memMapShapes.keys()) {
-        std::cout << "shape " << m_shapeType << " -- id: " << id << ", shapePtr: " 
-                  << printGeoShape(m_memMapShapes.get(id)) << std::endl;
+        PRINT_MSG("shape " << m_shapeType << " -- id: " << id << ", shapePtr: " 
+                  << printGeoShape(m_memMapShapes.get(id)));
     }
 }
 }

@@ -33,6 +33,7 @@
  */
 
 // local includes
+#include "guardedPrint.h"
 #include "BuildGeoShapes_Box.h"
 #include "BuildGeoShapes_EllipticalTube.h"
 #include "BuildGeoShapes_Tube.h"
@@ -104,10 +105,6 @@
 #include <vector>
 #include <format>
 
-// mutexes for synchronized access to containers and output streams in
-// multi-threading mode
-std::mutex muxCout;
-
 using namespace GeoGenfun;
 using namespace GeoXF;
 
@@ -134,13 +131,6 @@ namespace {
     
 }
 
-#define PRINT_MSG(THE_MSG) \
-    {                      \
-        std::lock_guard guard{muxCout}; \
-        std::cout<<__func__<<"() - :"<<__LINE__<<" "<<THE_MSG<<std::endl; \
-    }
-
-
 namespace GeoModelIO {
 
 ReadGeoModel::ReadGeoModel(GMDBManager* db):
@@ -150,17 +140,17 @@ ReadGeoModel::ReadGeoModel(std::shared_ptr<GMDBManager> db):
     // Check if the user asked for debug messages
     if (GeoStrUtils::getEnvVar("GEOMODEL_ENV_IO_LOGLEVEL_1").size()) {
         m_loglevel = 1;
-        PRINT_MSG("You defined the GEOMODEL_ENV_IO_DEBUG variable, so you will see a verbose output.");
+        PRINT_LOG_MSG("You defined the GEOMODEL_ENV_IO_DEBUG variable, so you will see a verbose output.");
     }
     // Check if the user asked for verbose debug messages
     if (GeoStrUtils::getEnvVar("GEOMODEL_ENV_IO_LOGLEVEL_2").size()) {
         m_loglevel = 2;
-        PRINT_MSG("You defined the GEOMODEL_ENV_IO_READ_DEBUG_VERBOSE variable, so you will see a verbose output.");
+        PRINT_LOG_MSG("You defined the GEOMODEL_ENV_IO_READ_DEBUG_VERBOSE variable, so you will see a verbose output.");
     }
     // Check if the user asked for timing output
     if (GeoStrUtils::getEnvVar("GEOMODEL_ENV_IO_READ_TIMING").size()) {
         m_timing = true;
-        PRINT_MSG("You defined the GEOMODEL_ENV_IO_READ_TIMING variable, so you will see a timing measurement in the output.");
+        PRINT_LOG_MSG("You defined the GEOMODEL_ENV_IO_READ_TIMING variable, so you will see a timing measurement in the output.");
     }
 }
 GMDBManager& ReadGeoModel::dbManager() const {
@@ -172,7 +162,7 @@ std::shared_ptr<GMDBManager> ReadGeoModel::dbManagerPtr() const{ return m_dbMana
 
 PVConstLink ReadGeoModel::buildGeoModel() {
     if (m_loglevel >= 2){
-        PRINT_MSG("ReadGeoModel::buildGeoModel()");
+        PRINT_LOG_MSG("ReadGeoModel::buildGeoModel()");
     }
     if (!m_world) {
         m_world = assembleWorld();
@@ -265,14 +255,14 @@ void ReadGeoModel::loadDB() {
     TimePoint_t end = std::chrono::system_clock::now();  // timing: get end time
     auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     if (m_timing || (m_loglevel >= 1)) {
-        PRINT_MSG("*** Time taken to fetch GeoModel data from the database: " << diff << " [s]")
+        PRINT_LOG_MSG("*** Time taken to fetch GeoModel data from the database: " << diff << " [s]")
     }
 }
 
 PVLink ReadGeoModel::assembleWorld() {
     if (m_dbManager && m_dbManager->checkIsDBOpen()) {
         if (m_loglevel >= 1) {
-            PRINT_MSG( "OK! Database is open!");
+            PRINT_LOG_MSG( "OK! Database is open!");
         } 
     } else {
         THROW_EXCEPTION("ERROR!! Database is NOT open!");
@@ -287,7 +277,7 @@ PVLink ReadGeoModel::assembleWorld() {
     TimePoint_t start = std::chrono::system_clock::now();  // timing: get start time
 
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building nodes serially...");
+        PRINT_LOG_MSG("Building nodes serially...");
     }
     
     auto& pool = GeoThreading::ThreadPool::getPool(-1); 
@@ -322,7 +312,7 @@ PVLink ReadGeoModel::assembleWorld() {
     TimePoint_t end = std::chrono::system_clock::now();  // timing: get end time
     auto diff = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     if (m_timing || (m_loglevel >= 1)) {
-       PRINT_MSG("*** Time taken to build all GeoModel nodes: " << diff << " [s]");
+       PRINT_LOG_MSG("*** Time taken to build all GeoModel nodes: " << diff << " [s]");
     }
 
     // *** recreate all mother-daughter relatioships between nodes ***
@@ -331,7 +321,7 @@ PVLink ReadGeoModel::assembleWorld() {
     end = std::chrono::system_clock::now();  // timing: get end time
     diff = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     if (m_timing || (m_loglevel >= 1)) {
-       PRINT_MSG("*** Time taken to recreate all mother-daughter relationships between nodes of the GeoModel tree: "
+       PRINT_LOG_MSG("*** Time taken to recreate all mother-daughter relationships between nodes of the GeoModel tree: "
                   << diff << " [s]");
     }
     /// Fetch the world because all other pointers are now going to be cleared
@@ -357,7 +347,7 @@ PVLink ReadGeoModel::assembleWorld() {
 //! store their pointers
 void ReadGeoModel::buildAllSerialDenominators() {
     if (m_loglevel >= 1){
-        PRINT_MSG("Building all SerialDenominator nodes...");
+        PRINT_LOG_MSG("Building all SerialDenominator nodes...");
     }
     const DBRowsList serialDenoms = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialDenominator");
     for (const DBRowEntry& values : serialDenoms) {
@@ -379,7 +369,7 @@ void ReadGeoModel::buildAllSerialDenominators() {
 //! store their pointers
 void ReadGeoModel::buildAllSerialIdentifiers() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all SerialIdentifier nodes...");
+        PRINT_LOG_MSG("Building all SerialIdentifier nodes...");
     }
     const DBRowsList serialsIds = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialIdentifier");
     for (const auto& serialValues : serialsIds) {
@@ -401,7 +391,7 @@ void ReadGeoModel::buildAllSerialIdentifiers() {
 //! store their pointers
 void ReadGeoModel::buildAllIdentifierTags() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all IdentifierTag nodes...");
+        PRINT_LOG_MSG("Building all IdentifierTag nodes...");
     }
     const DBRowsList idTags{m_dbManager->getTableFromNodeType_VecVecData("GeoIdentifierTag")};
     for (const auto& idValues : idTags) {
@@ -422,7 +412,7 @@ void ReadGeoModel::buildAllIdentifierTags() {
 //! pointers
 void ReadGeoModel::buildAllNameTags() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all NameTag nodes...");
+        PRINT_LOG_MSG("Building all NameTag nodes...");
     }
     const DBRowsList nameTagDB = m_dbManager->getTableFromNodeType_VecVecData("GeoNameTag");
     for (const auto& entry : nameTagDB) {
@@ -442,7 +432,7 @@ void ReadGeoModel::buildAllNameTags() {
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllElements() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all Elements... ");
+        PRINT_LOG_MSG("Building all Elements... ");
     }
     const DBRowsList elements = m_dbManager->getTableFromNodeType_VecVecData("GeoElement");
     for (const DBRowEntry& values : elements) {
@@ -452,7 +442,7 @@ void ReadGeoModel::buildAllElements() {
         double elZ = UnpackData_t::getFromVariant_Double(values[3], "Element:Z");
         double elA = UnpackData_t::getFromVariant_Double(values[4], "Element:A");
         if (m_loglevel >= 2) {
-            PRINT_MSG("\tElement - ID:" << elId << ", name:" << elName
+            PRINT_LOG_MSG("\tElement - ID:" << elId << ", name:" << elName
                     << ", symbol:" << elSymbol << ", Z:" << elZ << ", A:" << elA
                     << " ( " << elA / (GeoModelKernelUnits::g / GeoModelKernelUnits::mole)
                     << "[g/mole] )");
@@ -470,7 +460,7 @@ void ReadGeoModel::buildAllElements() {
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllMaterials() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all Materials...");
+        PRINT_LOG_MSG("Building all Materials...");
     }
     const DBRowsList materials = m_dbManager->getTableFromNodeType_VecVecData("GeoMaterial");
     const DBRowsList materials_Data = m_dbManager->getTableFromTableName_VecVecData("Materials_Data");
@@ -482,7 +472,7 @@ void ReadGeoModel::buildAllMaterials() {
          const unsigned dataEnd = UnpackData_t::getFromVariant_Int(values[4], "Material:dataEnd");
 
         if (m_loglevel >= 3) {
-            PRINT_MSG("\tbuildMaterial() : Material - ID:" << matId << ", name:" << matName
+            PRINT_LOG_MSG("\tbuildMaterial() : Material - ID:" << matId << ", name:" << matName
                       << ", density:" << matDensity << " ( "<< matDensity / (GeoModelKernelUnits::g / GeoModelKernelUnits::cm3)
                       << "[g/cm3] )"<< ", elements: dataStart: " << dataStart << ", dataEnd: " << dataEnd);
         }
@@ -516,13 +506,13 @@ void ReadGeoModel::buildAllMaterials() {
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllVSurfaces() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all Virtual Surfaces...");
+        PRINT_LOG_MSG("Building all Virtual Surfaces...");
     }
     const DBRowsList vSurfaces = m_dbManager->getTableFromNodeType_VecVecData("GeoVSurface");
     for (const DBRowEntry& surfaceEntry : vSurfaces) {
         const unsigned surfId = UnpackData_t::getFromVariant_Int(surfaceEntry[0], "surfaceID");
         if (m_loglevel >= 3) {
-           PRINT_MSG("buildVSurface(), testing VSurface id: " << surfId << "...");
+           PRINT_LOG_MSG("buildVSurface(), testing VSurface id: " << surfId << "...");
         }
         const std::string shapeType = UnpackData_t::getFromVariant_String(surfaceEntry[1], "VSurf_shapeType");
         const unsigned int shapeId = UnpackData_t::getFromVariant_Int(surfaceEntry[2], "VSurf_shapeID");
@@ -552,7 +542,7 @@ void ReadGeoModel::buildAllVSurfaces() {
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllLogVols() {
     if (m_loglevel >= 1) {
-        PRINT_MSG("Building all LogVols...");
+        PRINT_LOG_MSG("Building all LogVols...");
     }
     const DBRowsList logVols = m_dbManager->getTableFromNodeType_VecVecData("GeoLogVol");
     auto& pool{GeoThreading::ThreadPool::getPool()};
@@ -578,7 +568,7 @@ void ReadGeoModel::buildAllLogVols() {
                 const int matId = UnpackData_t::getFromVariant_Int(values[4], "LogVol_MaterialID");
 
                 if (m_loglevel >= 3) {
-                   PRINT_MSG("Material Id:"<<matId);
+                   PRINT_LOG_MSG("Material Id:"<<matId);
                 }
                 GeoIntrusivePtr<GeoMaterial> mat = getBuiltMaterial(matId);
                 if (!mat) {
@@ -586,7 +576,7 @@ void ReadGeoModel::buildAllLogVols() {
                 }
                 auto logPtr = make_intrusive<GeoLogVol>(logVolName, shape, mat);
                 if (m_loglevel >= 3) {
-                    PRINT_MSG("Address of the stored LogVol:" << logPtr.get());
+                    PRINT_LOG_MSG("Address of the stored LogVol:" << logPtr.get());
                 }
                 if (!m_memMapLogVols.insert(std::make_pair(id, logPtr))) {
                     THROW_EXCEPTION("Failed to register a new logical volume under ID "<<id<<" The id is already taken");
@@ -629,7 +619,7 @@ template <typename PhysVol_t>
                         THROW_EXCEPTION("Logical volume "<<logVolID<<" is not registered");
                     }
                     if (m_loglevel >= 3) {
-                        PRINT_MSG("using the cached LogVol [" << logVolID<< "] w/ address: " << logVol.get() << "...");
+                        PRINT_LOG_MSG("using the cached LogVol [" << logVolID<< "] w/ address: " << logVol.get() << "...");
                     }
                     auto newVol = make_intrusive<PhysVol_t>(logVol);
                     if (!memCache.insert(std::make_pair(volID, newVol))) {
@@ -693,7 +683,7 @@ template <typename Transform_t>
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllPhysVols() {
     if (m_loglevel >= 2) {
-        PRINT_MSG("Building all PhysVols...");
+        PRINT_LOG_MSG("Building all PhysVols...");
     }
     buildPhysVols("GeoPhysVol", m_memMapPhysVols);
     if (m_memMapPhysVols.size()) {
@@ -703,7 +693,7 @@ void ReadGeoModel::buildAllPhysVols() {
 
 //! Iterate over the list of nodes, build them all, and store their pointers
 void ReadGeoModel::buildAllFullPhysVols() {
-    if (m_loglevel >= 2) PRINT_MSG("Building all FullPhysVols...");
+    if (m_loglevel >= 2) PRINT_LOG_MSG("Building all FullPhysVols...");
     buildPhysVols("GeoFullPhysVol", m_memMapFullPhysVols);
     if (m_memMapFullPhysVols.size()) {
         std::cout<<"All "<<m_memMapFullPhysVols.size()<<" full physical volumes have been built "<<std::endl;
@@ -715,7 +705,7 @@ void ReadGeoModel::buildAllFullPhysVols() {
 //! store their pointers
 void ReadGeoModel::buildAllAlignableTransforms() {
     if (m_loglevel >= 2) {
-        PRINT_MSG("Building all AlignableTransforms... ");
+        PRINT_LOG_MSG("Building all AlignableTransforms... ");
     }
     buildTransforms("GeoAlignableTransform", m_memMapAlignableTransforms);
 }
@@ -723,13 +713,13 @@ void ReadGeoModel::buildAllAlignableTransforms() {
 //! their pointers
 void ReadGeoModel::buildAllTransforms() {
     if (m_loglevel >= 2) {
-       PRINT_MSG("Building all Transforms...");
+       PRINT_LOG_MSG("Building all Transforms...");
     }
     buildTransforms("GeoTransform", m_memMapTransforms);
 }
 void ReadGeoModel::buildAllGeoFunc(){
     if (m_loglevel >= 2) {
-        PRINT_MSG("Building all GeoFunctions");
+        PRINT_LOG_MSG("Building all GeoFunctions");
     }
     // containers to store data that have been moved to the new DB schema
     DBRowsList functions = m_dbManager->getTableFromNodeType_VecVecData("Function");
@@ -760,7 +750,7 @@ void ReadGeoModel::buildAllGeoFunc(){
 }
 void ReadGeoModel::buildAllSerialTransformers() {
     if (m_loglevel >= 2) {
-        PRINT_MSG("Building all SerialTransformers...");
+        PRINT_LOG_MSG("Building all SerialTransformers...");
     }
     DBRowsList serialTransformers = m_dbManager->getTableFromNodeType_VecVecData("GeoSerialTransformer");
 
@@ -796,16 +786,20 @@ void ReadGeoModel::connectNodes() {
     const DBRowsList records = m_dbManager->getChildrenTable();
  
     if (m_loglevel >= 1) {
-        PRINT_MSG(" - processing " << records.size() << " keys...");
+        PRINT_LOG_MSG(" - processing " << records.size() << " keys...");
     }
     auto& pool{GeoThreading::ThreadPool::getPool()};
+    std::vector<std::size_t> childBatches{};
     for (std::size_t start = 0 ; start < records.size(); ){
         std::size_t end = std::min(start + objectBatch, records.size());
         /// Ensure that a parent volume is never chopped into two batches
-        for (bool newVol{false} ; !newVol && end < records.size() -1; ++end) {
+        bool newVol{false};
+        for ( ; !newVol && end < records.size(); ++end) {
+            if (end == records.size() -1) {
+                continue;
+            }
             const DBRowEntry& currEnd{records[end]};
             const DBRowEntry& nextOne{records[end+1]};
-
             if(UnpackData_t::getFromVariant_Int(currEnd[1], "currEnd:parentID") !=
                UnpackData_t::getFromVariant_Int(nextOne[1], "nextOne:parentID") ||
                UnpackData_t::getFromVariant_Int(currEnd[2], "currEnd:parentTableId") !=
@@ -813,6 +807,7 @@ void ReadGeoModel::connectNodes() {
                newVol = true;
             }
         }
+        childBatches.push_back(end);
         pool.appendTask([this, start,end, &records](){
             if (m_loglevel >= 2) {
                 std::stringstream sstr{};
@@ -822,7 +817,7 @@ void ReadGeoModel::connectNodes() {
                     sstr<<"["<<UnpackData_t::getFromVariant_Int(record[1], "record:parentID")
                         <<";"<<UnpackData_t::getFromVariant_Int(record[2], "record:parentTableId") << "], ";
                 }
-                PRINT_MSG(sstr.str());
+                PRINT_LOG_MSG(sstr.str());
             }
             for (std::size_t itr = start; itr < end; ++itr) {
                 processParentChild(records[itr]);
@@ -831,6 +826,56 @@ void ReadGeoModel::connectNodes() {
         start = end;
     }
     pool.drainQueue();
+    inspectChildBatching(records, childBatches);
+}
+void ReadGeoModel::inspectChildBatching(const DBRowsList& records,
+                                        const std::vector<std::size_t>& childBatches) const {
+    if (!m_inspectNodeTable) {
+        return;
+    }
+    /// Check whether the child node tables are properly batched
+    struct ChildTable {
+        unsigned volTableId{std::numeric_limits<unsigned>::max()};
+        unsigned volId{std::numeric_limits<unsigned>::max()};
+        std::size_t batchNumber{0};
+        std::size_t firstElement{0};
+        std::size_t lastElement{0};
+    };
+    std::size_t start{0};
+    std::vector<ChildTable> children{};
+    for (std::size_t batch = 0 ; batch < childBatches.size(); ++batch) {
+        for ( ; start < childBatches[batch] ; ++start) {
+            const DBRowEntry& currEntry{records.at(start)};
+            const unsigned volId = UnpackData_t::getFromVariant_Int(currEntry[1], "parentID");
+            const unsigned tableId =  UnpackData_t::getFromVariant_Int(currEntry[2], "parentTableId");
+            std::vector<ChildTable>::reverse_iterator itr = 
+                std::find_if(children.rbegin(), children.rend(), 
+                             [volId, tableId](const ChildTable& known){
+                                return known.volTableId == tableId && known.volId == volId;
+                            });
+            if (itr == children.rend()) {
+                ChildTable& newTable = children.emplace_back();
+                newTable.volTableId = tableId;
+                newTable.volId = volId;
+                newTable.batchNumber = batch;
+                newTable.firstElement = start;
+                newTable.lastElement = start;
+            } else {
+                ChildTable& checkTable = (*itr);
+                if (checkTable.batchNumber != batch){
+                    THROW_EXCEPTION("The volume from table: "<<checkTable.volTableId
+                        <<", id: "<<checkTable.volId<<", batch: "<<checkTable.batchNumber
+                        <<" is also in batch: "<<batch<<", entry: "<<start
+                    <<".\nCovered range: ["<<checkTable.firstElement<<";"<<checkTable.lastElement<<"]"
+                    <<"\nNumber of all records: "<<records.size());
+                }
+                if (checkTable.lastElement +1 != start) {
+                    THROW_EXCEPTION("Found bad sequence");
+                }
+                ++checkTable.lastElement;
+            }
+        }
+    }
 }
 
 void ReadGeoModel::processParentChild(const DBRowEntry& parentchild) {
@@ -863,7 +908,7 @@ void ReadGeoModel::processParentChild(const DBRowEntry& parentchild) {
     // Using the parentCopyNumber here, to get a given instance of the
     // parent volume
     if (m_loglevel >= 3) {
-        PRINT_MSG("build/get parent volume...");
+        PRINT_LOG_MSG("build/get parent volume...");
     }
     PVLink parentVol = getVPhysVol(parentId, parentTableId);
     if (childNodeType == "GeoPhysVol") {
@@ -894,7 +939,7 @@ void ReadGeoModel::processParentChild(const DBRowEntry& parentchild) {
 // Instantiate a PhysVol and get its children
 PVLink ReadGeoModel::getVPhysVol(const unsigned int id, const unsigned int tableId) const {
     if (m_loglevel >= 3) {
-        PRINT_MSG("id: " << id << ", tableId: " << tableId);
+        PRINT_LOG_MSG("id: " << id << ", tableId: " << tableId);
     }
     const std::string& tableName = m_tableID_toTableName.at(tableId);
     if (tableName == "GeoPhysVol") {
@@ -907,9 +952,8 @@ PVLink ReadGeoModel::getVPhysVol(const unsigned int id, const unsigned int table
 // Get the root volume
 PVLink ReadGeoModel::getRootVolume() {
     if (m_loglevel >= 3) {
-        std::lock_guard guard{muxCout};
-        std::cout << "ReadGeoModel::getRootVolume()" << std::endl;
-        std::cout << "m_root_vol_data: " << m_root_vol_data.first << ", " << m_root_vol_data.second << std::endl;       
+        PRINT_LOG_MSG("m_root_vol_data: " << m_root_vol_data.first << ", " 
+                    << m_root_vol_data.second);     
     }
     const unsigned tableId = m_root_vol_data.first;
     const unsigned id = m_root_vol_data.second;

@@ -17,8 +17,6 @@ std::string printVolume(const PVConstLink& volume, const unsigned childIndent);
 std::string printVolume(const PVConstLink& volume) {
     return printVolume(volume, indentStep);
 }
-
-
 std::string printVolume(const PVConstLink& volume, const unsigned childIndent) {
     std::stringstream outStr{};
     
@@ -50,6 +48,15 @@ std::string printVolume(const PVConstLink& volume, const unsigned childIndent) {
             outStr<<"rel. position: "<<GeoTrf::toString(child.transform, true)<<", "; 
         }
         outStr<<printVolume(children[ch].volume, childIndent + indentStep)<<std::endl;
+    }
+    return outStr.str();
+}
+
+std::string printNodes(const PVConstLink& volume) {
+    std::stringstream outStr{};
+    for (unsigned ch = 0 ; ch < volume->getNChildNodes(); ++ch) {
+        const GeoGraphNode* chNode = *volume->getChildNode(ch);
+        outStr<<"  --- "<<(ch+1)<<"):  "<<typeid(*chNode).name()<<std::endl;
     }
     return outStr.str();
 }

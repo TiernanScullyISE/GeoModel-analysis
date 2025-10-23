@@ -7,5 +7,7 @@
 
 /** @brief creates a string to print the volume */
 std::string printVolume(const PVConstLink& volume);
+/** @brief Prints hte node names of the volume */
+std::string printNodes(const PVConstLink& volume);
 
 #endif

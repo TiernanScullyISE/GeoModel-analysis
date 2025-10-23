@@ -117,6 +117,10 @@ class ReadGeoModel {
         return m_dbManager->getTableRecords_String(tableName);
     }
 
+    /** @brief If called ReadGeoModel checks whether the child node table is properly
+     *         segmented across the worker tasks */
+    void inspectChildConnection() {  m_inspectNodeTable = true; }
+
     /** @brief Returns the reference to the dbManager */
     GMDBManager& dbManager() const;
     /** @brief Returns the shared pointer to the dBManager */
@@ -218,6 +222,13 @@ class ReadGeoModel {
     void connectNodes();
     /** @brief Process a single entry from the child record table to add a new object to a PhysVol */
     void processParentChild(const DBRowEntry& parentchild);
+    /** @brief Inspects whether the child records have been splitted correctly. For each volume,
+     *         it's checked that the records themselves are sequentally in the DBRowList & 
+     *         that the batch number is the same throughout
+     *  @param childRecords: Full content of the childNodeRecord
+     *  @param batchSize: List of indices marking the last element processed by a thread task */
+    void inspectChildBatching(const DBRowsList& childRecords,
+                              const std::vector<std::size_t>& batchSize) const;
     /** @brief fetches the world volume ID from the table and returns the corresponding PhysVol */
     PVLink getRootVolume();
     /** @brief Returns the constructed logical volume
@@ -298,6 +309,8 @@ class ReadGeoModel {
     unsigned m_loglevel{0};
     /** @brief Swtich to toggle whether the maps are cleared as soon as they're no longer needed. */
     bool m_autoClean{true};
+    /** @brief Switch to inspect the batching of the child node table */
+    bool m_inspectNodeTable{false};
 };
 
 } /* namespace GeoModelIO */

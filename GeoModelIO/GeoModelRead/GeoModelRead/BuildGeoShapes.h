@@ -65,6 +65,7 @@ private:
   std::string m_shapeType{};
   GeoIdObjMap<GeoShapePtr> m_memMapShapes{};
   DBRowsList m_primaryData{};
+  std::atomic<bool> m_printed{false};
 protected:
   DBRowsList m_auxillaryData{};
 };
