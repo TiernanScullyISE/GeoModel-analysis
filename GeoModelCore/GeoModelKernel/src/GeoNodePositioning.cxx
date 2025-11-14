@@ -8,6 +8,7 @@
 
 #include <mutex>
 #include <thread>
+#include <cassert>
 
 
 GeoNodePositioning::GeoNodePositioning(const GeoPlacement* node):
