@@ -45,6 +45,7 @@ void GeoVolumeCursor::next() {
     
     int N = m_parent->getNChildNodes();
     if(N==0) return;
+    if (m_majorIndex>=N) return;
     const GeoGraphNode * const *node  = m_parent->getChildNode(m_majorIndex);
     const GeoGraphNode * const *back  = m_parent->getChildNode(N-1);
     const GeoGraphNode * const *end   = back+1;
