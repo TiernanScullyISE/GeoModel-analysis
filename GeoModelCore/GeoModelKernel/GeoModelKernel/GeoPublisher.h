@@ -36,11 +36,10 @@
 #include <iostream>
 
 
+
 class GeoAlignableTransform;
 class GeoVFullPhysVol;
 
-typedef std::unordered_map<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>> AuxTableDefs;
-typedef std::unordered_map<std::string, std::vector<std::vector<std::variant<int,long,float,double,std::string>>>> AuxTableData;
 
 class GeoPublisher
 {
@@ -48,24 +47,32 @@ class GeoPublisher
   GeoPublisher() = default;
   virtual ~GeoPublisher() = default;
 
+  using DBRecord = std::variant<int,long,float,double,std::string>;
+  using AuxTableDefs = std::unordered_map<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>;
+  using AuxTableData =  std::unordered_map<std::string, std::vector<std::vector<DBRecord>>>;
+
+
   template<class N, typename T> void publishNode(N node,T keyT);
 
-  std::map<GeoVFullPhysVol*, std::any> getPublishedFPV();
-  std::map<GeoAlignableTransform*, std::any> getPublishedAXF();
+  std::map<GeoVFullPhysVol*, std::any> getPublishedFPV() const ;
+  std::map<GeoAlignableTransform*, std::any> getPublishedAXF() const;
 
-  void setName(std::string name);
-  std::string getName() { return m_name; }
+  void setName(const std::string& name);
+  std::string getName()  const { return m_name; }
 
-  void storeDataTable( const std::string& tableName, const std::vector<std::string>& colNames, const std::vector<std::string>& colTypes, std::vector<std::vector<std::variant<int,long,float,double,std::string>>> tableData );
+  void storeDataTable(const std::string& tableName, 
+                      const std::vector<std::string>& colNames, 
+                      const std::vector<std::string>& colTypes, 
+                      std::vector<std::vector<DBRecord>> tableData );
 
-    std::pair<AuxTableDefs, AuxTableData> getPublishedAuxData() { return std::make_pair(m_auxiliaryTablesVar, m_auxiliaryTablesVarData); }
+    std::pair<AuxTableDefs, AuxTableData> getPublishedAuxData() const { 
+      return std::make_pair(m_auxiliaryTablesVar, m_auxiliaryTablesVarData); 
+    }
 
  private:
 
   std::map<GeoVFullPhysVol*, std::any> m_publishedFPV;
   std::map<GeoAlignableTransform*, std::any> m_publishedAXF;
-
-  template<typename Iter> void printInsertionStatus(Iter it, bool success);
 
   std::string m_name;
 

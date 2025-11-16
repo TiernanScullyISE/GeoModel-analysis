@@ -20,6 +20,7 @@
 //                                      equal to the next element of the vector.
 //
 #include "GeoModelXml/MulticopyProcessor.h"
+#include "GeoModelXml/StringWrappers.h"
 
 #include "OutputDirector.h"
 #include <sstream>
@@ -38,58 +39,44 @@
 #include "GeoModelXml/GmxUtil.h"
 
 #include "GeoModelKernel/throwExcept.h"
+#include "GeoModelHelpers/StringUtils.h"
 
 using namespace xercesc;
 using namespace std;
 
 
 void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &toAdd) {
-    char *toRelease;
-    XMLCh * name_tmp = XMLString::transcode("name");
-    toRelease = XMLString::transcode(element->getAttribute(name_tmp));
-    string name(toRelease);
-    XMLString::release(&toRelease);
-    XMLString::release(&name_tmp);
+   
+    const std::string name = GeoXML::fetchAttribute(*element, "name");
     //char *toRelease;
     XMLCh *ref = XMLString::transcode("ref");
-    XMLCh * alignable_tmp = XMLString::transcode("alignable");
-    const XMLCh *idref;
+    const XMLCh *idref{};
     DOMDocument *doc = element->getOwnerDocument();
 
-    bool alignable = element->hasAttribute(alignable_tmp);
+    bool alignable = GeoXML::hasAttribute(*element, "alignable");
     //
     //    How many copies?
     //
-    int nCopies{0};
-    XMLCh * n_tmp = XMLString::transcode("n");
-    toRelease = XMLString::transcode(element->getAttribute(n_tmp));
-    nCopies = gmxUtil.evaluate(toRelease);
-    XMLString::release(&toRelease);
-    XMLString::release(&n_tmp);
+    const int nCopies = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "n").c_str());
     //
     //    See if it is in the map; if so, xfList is already done. If not, fill xfList.
     //
 
-    map<string, GeoNodeList>::iterator entry;
-    GeoNodeList *xfList;
+    std::map<std::string, GeoNodeList>::iterator entry;
+    GeoNodeList xfList{};
     // Check that the item is not already in the registry, or is alignable and so a new transform must *always* be made to allow unique alignment corrections; make a new item
     //See also handling in TransformProcessor/Element2GeoItem
-    if ((entry = m_map.find(name)) == m_map.end() || alignable) { 
+    if ((entry = m_map.find(name)) == m_map.end()) { 
         //
         //    Add empty node list to the map
         //       
-        xfList = &m_map[name];
-        //
+         //
         //    Loopvar Variable name
         //
         string varname{}, firstElement{};
-        XMLCh * loopvar_tmp = XMLString::transcode("loopvar");
-        bool hasVarname = (element->getAttributeNode(loopvar_tmp) != 0);
-        if (hasVarname) {
-            toRelease = XMLString::transcode(element->getAttribute(loopvar_tmp));
-            varname = toRelease;
-            XMLString::release(&toRelease);
-            XMLString::release(&loopvar_tmp);
+        bool hasVarName = GeoXML::hasAttribute(*element, "loopvar");
+        if (hasVarName) {
+            varname = GeoXML::fetchAttribute(*element, "loopvar");
             // Check it is a vector
             firstElement = varname + "_0";
             if (!gmxUtil.eval.findVariable(firstElement.c_str())) {
@@ -101,11 +88,9 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
         //    Get the transformation-element
         //
         DOMElement *elXf = element->getFirstElementChild();
-        toRelease = XMLString::transcode(elXf->getNodeName());
-        string nodeName(toRelease);
-        XMLString::release(&toRelease);
+        std::string nodeName = GeoXML::nodeName(*elXf);
         Element2GeoItem *xFormProcessor{nullptr};
-        if (hasVarname) {
+        if (hasVarName) {
             if (nodeName == "transformation") { // OK
                 xFormProcessor = &(gmxUtil.tagHandler.transformation);
             } else { // Not OK
@@ -122,16 +107,15 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
         //
         GeoIntrusivePtr<GeoAlignableTransform> geoAXf{nullptr};
         GeoIntrusivePtr<GeoTransform> geoXf{nullptr};
-        if (hasVarname) {
+        if (hasVarName) {
             for (int i = 0; i < nCopies; ++i) {
                 gmxUtil.eval.setVariable(varname.c_str(), (varname + "_" + to_string(i)).c_str());
                 if (alignable) {
                     geoAXf = dynamic_pointer_cast<GeoAlignableTransform>(xFormProcessor->make(elXf, gmxUtil));
-                    xfList->push_back(geoAXf);
-                }
-                else {
+                    xfList.push_back(geoAXf);
+                } else {
                     geoXf = dynamic_pointer_cast<GeoTransform>( xFormProcessor->make(elXf, gmxUtil));
-                    xfList->push_back(geoXf);
+                    xfList.push_back(geoXf);
                 }
                 gmxUtil.eval.removeVariable(varname.c_str()); // Avoids a warning status in evaluator
             }
@@ -141,22 +125,25 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
             //    First copy gets the Identity transform (i.e. placed in "default position" for object)
             //
             //Is there a better way to just get the Transform3D?
-            GeoTrf::Transform3D hepXf0  = dynamic_pointer_cast<GeoTransform>(xFormProcessor->make(elXf, gmxUtil))->getTransform();
-            GeoTrf::Transform3D hepXf=GeoTrf::Transform3D::Identity(); // Identity initially for the first copy
+            GeoTrf::Transform3D hepXf0 = dynamic_pointer_cast<GeoTransform>(xFormProcessor->make(elXf, gmxUtil))->getTransform();
+            GeoTrf::Transform3D hepXf{GeoTrf::Transform3D::Identity()}; // Identity initially for the first copy
             for (int i = 0; i < nCopies; ++i) {
                 if (alignable){
-                   geoAXf = make_intrusive<GeoAlignableTransform>(hepXf) ; 
-                   xfList->push_back(geoAXf);
+                   geoAXf = make_intrusive<GeoAlignableTransform>(hepXf); 
+                   xfList.push_back(geoAXf);
                 }
                 else{
                    geoXf = make_intrusive<GeoTransform>(hepXf) ; 
-                   xfList->push_back(geoXf);
+                   xfList.push_back(geoXf);
                 }
                 hepXf = hepXf0 * hepXf; //multiply by hepXf0 again for each copy
             }
         }
+        if (!alignable) {
+            m_map[name] = xfList;
+        }
     } else { //if it is already in the registry, use existing version (if allowed)
-        xfList = &entry->second;
+        xfList = entry->second;
     }
 
 
@@ -164,9 +151,7 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
     //    Get object to be copied
     //
     DOMElement *object = element->getLastElementChild();
-    toRelease = XMLString::transcode(object->getNodeName());
-    string nodeName(toRelease);
-    XMLString::release(&toRelease);
+    std::string nodeName = GeoXML::nodeName(*object);
     ElementProcessor *objectProcessor = gmxUtil.processorRegistry.find(nodeName);
     //
     //    Zero its copy number. Only needed if an item is used in 2 or more multicopies;
@@ -219,36 +204,41 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
     //
     int level{0};
     if (alignable) {
-        istringstream(XMLString::transcode(element->getAttribute(alignable_tmp))) >> level;
+        level =  GeoStrUtils::atoi(GeoXML::fetchAttribute(*element, "alignable"));
     }
     //
     //    Add transforms and physvols etc. to list to be added
     //
-    map<string, int> index;
+    std::map<std::string, int> index;
     for (int copy = 0; copy < nCopies; ++copy) {
-        toAdd.push_back((*xfList)[copy]);
+        toAdd.push_back(xfList[copy]);
         int lastTransform = toAdd.size() - 1;
         objectProcessor->process(object, gmxUtil, toAdd);
         if (alignable) {
             //Loop over nodes to find the ones we expect to have. We loop only over the new items added in the last iteration (from the end of the vector to "lastTransform" which represents the size before the latest iteration)
-            GeoIntrusivePtr<GeoNameTag> nameTag {};
-            GeoIntrusivePtr<GeoIdentifierTag> idTag{};
-            GeoIntrusivePtr<GeoVFullPhysVol> fpv{};
-            GeoIntrusivePtr<GeoAlignableTransform> gat{};
-            int nameTagIndex = -1;
-            int idTagIndex = -1;
-            int fpvIndex = -1;
-            int gatIndex = -1;            
+            int nameTagIndex{-1}, idTagIndex{-1}, fpvIndex {-1}, gatIndex{-1};            
             //reverse interator
             for(int iNodeI=toAdd.size() -1; iNodeI>=lastTransform; --iNodeI){
-                fpv = dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[iNodeI]);
-                if(fpv) {fpvIndex=iNodeI;continue;} 
-                idTag = dynamic_pointer_cast<GeoIdentifierTag>(toAdd[iNodeI]);
-                if(idTag) {idTagIndex=iNodeI;continue;}
-                nameTag = dynamic_pointer_cast<GeoNameTag>(toAdd[iNodeI]);
-                if(nameTag) {nameTagIndex=iNodeI;continue;} 
-                gat = dynamic_pointer_cast<GeoAlignableTransform>(toAdd[iNodeI]);
-                if(gat) {gatIndex=iNodeI;continue;}
+                auto fpv = dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[iNodeI]);
+                if(fpv) {
+                    fpvIndex=iNodeI;
+                    continue;
+                } 
+                auto idTag = dynamic_pointer_cast<GeoIdentifierTag>(toAdd[iNodeI]);
+                if(idTag) {
+                    idTagIndex=iNodeI;
+                    continue;
+                }
+                auto nameTag = dynamic_pointer_cast<GeoNameTag>(toAdd[iNodeI]);
+                if(nameTag) {
+                    nameTagIndex=iNodeI;
+                    continue;
+                } 
+                auto gat = dynamic_pointer_cast<GeoAlignableTransform>(toAdd[iNodeI]);
+                if(gat) {
+                    gatIndex=iNodeI;
+                    continue;
+                }
             } 
             if((idTagIndex!=-1) && (nameTagIndex!=-1)){
                 msglog << "copy = " << copy << "; level = " << level << endmsg;
@@ -268,27 +258,22 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
             gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
             gmxUtil.positionIndex.indices(index, gmxUtil.eval);
             //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)
-            XMLCh * splitLevel_tmp = XMLString::transcode("splitLevel");
-            bool split = element->hasAttribute(splitLevel_tmp);
-            char* splitString;
-            int splitLevel = 1;
-            if (split) {
-                splitString = XMLString::transcode(element->getAttribute(splitLevel_tmp));
-                splitLevel = gmxUtil.evaluate(splitString);
-                XMLString::release(&splitString);
+            if (GeoXML::hasAttribute(*element, "splitLevel")) {
+                int splitLevel = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "splitLevel").c_str());
                 for(int i=0;i<splitLevel;i++){
                     std::string field = "eta_module";//eventually specify in Xml the field to split in?
                     std::pair<std::string,int> extraIndex(field,i);
-                    gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex,dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex]));
+                    gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex,
+                                                             dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),
+                                                             dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex]));
                 }
             }
-            else gmxUtil.gmxInterface().addAlignable(level, index, dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex]));
+            else gmxUtil.gmxInterface().addAlignable(level, index, 
+                                                     dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),
+                                                     dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex]));
             gmxUtil.positionIndex.decrementLevel(); // Put it back where it was
-            index.clear();
-            XMLString::release(&splitLevel_tmp);
         }
     }
 
     XMLString::release(&ref);
-    XMLString::release(&alignable_tmp);
 }

@@ -194,7 +194,9 @@ void ReplicaZProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Geo
     //
     map<string, int> index;
     for (int copy = 0; copy < nCopies; ++copy) {
-        if (elementsToSkip.size()>0 && std::find(elementsToSkip.begin(),elementsToSkip.end(),copy)!=elementsToSkip.end()) continue;
+        if (elementsToSkip.size()  && std::ranges::find(elementsToSkip,copy)!=elementsToSkip.end()) {
+            continue;
+        }
         toAdd.push_back((*xfList)[copy]);
         int lastTransform = toAdd.size() - 1;
         objectProcessor->process(object, gmxUtil, toAdd);

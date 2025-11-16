@@ -7,7 +7,7 @@ file( GLOB HEADERS GeoModelXMLParser/*.h )
 # Create the library.
 add_library( GeoModelXMLParser SHARED ${HEADERS} ${SOURCES} )
 target_link_libraries( GeoModelXMLParser PUBLIC XercesC::XercesC
-   ExpressionEvaluator )
+                                                ExpressionEvaluator )
 target_include_directories( GeoModelXMLParser PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )

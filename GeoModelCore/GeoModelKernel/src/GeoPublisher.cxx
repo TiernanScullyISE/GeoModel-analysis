@@ -17,20 +17,17 @@
 
 
 
-std::map<GeoVFullPhysVol*, std::any> GeoPublisher::getPublishedFPV()
-{
+std::map<GeoVFullPhysVol*, std::any> GeoPublisher::getPublishedFPV() const {
     return m_publishedFPV;
 }
 
-std::map<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF()
-{
+std::map<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF() const {
     return m_publishedAXF;
 }
 
 
-void GeoPublisher::setName(std::string name)
-{
-    m_name = std::move(name);
+void GeoPublisher::setName(const std::string& name) {
+    m_name = name;
 }
 
 /*
@@ -41,7 +38,10 @@ void GeoPublisher::storeDataTable( std::string tableName, std::vector<std::strin
 }
 */
 
-void GeoPublisher::storeDataTable( const std::string& tableName, const std::vector<std::string>& colNames, const std::vector<std::string>& colTypes, std::vector<std::vector<std::variant<int,long,float,double,std::string>>> tableData )
+void GeoPublisher::storeDataTable( const std::string& tableName, 
+                                    const std::vector<std::string>& colNames, 
+                                    const std::vector<std::string>& colTypes, 
+                                    std::vector<std::vector<DBRecord>> tableData )
 {
     m_auxiliaryTablesVar[ tableName ] = std::make_pair(colNames, colTypes);
     m_auxiliaryTablesVarData[ tableName ] = std::move(tableData);

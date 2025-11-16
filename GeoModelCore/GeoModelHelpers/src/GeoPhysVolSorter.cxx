@@ -41,8 +41,8 @@ int GeoPhysVolSorter::compare(const GeoVPhysVol* a, const GeoVPhysVol* b) const 
             return childA.isAlignable ? -1 : 1;
         }
         /// Check whether the voumes are full physical volumes
-        if (childA.isSensitive != childB.isSensitive) {
-            return childA.isSensitive ? -1 : 1;
+        if (childA.isSensitive || childB.isSensitive) {
+            return childA.volume < childB.volume ? - 1 : 1;
         }
         /// Check equivalance of the transformations
         const int transCmp = sorter.compare(childA.transform,

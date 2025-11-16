@@ -15,7 +15,7 @@
 #include "GeoModelKernel/RCBase.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class RCBase;
@@ -32,10 +32,12 @@ class Element2GeoItem: public GeoDeDuplicator {
 public:
     Element2GeoItem() = default;
     virtual ~Element2GeoItem() = default;
-    GeoIntrusivePtr<RCBase> process(const xercesc::DOMElement *element, GmxUtil &gmxUtil, const bool &allowDuplication=false);
+    GeoIntrusivePtr<RCBase> process(const xercesc::DOMElement *element, 
+                                    GmxUtil &gmxUtil);
+                                    
     virtual GeoIntrusivePtr<RCBase> make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const;
 protected:
-    using EntryMap = std::map<std::string, GeoIntrusivePtr<RCBase>>;
+    using EntryMap = std::unordered_map<std::string, GeoIntrusivePtr<RCBase>>;
     EntryMap m_map{};  
 };
 #endif // ELEMENT2GEO_ITEM_H

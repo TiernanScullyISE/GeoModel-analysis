@@ -12,9 +12,10 @@
 //   Add them to the physvol.
 //
 #include "GeoModelXml/AssemblyProcessor.h"
+#include "GeoModelXml/StringWrappers.h"
 
 #include <map>
-
+#include <iostream>
 #include <xercesc/dom/DOM.hpp>
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
@@ -36,17 +37,13 @@ void AssemblyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Geo
 
     gmxUtil.positionIndex.incrementLevel();
 
-    XMLCh * name_tmp = XMLString::transcode("name");
-    char *name2release = XMLString::transcode(element->getAttribute(name_tmp));
-    string name(name2release);
+    const std::string name = GeoXML::fetchAttribute(*element, "name");
     gmxUtil.positionIndex.addToLevelMap(name,gmxUtil.positionIndex.level());
-    XMLString::release(&name2release);
-    XMLString::release(&name_tmp);
 //
 //    Look for the assembly in the map; if not yet there, add it
 //
-    map<string, AssemblyStore>::iterator entry;
-    if ((entry = m_map.find(name)) == m_map.end()) { // Not in registry; make a new item
+    std::map<std::string, AssemblyStore>::iterator entry = m_map.find(name); 
+    if (entry == m_map.end()) { // Not in registry; make a new item
         //
         //    Name
         AssemblyStore& store {m_map[name]};
@@ -66,31 +63,26 @@ void AssemblyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Geo
     for (DOMNode *child = element->getFirstChild(); child != 0; child = child->getNextSibling()) {
         if (child->getNodeType() == DOMNode::ELEMENT_NODE) {
             DOMElement *el = dynamic_cast<DOMElement *> (child);
-            name2release = XMLString::transcode(el->getNodeName());
-            string name(name2release);
-            XMLString::release(&name2release);
+            const std::string name = GeoXML::nodeName(*el);
             gmxUtil.processorRegistry.find(name)->process(el, gmxUtil, childrenAdd);
         }
     }
 //
 //    Make a new PhysVol and add everything to it, then add it to the list of things for my caller to add
 //
-    XMLCh * alignable_tmp = XMLString::transcode("alignable");
-    char *toRelease = XMLString::transcode(element->getAttribute(alignable_tmp));
-    string alignable(toRelease);
-    XMLString::release(&toRelease);
-    XMLString::release(&alignable_tmp);
-    if (alignable.compare(string("true")) == 0) {
-        GeoIntrusivePtr<GeoFullPhysVol> pv = make_intrusive<GeoFullPhysVol>(cacheVolume(lv));
-        for (GeoNodeList::iterator node = childrenAdd.begin(); node != childrenAdd.end(); ++node) {
-            pv->add(*node);
+    const std::string alignable = GeoXML::fetchAttribute(*element, "alignable");
+    if (alignable == "true") {
+
+        auto pv = make_intrusive<GeoFullPhysVol>(cacheVolume(lv));
+        for (const auto& node : childrenAdd) {
+            pv->add(node);
         }
         toAdd.push_back(pv); // NB: the *PV is third item added, so reference as toAdd[2].
     }
     else {
-        GeoIntrusivePtr<GeoPhysVol> pv = make_intrusive<GeoPhysVol>(cacheVolume(lv));
-        for (GeoNodeList::iterator node = childrenAdd.begin(); node != childrenAdd.end(); ++node) {
-            pv->add(*node);
+        auto pv = make_intrusive<GeoPhysVol>(cacheVolume(lv));
+        for (const auto& node : childrenAdd) {
+            pv->add(node);
         }
         toAdd.push_back(cacheVolume(pv));
     }
@@ -101,17 +93,13 @@ void AssemblyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Geo
 }
 
 void AssemblyProcessor::zeroId(const xercesc::DOMElement *element) {
-
-    XMLCh * name_tmp = XMLString::transcode("name");
-    char *name2release = XMLString::transcode(element->getAttribute(name_tmp));
-    string name(name2release);
-    XMLString::release(&name2release);
-    XMLString::release(&name_tmp);
-//
+   const std::string name = GeoXML::fetchAttribute(*element, "name");
+    
 //    Look for the assembly in the map; if not yet there, add it
 //
-    map<string, AssemblyStore>::iterator entry;
-    if ((entry = m_map.find(name)) != m_map.end()) {
+    
+    std::map<std::string, AssemblyStore>::iterator entry = m_map.find(name);
+    if (entry != m_map.end()) {
         entry->second.id = 0;
     }
 /* else ... Not an error: it is usually just about to be made with id = 0; no action needed. */

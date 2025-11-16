@@ -19,9 +19,11 @@
 
 
 #include "GeoModelXml/LogvolProcessor.h"
+#include "GeoModelXml/StringWrappers.h"
 #include "OutputDirector.h"
 
 #include <map>
+#include <format>
 
 #include <xercesc/dom/DOM.hpp>
 #include "GeoModelKernel/GeoNameTag.h"
@@ -68,48 +70,29 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
   gmxUtil.positionIndex.incrementLevel();
 
   // get the name of the LogVol
-  XMLCh * name_tmp = XMLString::transcode("name");
-  char *name2release = XMLString::transcode(element->getAttribute(name_tmp));
-  string name(name2release);
+  const std::string name = GeoXML::fetchAttribute(*element, "name");
   gmxUtil.positionIndex.addToLevelMap(name,gmxUtil.positionIndex.level());
-  XMLString::release(&name2release);
-  XMLString::release(&name_tmp);
-
+  
   // get the value for the "named" option;
   // if "true", add a GeoNameTag to the GeoModel tree
-  XMLCh * named_tmp = XMLString::transcode("named");
-  char *toRelease2 = XMLString::transcode(element->getAttribute(named_tmp));
-  string named(toRelease2);
-  XMLString::release(&toRelease2);
-  XMLString::release(&named_tmp);
-  bool isNamed = bool(named.compare(string("true")) == 0);
+  const std::string named = GeoXML::fetchAttribute(*element, "named");
+  bool isNamed = (named == "true");
   
   // get the value for the "identifier" option;
   // if "true", add a GeoIdentifierTag to the GeoModel tree
-  XMLCh * id_tmp = XMLString::transcode("identifier");
-  char *toRelease3 = XMLString::transcode(element->getAttribute(id_tmp));
-  string idStr(toRelease3);
-  XMLString::release(&toRelease3);
-  XMLString::release(&id_tmp);
-  bool hasIdentifier = bool(idStr.compare(string("true")) == 0);
-
+  const std::string idStr = GeoXML::fetchAttribute(*element, "identifier");
+  bool hasIdentifier = idStr == "true";
   //
-
-  XMLCh * envelope_tmp = XMLString::transcode("envelope");
-  char *env = XMLString::transcode(element->getAttribute(envelope_tmp));
-  string envelope(env);
-  bool is_envelope=(envelope.compare(string("true"))==0);
-  XMLString::release(&env);
+  std::string envelope = GeoXML::fetchAttribute(*element, "envelope");
+  bool is_envelope=(envelope == "true");
   
-  XMLCh * sensitive_tmp = XMLString::transcode("sensitive");
-  bool sensitive = element->hasAttribute(sensitive_tmp);
-  XMLString::release(&sensitive_tmp);
-
+  bool sensitive = GeoXML::hasAttribute(*element, "sensitive");
+ 
 //
 //    Look for the logvol in the map; if not yet there, add it
 //
-  map<string, LogVolStore>::iterator entry;
-  if ((entry = m_map.find(name)) == m_map.end()) { // Not in registry; make a new item
+  std::map<std::string, LogVolStore>::iterator entry = m_map.find(name);
+  if (entry == m_map.end()) { // Not in registry; make a new item
     //
     //    Name
     //   
@@ -137,12 +120,8 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
     //
     //    What sort of shape?
     //
-    name2release = XMLString::transcode(refShape->getNodeName());
-    string shapeType(name2release);
-    XMLString::release(&name2release);
-    XMLString::release(&shape_tmp);
-
-    GeoIntrusivePtr<const GeoShape> shGeo = dynamic_pointer_cast<const GeoShape>(gmxUtil.geoItemRegistry.find(shapeType)->process(refShape, gmxUtil));
+    std::string shapeType = GeoXML::nodeName(*refShape);
+    auto shGeo = dynamic_pointer_cast<const GeoShape>(gmxUtil.geoItemRegistry.find(shapeType)->process(refShape, gmxUtil));
     //
     //    Get the material
     //
@@ -166,7 +145,7 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
 
     if (gmxUtil.matManager) {
         if (!gmxUtil.matManager->isMaterialDefined(nam_mat)) {
-            GeoIntrusivePtr<GeoMaterial> tempMat=dynamic_pointer_cast<GeoMaterial>(gmxUtil.tagHandler.material.process(refMaterial, gmxUtil));
+            auto tempMat=dynamic_pointer_cast<GeoMaterial>(gmxUtil.tagHandler.material.process(refMaterial, gmxUtil));
             // we let GMX create the material and store it in the MM
             gmxUtil.matManager->addMaterial(tempMat);
         } matGeo = gmxUtil.matManager->getMaterial(nam_mat);
@@ -199,42 +178,36 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
   //
   // RMB: Note -- here the code looks for "children of the LogVol" but this is not true: they are PhysVol children. In fact, they are later added to the newly created PhysVol... needs to be clearified/updated
   GeoNodeList childrenAdd;
-  for (DOMNode *child = element->getFirstChild(); child != 0; child = child->getNextSibling()) {
+  for (DOMNode *child = element->getFirstChild(); child != nullptr; child = child->getNextSibling()) {
       if (child->getNodeType() == DOMNode::ELEMENT_NODE) {
         DOMElement *el = dynamic_cast<DOMElement *> (child);
-        name2release = XMLString::transcode(el->getNodeName());
-        string name(name2release);
-        XMLString::release(&name2release);
+        std::string name = GeoXML::nodeName(*el);
         gmxUtil.processorRegistry.find(name)->process(el, gmxUtil, childrenAdd);
       }
   }
   //
   //   Make a list of things to be added
   //
-  if(isNamed) {
-      if(!sensitive) toAdd.push_back(nameTag_physVolName);//If sensitive, it gets a different name in a moment...
+  if(isNamed && !sensitive) {
+    toAdd.push_back(nameTag_physVolName);//If sensitive, it gets a different name in a moment...
   }
 
   int sensId = 0;
-  map<string, int> index;
+  std::map<std::string, int> index;
   if (sensitive) {
     gmxUtil.positionIndex.setCopyNo(m_map[name].id++);
     gmxUtil.positionIndex.indices(index, gmxUtil.eval);
     sensId = gmxUtil.gmxInterface().sensorId(index);
     std::string newName = name;
-    for(auto index_i:index){
-            newName.append("_");
-            newName.append(index_i.first);
-            newName.append("_");
-            newName.append(std::to_string(index_i.second));
+    for(auto& [nodeName, nodeIdx]: index) {
+      newName += std::format("_{:}_{:}", nodeName, nodeIdx);
     }
     nameTag_physChildVolName = nameTag(newName);//Make sensitive always have a name, to extra Id information from
     toAdd.push_back(nameTag_physChildVolName);
     if(hasIdentifier) { //TODO: check if all "sensitive" volumes must have an identifier. If that's the case, then we can remove this "if" here
         toAdd.push_back(geoId(sensId));
     }
-  }
-  else {
+  } else {
       if(hasIdentifier) {
           toAdd.push_back(geoId(m_map[name].id)); // Normal copy number
           gmxUtil.positionIndex.setCopyNo(m_map[name].id++);
@@ -246,16 +219,12 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
   //
   
   // get the value for the "alignable" option
-  XMLCh * alignable_tmp = XMLString::transcode("alignable");
-  char *toRelease = XMLString::transcode(element->getAttribute(alignable_tmp));
-  string alignable(toRelease);
-  XMLString::release(&toRelease);
-  XMLString::release(&alignable_tmp);
+  std::string alignable = GeoXML::fetchAttribute(*element, "alignable");
   
 
-  if (sensitive || (alignable.compare(string("true")) == 0)) {
+  if (sensitive || alignable == "true") {
     //msglog << MSG::DEBUG << "Handling a FullPhysVol (i.e., an 'alignable' or 'sensitive' volume) ..." << endmsg;
-    GeoIntrusivePtr<GeoFullPhysVol> pv = make_intrusive<GeoFullPhysVol>(cacheVolume(lv));
+    auto pv = make_intrusive<GeoFullPhysVol>(cacheVolume(lv));
     if (is_envelope) GeoVolumeTagCatalog::VolumeTagCatalog()->addTaggedVolume("Envelope",name,pv);
     for (const auto& node : childrenAdd) {
 	     pv->add(node);
@@ -265,35 +234,25 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
     //    Add sensitive volumes to detector manager via GmxInterface
     //
     if (sensitive) {
-      XMLCh * sensitive_tmp = XMLString::transcode("sensitive");
-      name2release = XMLString::transcode(element->getAttribute(sensitive_tmp));
-      string sensitiveName(name2release);
-      XMLString::release(&name2release);
-      XMLString::release(&sensitive_tmp);
-	    //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)
-      XMLCh * splitLevel_tmp = XMLString::transcode("splitLevel");
-      bool split = element->hasAttribute(splitLevel_tmp);
-      char* splitString;
-	    int splitLevel = 1;
-	    if (split) {
-        splitString = XMLString::transcode(element->getAttribute(splitLevel_tmp));
-        splitLevel = gmxUtil.evaluate(splitString);
-        XMLString::release(&splitString);
+      std::string sensitiveName = GeoXML::fetchAttribute(*element, "sensitive");
+      //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)
+      int splitLevel = 1;
+	    if (GeoXML::hasAttribute(*element, "splitLevel")) {
+        splitLevel = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "splitLevel").c_str());
         for(int i=0;i<splitLevel;i++){
           std::string field = "eta_module";//eventually specify in Xml the field to split in?
           std::pair<std::string,int> extraIndex(field,i);
           gmxUtil.gmxInterface().addSplitSensor(sensitiveName, index,extraIndex, sensId, 
-                                                dynamic_pointer_cast<GeoVFullPhysVol> (pv),splitLevel);
+                                                dynamic_pointer_cast<GeoVFullPhysVol> (pv), splitLevel);
         }
 	    }
 	    else gmxUtil.gmxInterface().addSensor(sensitiveName, index, sensId, 
                                              dynamic_pointer_cast<GeoVFullPhysVol>(pv));
-        XMLString::release(&splitLevel_tmp);
     }
   }
   else {
       //msglog << MSG::DEBUG << "Handling a standard PhysVol..." << endmsg;
-      GeoIntrusivePtr<GeoPhysVol> pv = make_intrusive<GeoPhysVol>(cacheVolume(lv));
+      auto pv = make_intrusive<GeoPhysVol>(cacheVolume(lv));
       if (is_envelope) GeoVolumeTagCatalog::VolumeTagCatalog()->addTaggedVolume("Envelope",name,pv);
       //msglog << MSG::DEBUG << "Now, looping over all the children of the LogVol (in the GMX meaning)..." << endmsg; 
       for (const auto & node : childrenAdd) {
@@ -312,11 +271,8 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
 
 void LogvolProcessor::zeroId(const xercesc::DOMElement *element) {
 
-  XMLCh * name_tmp = XMLString::transcode("name");
-  char *name2release = XMLString::transcode(element->getAttribute(name_tmp));
-  string name(name2release);
-  XMLString::release(&name2release);
-  XMLString::release(&name_tmp);
+  
+  const std::string name = GeoXML::fetchAttribute(*element, "name");
   //
   //    Look for the logvol in the map; if not yet there, add it
   //

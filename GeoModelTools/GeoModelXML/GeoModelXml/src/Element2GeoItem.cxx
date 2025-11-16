@@ -1,51 +1,52 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <string>
 
+
 #include "GeoModelXml/Element2GeoItem.h"
+#include "GeoModelXml/StringWrappers.h"
+#include "GeoModelXml/GmxUtil.h"
+
 #include "OutputDirector.h"
 
 #include "xercesc/util/XercesDefs.hpp"
 #include <xercesc/dom/DOM.hpp>
-#include "xercesc/util/XMLString.hpp"
 
-#include "GeoModelXml/GmxUtil.h"
 #include "GeoModelKernel/RCBase.h"
 #include "GeoModelKernel/throwExcept.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
 
-using namespace std;
-using namespace xercesc;
+GeoIntrusivePtr<RCBase> Element2GeoItem::process(const xercesc::DOMElement *element, 
+                                                 GmxUtil &gmxUtil) {
 
-
-GeoIntrusivePtr<RCBase> Element2GeoItem::process(const xercesc::DOMElement *element, GmxUtil &gmxUtil, const bool &allowDuplication) {
-
-    char *name2release;
-    XMLCh * name_tmp = XMLString::transcode("name");
-
-    name2release = XMLString::transcode(element->getAttribute(name_tmp));
-    string name(name2release);
-    XMLString::release(&name2release);
-    XMLString::release(&name_tmp);
+    const std::string name =  GeoXML::fetchAttribute(*element, "name");
 
     GeoIntrusivePtr<RCBase> item{nullptr};
-    EntryMap::iterator entry;
-    if (name.empty() || allowDuplication) { // Unnamed item or an item that can be duplicated; cannot store in the map; make a new one 
-        item = make(element, gmxUtil);
-    } else if ((entry = m_map.find(name)) == m_map.end()) { // Not in; make a new one
-        item = make(element, gmxUtil);
-        m_map[name] = item; // And put it in the map
+    // Unnamed item or an item that can be duplicated; cannot store in the map; make a new one
+    if (name.empty()) {
+        return make(element, gmxUtil);
     }
-    else { // Get it from the map
-        item = entry->second; 
+    EntryMap::iterator entry = m_map.find(name);
+    /// Element not yet created
+    if (entry == m_map.end()) { 
+        auto item = make(element,gmxUtil);
+        if (!item) {
+            THROW_EXCEPTION("Item not made "<<name<<", "<< GeoXML::nodeName(*element));
+        }
+        if (dynamic_pointer_cast<GeoAlignableTransform>(item) != nullptr) {
+            return item;
+        }
+        const auto insert_itr = m_map.insert(std::make_pair(name, item));
+        if (!insert_itr.second) {
+            THROW_EXCEPTION("Failed to create element "<<name<<", "<< GeoXML::nodeName(*element));
+        }
+        return insert_itr.first->second;
     }
-
-    return item;
+    /// Return the existing one
+    return entry->second;
 }
 
 GeoIntrusivePtr<RCBase> Element2GeoItem::make(const xercesc::DOMElement *element, GmxUtil & /* gmxUtil */) const {
-    char *name2release = XMLString::transcode(element->getNodeName());
-    std::string nodeName{name2release};
-    XMLString::release(&name2release);
-    THROW_EXCEPTION("Oh oh: called base class make() method of Element2GeoType object; tag " << nodeName);
+    THROW_EXCEPTION("Oh oh: called base class make() method of Element2GeoType object; tag " << GeoXML::nodeName(*element));
 }

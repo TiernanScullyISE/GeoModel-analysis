@@ -61,7 +61,9 @@ void GmxInterface::addSensor(const string& name, map<string, int> &index, int se
     //finally, add the sensor type
     idString << "_" << name;
     msglog << "\nSequential ID = " << sequentialId << endmsg;
-    if (m_publisher) m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
+    if (m_publisher) {
+        m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
+    }
 }
 
 void GmxInterface::addSplitSensor(const string& name, map<string, int> &index, std::pair<std::string, int> &extraIndex, int sequentialId, GeoVFullPhysVol *fpv,int splitLevel) {
@@ -80,8 +82,9 @@ void GmxInterface::addSplitSensor(const string& name, map<string, int> &index, s
     //finally, add the sensor type
     idString << "_" << name;
     msglog << "\nSequential ID = " << sequentialId << endmsg;
-    if (m_publisher) m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
-   
+    if (m_publisher) {
+        m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
+    }
 }
 
 void GmxInterface::addAlignable(int level, map<std::string, int> &index, GeoVFullPhysVol *fpv, 
@@ -129,7 +132,9 @@ void GmxInterface::addSplitAlignable(int level,
     if(!fpv) msglog << MSG::WARNING << "Could not find a FullPhysVol when adding split alignable"<<endmsg;
     if(!transform) msglog << MSG::WARNING << "Could not find an alignable transform when adding split alignable"<<endmsg;
     //publish
-    if (m_publisher) m_publisher->publishNode<GeoAlignableTransform *,std::string>(transform, idString.str());
+    if (m_publisher) {
+        m_publisher->publishNode<GeoAlignableTransform *,std::string>(transform, idString.str());
+    }
 }
 bool GmxInterface::doPhysVolDeDpulication () const{ return m_deDuplicatePhysVols; }
 bool GmxInterface::doLogVolDeDuplication() const{ return m_deDuplicateLogVols; }

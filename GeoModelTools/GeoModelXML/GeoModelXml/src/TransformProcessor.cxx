@@ -15,6 +15,12 @@
 //
 #include "GeoModelXml/TransformProcessor.h"
 
+
+#include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
+
+#include "GeoModelHelpers/StringUtils.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -26,7 +32,6 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
-#include "GeoModelXml/GmxUtil.h"
 #include "xercesc/util/XMLString.hpp"
 
 
@@ -35,41 +40,33 @@ using namespace std;
 using namespace xercesc;
 
 void TransformProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &toAdd) {
-    char *tagName;
-    XMLCh * alignable_tmp;
-
-    alignable_tmp = XMLString::transcode("alignable");
-    const bool alignable = element->hasAttribute(alignable_tmp);
+    
+    const bool alignable = GeoXML::hasAttribute(*element, "alignable");
     //
     //    Do second element first, to find what sort of transform is needed (shape or logvol etc.?)
     //
     GeoNodeList objectsToAdd;
     DOMElement *object = element->getLastElementChild();
-    tagName = XMLString::transcode(object->getTagName());
-    string objectName(tagName);
-    gmxUtil.processorRegistry.find(objectName)->process(object, gmxUtil, objectsToAdd);
-    XMLString::release(&tagName);
-    XMLString::release(&alignable_tmp);
+  
+    std::string tagName = GeoXML::tagName(*object);
+    gmxUtil.processorRegistry.find(tagName)->process(object, gmxUtil, objectsToAdd);
     //
     //    Get the transformation
     //
     DOMElement *transformation = element->getFirstElementChild();
-    tagName = XMLString::transcode(transformation->getTagName()); // transformation or transformationref
+    tagName = GeoXML::tagName(*transformation); // transformation or transformationref
  
     // TODO:  ******* Should check here that an alignable transform is given an alignable transformation and object; to be done
     // If alignable is true, this is passed on to Element2GeoItem::process in order to allow multiple transforms to be created with the same name
     // This is necessary because we need an AlignableTransform for each element we want to align, even if the initial transform is identical.
     // Without this, the de-duplication will return an already-exisiting transform if one already exists with that name
  
-    toAdd.push_back(dynamic_pointer_cast<GeoGraphNode>(gmxUtil.geoItemRegistry.find(string(tagName))->process(transformation, gmxUtil, alignable)));
-    XMLString::release(&tagName);
+    toAdd.push_back(dynamic_pointer_cast<GeoGraphNode>(gmxUtil.geoItemRegistry.find(tagName)->process(transformation, gmxUtil)));
     //
     //    Add transformation to DetectorManager via GmxInterface, if it is alignable
     //
     if (alignable) { 
-        int level;
-        alignable_tmp = XMLString::transcode("alignable");
-        istringstream(XMLString::transcode(element->getAttribute(alignable_tmp))) >> level;
+        int level = GeoStrUtils::atoi(GeoXML::fetchAttribute(*element, "alignable"));
         map<string, int> index;
         gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
         gmxUtil.positionIndex.indices(index, gmxUtil.eval);
@@ -77,33 +74,27 @@ void TransformProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
         //Checking all objects to find right one not so efficient - Define const int in LogvolProcessor?
         //sanity check... see if we find a FullPhysVol somewhere in the object list...
         GeoIntrusivePtr<GeoVFullPhysVol>  fpv;
-        for(GeoIntrusivePtr<GeoGraphNode>  iFpv: objectsToAdd){ //maybe this needs to be in reverse???
+        for(GeoIntrusivePtr<GeoGraphNode> iFpv: objectsToAdd){ //maybe this needs to be in reverse???
             fpv = dynamic_pointer_cast<GeoVFullPhysVol> (iFpv);
             if (fpv) break; //if we find it, use it...
         }
 
         //now check that the AlignableTransform is actually valid!
-        GeoIntrusivePtr<GeoAlignableTransform> gat = dynamic_pointer_cast<GeoAlignableTransform>(toAdd.back());
+        auto gat = dynamic_pointer_cast<GeoAlignableTransform>(toAdd.back());
         if(fpv && gat) {
             //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)
-            XMLCh * splitLevel_tmp = XMLString::transcode("splitLevel");
-            bool split = element->hasAttribute(splitLevel_tmp);
-            char* splitString;
-	        int splitLevel = 1;
-	        if (split) {
-                splitString = XMLString::transcode(element->getAttribute(splitLevel_tmp));
-                splitLevel = gmxUtil.evaluate(splitString);
-                XMLString::release(&splitString);
-                for(int i=0;i<splitLevel;i++){
+            int splitLevel = 1;
+	        if (GeoXML::hasAttribute(*element, "splitLevel")) {
+                splitLevel = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "splitLevel").c_str());
+                for(int i=0;i<splitLevel; +i) {
                     std::string field = "eta_module";//eventually specify in Xml the field to split in?
-                    std::pair<std::string,int> extraIndex(field,i);
-                    gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex,fpv,gat);
+                    std::pair<std::string,int> extraIndex(field, i);         
+                    gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex, fpv, gat);
                 }
+            } else { 
+                gmxUtil.gmxInterface().addAlignable(level, index, fpv, gat);
             }
-            else gmxUtil.gmxInterface().addAlignable(level, index,fpv,gat);
-            XMLString::release(&splitLevel_tmp);
-        }    
-        else{
+        } else{
              std::cout<<"WARNING:";
              if(!gat) std::cout<<" No valid AlignableTransform";
              if(!fpv) std::cout<<" No valid FullPhysicalVolume";
@@ -115,7 +106,6 @@ void TransformProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
         }
 
         gmxUtil.positionIndex.decrementLevel(); 
-	    XMLString::release(&alignable_tmp);
     }
     //
     //    And add the name and physvol etc. after the transformation
