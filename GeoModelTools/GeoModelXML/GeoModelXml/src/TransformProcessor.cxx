@@ -86,7 +86,7 @@ void TransformProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
             int splitLevel = 1;
 	        if (GeoXML::hasAttribute(*element, "splitLevel")) {
                 splitLevel = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "splitLevel").c_str());
-                for(int i=0;i<splitLevel; +i) {
+                for(int i=0;i<splitLevel; ++i) {
                     std::string field = "eta_module";//eventually specify in Xml the field to split in?
                     std::pair<std::string,int> extraIndex(field, i);         
                     gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex, fpv, gat);
