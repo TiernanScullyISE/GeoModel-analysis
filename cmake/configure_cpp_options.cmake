@@ -27,6 +27,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations" ) # very b
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic-errors" ) # better for an even more severe check
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Weverything -Werror -pedantic-errors" ) # not recommended, it warns for really EVERYTHING!
 
+# Enable "warning as errors" globally, for all targets in the GeoModel project
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+if(CMAKE_COMPILE_WARNING_AS_ERROR)
+    message(STATUS "${Yellow}INFO: to check the GeoModel code better, we're treating warnings as errors. [If you want to temporarely disable this behaviour in your local build, use the related CMake command-line option: 'cmake --compile-no-warning-as-error'].${ColourReset}")
+endif()
+
 # TODO: for Debug and with GCC, do we want to set the flags below by default?
 # set( CMAKE_BUILD_TYPE DEBUG )
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O0 -g -gdwarf-2" )
