@@ -17,11 +17,11 @@
 
 
 
-std::map<GeoVFullPhysVol*, std::any> GeoPublisher::getPublishedFPV() const {
+std::multimap<GeoVFullPhysVol*, std::any> GeoPublisher::getPublishedFPV() const {
     return m_publishedFPV;
 }
 
-std::map<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF() const {
+std::multimap<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF() const {
     return m_publishedAXF;
 }
 
@@ -29,14 +29,6 @@ std::map<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF() const
 void GeoPublisher::setName(const std::string& name) {
     m_name = name;
 }
-
-/*
-void GeoPublisher::storeDataTable( std::string tableName, std::vector<std::string> colNames, std::vector<std::string> colTypes, std::vector<std::vector<std::string>> tableData )
-{
-    m_auxiliaryTablesStr[ tableName ] = std::make_pair(colNames, colTypes);
-    m_auxiliaryTablesStrData[ tableName ] = tableData;
-}
-*/
 
 void GeoPublisher::storeDataTable( const std::string& tableName, 
                                     const std::vector<std::string>& colNames, 

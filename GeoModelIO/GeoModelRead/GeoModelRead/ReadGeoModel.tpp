@@ -67,23 +67,27 @@ namespace GeoModelIO {
 
             //TODO: check if we can get rid of stoul/stoi...
             if constexpr ( std::is_same_v<unsigned, T> ) {
-                unsigned int key = std::stoul( keyStr );
-                mapNodes.insert( {key, volPtr} );
+                unsigned key = std::stoul( keyStr );
+                if (!mapNodes.insert( {key, volPtr} ).second && doCheckTable) {
+                    THROW_EXCEPTION("The key "<<key <<" is given twice");
+                }
             } 
             else if constexpr ( std::is_same_v<int, T> ) {
                 int key = std::stoi( keyStr );
-                mapNodes.insert( {key, volPtr} );
+                if (!mapNodes.insert( {key, volPtr} ).second && doCheckTable) {
+                    THROW_EXCEPTION("The key "<<key <<" is given twice");
+                }
             } 
             else if constexpr ( std::is_same_v<std::string, T> ) {
                 // OK! key is string already, so we use keyStr.
-                mapNodes.insert( {keyStr, volPtr} );
-            } 
-            else {
-                const std::string errMsg = "ERROR! Key type '" + keyType + "' is not currently supported.\n"
-                          + "For the moment, unsigned int, int, and string are supported.\n" 
-                          + "If in doubt, please ask to 'geomodel-developers@cern.ch'.\n"
-                          + "Exiting...\n";
-                THROW_EXCEPTION(errMsg);
+                if (!mapNodes.insert( {keyStr, volPtr} ).second && doCheckTable) {
+                    THROW_EXCEPTION("The key "<<keyStr << " is given twice");
+                }
+            } else {
+                THROW_EXCEPTION("ERROR! Key type '" <<keyType << "' is not currently supported.\n"
+                        << "For the moment, unsigned int, int, and string are supported.\n" 
+                        << "If in doubt, please ask to 'geomodel-developers@cern.ch'.\n"
+                        << "Exiting...\n");
             }
         }
         return mapNodes;

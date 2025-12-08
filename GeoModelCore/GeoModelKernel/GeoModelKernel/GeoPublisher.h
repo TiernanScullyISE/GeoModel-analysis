@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOSTORE_H
@@ -54,8 +54,8 @@ class GeoPublisher
 
   template<class N, typename T> void publishNode(N node,T keyT);
 
-  std::map<GeoVFullPhysVol*, std::any> getPublishedFPV() const ;
-  std::map<GeoAlignableTransform*, std::any> getPublishedAXF() const;
+  std::multimap<GeoVFullPhysVol*, std::any> getPublishedFPV() const ;
+  std::multimap<GeoAlignableTransform*, std::any> getPublishedAXF() const;
 
   void setName(const std::string& name);
   std::string getName()  const { return m_name; }
@@ -71,15 +71,15 @@ class GeoPublisher
 
  private:
 
-  std::map<GeoVFullPhysVol*, std::any> m_publishedFPV;
-  std::map<GeoAlignableTransform*, std::any> m_publishedAXF;
+  std::multimap<GeoVFullPhysVol*, std::any> m_publishedFPV{};
+  std::multimap<GeoAlignableTransform*, std::any> m_publishedAXF{};
 
-  std::string m_name;
+  std::string m_name{};
 
   // cache to store custom tables to store auxiliary data in the DB:
     // ---> map( tableName, columnsNames, columnsTypes )
-    AuxTableDefs m_auxiliaryTablesVar;
-    AuxTableData m_auxiliaryTablesVarData;
+    AuxTableDefs m_auxiliaryTablesVar{};
+    AuxTableData m_auxiliaryTablesVarData{};
 
 
 }; 

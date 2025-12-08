@@ -2326,15 +2326,12 @@ void WriteGeoModel::storePublishedAuxiliaryData(GeoPublisher* publisher) {
 
 void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     // loop over the published AlignableTransform nodes
-    std::map<GeoAlignableTransform*, std::any> mapAXF =
-        store->getPublishedAXF();
-    storeRecordPublishedNodes<std::map<GeoAlignableTransform*, std::any>>(
-        mapAXF, &m_publishedAlignableTransforms);
+    auto mapAXF = store->getPublishedAXF();
+    storeRecordPublishedNodes(mapAXF, &m_publishedAlignableTransforms);
 
     // loop over the published GeoVFullPhysVol nodes
-    std::map<GeoVFullPhysVol*, std::any> mapFPV = store->getPublishedFPV();
-    storeRecordPublishedNodes<std::map<GeoVFullPhysVol*, std::any>>(
-        mapFPV, &m_publishedFullPhysVols);
+    auto mapFPV = store->getPublishedFPV();
+    storeRecordPublishedNodes(mapFPV, &m_publishedFullPhysVols);
 
     // save the list of matching published nodes to the DB
     std::string storeName = store->getName();
