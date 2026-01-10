@@ -57,7 +57,7 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
     //
     //    How many copies?
     //
-    const int nCopies = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "n").c_str());
+    const int nCopies = gmxUtil.evaluate(GeoXML::fetchAttribute(*element, "n"));
     //
     //    See if it is in the map; if so, xfList is already done. If not, fill xfList.
     //
@@ -73,7 +73,7 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
          //
         //    Loopvar Variable name
         //
-        string varname{}, firstElement{};
+        std::string varname{}, firstElement{};
         bool hasVarName = GeoXML::hasAttribute(*element, "loopvar");
         if (hasVarName) {
             varname = GeoXML::fetchAttribute(*element, "loopvar");
@@ -109,7 +109,7 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
         GeoIntrusivePtr<GeoTransform> geoXf{nullptr};
         if (hasVarName) {
             for (int i = 0; i < nCopies; ++i) {
-                gmxUtil.eval.setVariable(varname.c_str(), (varname + "_" + to_string(i)).c_str());
+                gmxUtil.eval.setVariable(varname.c_str(), (varname + "_" + std::to_string(i)).c_str());
                 if (alignable) {
                     geoAXf = dynamic_pointer_cast<GeoAlignableTransform>(xFormProcessor->make(elXf, gmxUtil));
                     xfList.push_back(geoAXf);

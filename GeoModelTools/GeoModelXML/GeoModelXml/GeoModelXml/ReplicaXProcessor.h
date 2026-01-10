@@ -11,15 +11,16 @@
 #include <string>
 #include <map>
 
-#include "GeoModelXml/ElementProcessor.h"
+#include "GeoModelXml/IReplicaProcessor.h"
 class GmxUtil;
 
-class ReplicaXProcessor: public ElementProcessor {
+class ReplicaXProcessor: public IReplicaProcessor {
 public:
     ReplicaXProcessor() = default;
-    void process(const xercesc::DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &toAdd);
-private:
-    std::map <std::string, GeoNodeList> m_map; 
+    GeoNodeList fillReplicaTrf(const xercesc::DOMElement* element,
+                               GmxUtil& gmxUtil,
+                               const int nCopies,
+                               const bool alignable) override final;
 };
 
 #endif // REPLICAX_PROCESSOR_H
