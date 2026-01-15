@@ -1,0 +1,56 @@
+.\" Manpage for gmintegritycheck
+.\" Contact geomodel-core-team@cern.ch to correct errors or typos.
+.TH man 1 "01 Nov 2024" "6.5" "gmex man page"
+.SH NAME
+gmintegritycheck \- Print memory consumption and other information about GeoModel plugins 
+.SH SYNOPSIS
+gmintegritycheck inputFile.db
+.SH DESCRIPTION
+
+gmintegritycheck takes an SQLite database file containing a GeoModel
+description and reports issue which may or may not required atttention.
+
+It checks for unusual shared instances of GeoAlignableTransforms and
+reports on their shared count.  Shared instances of alignable transforms
+are permissible but it can also be the case that the situation is
+unintended.  If the shared instance is published, the name(s) under
+which it appears is also reported; otherwise it is reported as
+unpublished.
+
+GeoFullPhysVols cache their position in the geometry tree.  Since these
+volumes cannot be in two positions at the same time, they cannot be
+shared.  Shared instances of GeoFullPhysVols are reported as errors.
+
+gmintegrity check also checks for and reports GeoFullPhysVols and
+GeoAlignable transforms that are published multiple times in the
+fast lookup tables.  This is not necessarily an errors. 
+
+gmintegritycheck only works with files in SQLite format, it does not accept
+GeoModel plugins. 
+
+.\".SH OPTIONS
+.\"
+.\".TP
+.\".BI \-p 
+.\"Prints the geometry tree.
+
+
+
+.\" ====================================================================
+.SH "SEE ALSO"
+.\" ====================================================================
+.
+gmex(1), sqlitebrowser(1), gmcat (1), gmgraphbrowser(1), gmstatistics(1)
+
+.IR "geomodel.web.cern.ch" 
+is the location of the main documentation for the GeoModel Tools Suite
+.
+
+.SH BUGS
+There are no known bugs.
+.SH AUTHORS
+Primary authors are 
+.MT boudreau@\:pitt\:.edu
+Joe Boudreau
+.ME
+
