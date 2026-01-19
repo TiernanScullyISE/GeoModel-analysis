@@ -94,9 +94,8 @@ GmxInterface& GmxUtil::gmxInterface() {
     return m_gmxInterface;
 }
 
-double GmxUtil::evaluate(char const *expression) {
+double GmxUtil::evaluate(const std::string& strExpression) {
     static thread_local string lastGoodExpression("none"); // It is helpful for debugging to get some idea of where we had got to...
-    string strExpression(expression);
 
     bool isWhiteSpace = true;
     for(unsigned int i = 0; i < strExpression.length(); ++i){
@@ -107,7 +106,6 @@ double GmxUtil::evaluate(char const *expression) {
     }
     if (isWhiteSpace) { // Catch a common error early and give best message possible
        THROW_EXCEPTION("evaluate: empty or white space expression. Last good expression was " + lastGoodExpression);
-
     }
 //
 //    Process any []s. Contents are evaluated to in integer, then the [...] are replaced by 
@@ -120,7 +118,8 @@ double GmxUtil::evaluate(char const *expression) {
 //
     double result = eval.evaluate(noBrackets.c_str());
     if (eval.status() != GeoModelTools::Evaluator::OK) {
-        THROW_EXCEPTION("evaluate: invalid expression. Last good expression was <" + lastGoodExpression + ">");
+        THROW_EXCEPTION("evaluate: invalid expression <"<<noBrackets
+                     <<">. Last good expression was <" + lastGoodExpression + ">");
     }
     lastGoodExpression = strExpression;
     return result;

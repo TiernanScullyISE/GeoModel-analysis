@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Automatically generated code from /home/hessey/prog/gmx2geo/makeshape
@@ -15,12 +15,12 @@
 #include "GeoModelHelpers/TransformSorter.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
 #include "GeoModelKernel/throwExcept.h"
-#include "xercesc/util/XMLString.hpp"
+#include "GeoModelXml/StringWrappers.h"
 #include "GeoModelXml/GmxUtil.h"
 
-using namespace xercesc;
-using namespace std;
 
+using namespace GeoXML;
+using namespace xercesc;
 GeoIntrusivePtr<RCBase>MakeIntersection::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
     // 
     //    Process child elements; first is first shaperef; then transform; then second shaperef.
@@ -35,10 +35,7 @@ GeoIntrusivePtr<RCBase>MakeIntersection::make(const xercesc::DOMElement *element
                first = dynamic_pointer_cast<GeoShape>(gmxUtil.tagHandler.shaperef.process(dynamic_cast<DOMElement *> (child), gmxUtil));
                break;
             } case 1:  { // Second element is transformation or transformationref
-              char *toRelease = XMLString::transcode(child->getNodeName());
-              string nodeName(toRelease);
-              XMLString::release(&toRelease);
-              GeoTrfPtr geoXf = (nodeName == "transformation") ?
+              GeoTrfPtr geoXf = (nodeName(*child) == "transformation") ?
                       dynamic_pointer_cast<GeoTransform>( gmxUtil.tagHandler.transformation.process(dynamic_cast<DOMElement *>(child), gmxUtil)): 
                       dynamic_pointer_cast<GeoTransform>( gmxUtil.tagHandler.transformationref.process(dynamic_cast<DOMElement *>(child), gmxUtil));
               hepXf = geoXf->getTransform();

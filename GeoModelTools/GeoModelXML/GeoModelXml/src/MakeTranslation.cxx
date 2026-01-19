@@ -6,25 +6,19 @@
 #include <xercesc/dom/DOM.hpp>
 #include "xercesc/util/XMLString.hpp"
 #include "GeoModelXml/GmxUtil.h"
-
+#include "GeoModelXml/StringWrappers.h"
 #include <array>
 
 #include "GeoModelKernel/GeoDefinitions.h"
 
 
+using namespace GeoXML;
 using namespace xercesc;
 //using namespace HepGeom;
 GeoTrf::Translate3D MakeTranslation::getTransform(const DOMElement *translation, GmxUtil &gmxUtil) {
 
-    const int nParams = 3; 
+    constexpr std::size_t nParams = 3; 
     static const std::array<std::string, nParams> parName {"x", "y", "z"};
-    std::array<double, nParams> p{};
-    char *toRelease;
-
-    for (int i = 0; i < nParams; ++i) {
-        toRelease = XMLString::transcode(translation->getAttribute(XMLString::transcode(parName[i].data())));
-        p[i] = gmxUtil.evaluate(toRelease);
-        XMLString::release(&toRelease);
-    }
+    std::array<double, nParams> p{fetchAttributes(gmxUtil,*translation, parName)};
     return GeoTrf::Translate3D(p[0], p[1], p[2]);
 }

@@ -16,11 +16,11 @@
 #include "GeoModelHelpers/TransformSorter.h"
 #include "GeoModelKernel/throwExcept.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
-
-#include "xercesc/util/XMLString.hpp"
+#include "GeoModelXml/StringWrappers.h"
 #include "GeoModelXml/GmxUtil.h"
 
 using namespace xercesc;
+using namespace GeoXML;
 
 GeoIntrusivePtr<RCBase> MakeShapeShift::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
     
@@ -36,10 +36,7 @@ GeoIntrusivePtr<RCBase> MakeShapeShift::make(const xercesc::DOMElement *element,
             shape = dynamic_pointer_cast<GeoShape>(gmxUtil.tagHandler.shaperef.process(dynamic_cast<DOMElement*> (child), gmxUtil));
             break;
         } case 1: { // Second element is transformation or transformationref
-            char *toRelease = XMLString::transcode(child->getNodeName());
-            std::string nodeName{toRelease};
-            XMLString::release(&toRelease);
-            const GeoTransform *geoXf = (nodeName == "transformation")
+            const GeoTransform *geoXf = (nodeName(*child) == "transformation")
               ? dynamic_pointer_cast<const GeoTransform>( gmxUtil.tagHandler.transformation.process(dynamic_cast<DOMElement *>(child), gmxUtil))
               : dynamic_pointer_cast<const GeoTransform>( gmxUtil.tagHandler.transformationref.process(dynamic_cast<DOMElement *>(child), gmxUtil));
             hepXf = geoXf->getTransform();

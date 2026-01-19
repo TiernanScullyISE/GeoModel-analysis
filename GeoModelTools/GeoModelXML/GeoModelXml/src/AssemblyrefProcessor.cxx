@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -7,48 +7,41 @@
 //
 #include "OutputDirector.h"
 #include "GeoModelXml/AssemblyrefProcessor.h"
+#include "GeoModelXml/StringWrappers.h"
 #include "GeoModelKernel/throwExcept.h"
 
 #include "xercesc/util/XercesDefs.hpp"
 #include <xercesc/dom/DOM.hpp>
-#include "xercesc/util/XMLString.hpp"
+
 
 #include "GeoModelXml/GmxUtil.h"
 #include "GeoModelXml/GeoNodeList.h"
 
-using namespace std;
+using namespace GeoXML;
 using namespace xercesc;
-
 void AssemblyrefProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &toAdd) {
-XMLCh *ref = XMLString::transcode("ref");
-const XMLCh *idref;
-DOMDocument *doc = element->getOwnerDocument();
-char *toRelease;
-//
-//    Get the referenced element
-//
+    XMLCh *ref = XMLString::transcode("ref");
+    const XMLCh *idref{nullptr};
+    DOMDocument *doc = element->getOwnerDocument();
+    //
+    //    Get the referenced element
+    //
     idref = element->getAttribute(ref);
     DOMElement *elem = doc->getElementById(idref);
-//
-//    Check it is the right sort
-//
-    toRelease = XMLString::transcode(elem->getNodeName());
-    string nodeName(toRelease);
-    XMLString::release(&toRelease);
-    if (nodeName != string("assembly") && nodeName != string("set")) {
-        THROW_EXCEPTION("Error in xml/gmx file: assemblyref " << XMLString::transcode(idref) << " referenced a " << 
-                              nodeName << " instead of an assembly.\n");
+    XMLString::release(&ref);
+    //
+    //    Check it is the right sort
+    //
+    if (nodeName(*elem) != "assembly" && nodeName(*elem) != "set") {
+        THROW_EXCEPTION("Error in xml/gmx file: assemblyref " << XMLString::transcode(idref) 
+                    << " referenced a " << nodeName(*elem) << " instead of an assembly.\n");
     }
-//
-//    Process it
-//
-    XMLCh * zeroid_tmp = XMLString::transcode("zeroid");
-    const XMLCh *zeroid = element->getAttribute(zeroid_tmp);
-    if (XMLString::equals(zeroid, XMLString::transcode("true"))) {
+    //
+    //    Process it
+    //
+    const std::string zeroid = fetchAttribute(*element,"zeroid");
+    if (zeroid == "true") {
         gmxUtil.tagHandler.assembly.zeroId(elem);
     }
     gmxUtil.tagHandler.assembly.process(elem, gmxUtil, toAdd);
-    XMLString::release(&ref);
-    XMLString::release(&zeroid_tmp);
-    return;
 }

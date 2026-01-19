@@ -3,8 +3,10 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelXml/StringWrappers.h"
+#include "GeoModelHelpers/StringUtils.h"
 
 #include "xercesc/util/XMLString.hpp"
+#include <cassert>
 using namespace xercesc;
 namespace GeoXML{
     bool hasAttribute(const xercesc::DOMElement& element,
@@ -38,6 +40,22 @@ namespace GeoXML{
         XMLString::release(&name_tmp);
         return toRet;
     }
-
-
+    std::vector<int> rangeList(const xercesc::DOMElement& element,
+                               const std::string& attrName) {
+        std::vector<int> result{};
+        std::vector<std::string> parsed = GeoStrUtils::tokenize(fetchAttribute(element, attrName)," ");
+        for (const std::string& k : parsed) {
+            std::vector<std::string> tmp_parsed = GeoStrUtils::tokenize(k,"-");
+            if (tmp_parsed.size()==1) result.push_back(GeoStrUtils::atoi(tmp_parsed[0]));
+            else if (tmp_parsed.size()==2) {
+                int i1=GeoStrUtils::atoi(tmp_parsed[0]);
+                int i2=GeoStrUtils::atoi(tmp_parsed[1]);
+                assert(i1<i2);
+                for (int l=i1;l<=i2;++l) {
+                    result.push_back(l);
+                }
+            }
+        }
+        return result;
+    }
 }

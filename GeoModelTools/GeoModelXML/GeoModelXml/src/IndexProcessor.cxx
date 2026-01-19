@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -9,32 +9,13 @@
 
 #include <xercesc/dom/DOM.hpp>
 #include "GeoModelXml/IndexProcessor.h"
-
-#include "xercesc/util/XMLString.hpp"
 #include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
 
-using namespace std;
-using namespace xercesc;
+using namespace GeoXML;
 
-void IndexProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &/* toAdd */) {
-
-    XMLCh * ref_tmp = XMLString::transcode("ref");
-    XMLCh * value_tmp = XMLString::transcode("value");
-
-    char *name2release;
-
-    name2release = XMLString::transcode(element->getAttribute(ref_tmp));
-    string name(name2release);
-    XMLString::release(&name2release);
-
-    name2release = XMLString::transcode(element->getAttribute(value_tmp));
-    string value(name2release);
-    XMLString::release(&name2release);
-
+void IndexProcessor::process(const xercesc::DOMElement *element, GmxUtil &gmxUtil, GeoNodeList &/* toAdd */) {
+    const std::string name{fetchAttribute(*element, "ref")};
+    const std::string value{fetchAttribute(*element, "value")};
     gmxUtil.positionIndex.setFormula(name, value);
-
-    XMLString::release(&ref_tmp);
-    XMLString::release(&value_tmp);
-
-    return;
 }

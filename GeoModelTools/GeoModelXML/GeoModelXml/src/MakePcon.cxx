@@ -9,35 +9,28 @@
 #include "GeoModelKernel/GeoPcon.h"
 #include "GeoModelHelpers/GeoShapeUtils.h"
 #include "GeoModelKernel/throwExcept.h"
-#include "xercesc/util/XMLString.hpp"
-#include "GeoModelXml/GmxUtil.h"
 
+#include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
 #include <array>
 using namespace xercesc;
+using namespace GeoXML;
 
 
-GeoIntrusivePtr<RCBase>MakePcon::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
-    constexpr int nParams = 2; 
+GeoIntrusivePtr<RCBase> MakePcon::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
+    constexpr std::size_t nParams = 2; 
     static const std::array<std::string, nParams> parName{"sphi", "dphi"};
-    std::array<double, nParams> p{};
-    char *toRelease;
-    for (int i = 0; i < nParams; ++i) {
-        toRelease = XMLString::transcode(element->getAttribute(XMLString::transcode(parName[i].data())));
-        p[i] = gmxUtil.evaluate(toRelease);
-        XMLString::release(&toRelease);
-    }
-
+    std::array<double, nParams> p{fetchAttributes(gmxUtil, *element, parName)};
+  
     GeoIntrusivePtr<GeoPcon> pcon = make_intrusive<GeoPcon>(p[0], p[1]);
     //
     //    Add planes
     //
     double zPlane{0.}, rMinPlane{0.}, rMaxPlane{0.};
-    for (DOMNode *child = element->getFirstChild(); child != 0; child = child->getNextSibling()) {
+    for (DOMNode *child = element->getFirstChild(); child != nullptr; 
+                  child = child->getNextSibling()) {
         if (child->getNodeType() == DOMNode::ELEMENT_NODE) {
-            toRelease = XMLString::transcode(child->getNodeName());
-            std::string name(toRelease);
-            XMLString::release(&toRelease);
-            if (name == "addplane") {
+            if (nodeName(*child) == "addplane") {
                 gmxUtil.tagHandler.addplane.process(dynamic_cast<const DOMElement *>(child), zPlane, rMinPlane, rMaxPlane);
                 pcon->addPlane(zPlane, rMinPlane, rMaxPlane);
             }

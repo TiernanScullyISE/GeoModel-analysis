@@ -39,7 +39,7 @@ GeoIntrusivePtr<RCBase> MakeShaperef::process(const DOMElement *element, GmxUtil
     //    Get what sort of shape
     //
     char *toRelease = XMLString::transcode(shape->getNodeName());
-    string tag(toRelease);
+    std::string tag(toRelease);
     XMLString::release(&toRelease);
     XMLString::release(&ref_tmp);
     XMLString::release(&shapes_tmp);

@@ -11,7 +11,7 @@
 #include <xercesc/dom/DOM.hpp>
 #include "GeoModelXml/GmxUtil.h"
 #include "GeoModelXml/GeoNodeList.h"
-#include "xercesc/util/XMLString.hpp"
+#include "GeoModelXml/StringWrappers.h"
 
 using namespace std;
 using namespace xercesc;

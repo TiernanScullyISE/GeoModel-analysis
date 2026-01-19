@@ -25,15 +25,13 @@
 #include "GeoModelXml/GeoNodeList.h"
 #include "GeoModelXml/ProcessorRegistry.h"
 #include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
 
+
+using namespace GeoXML;
 using namespace xercesc;
 
-
-void ElementProcessor::process(const DOMElement *element, GmxUtil & /* gmxUtil*/, GeoNodeList & /* toAdd */) {
-
-    char *name2release = XMLString::transcode(element->getNodeName());
-    std::string name(name2release);
-    XMLString::release(&name2release);
-
-    msglog << MSG::FATAL << "Error!!! Default element processor called for tag-name " << name << endmsg;
+void ElementProcessor::process(const DOMElement *element, GmxUtil & /* gmxUtil*/, 
+                               GeoNodeList & /* toAdd */) {
+    THROW_EXCEPTION("Default element processor called for tag-name " << nodeName(*element));
 }

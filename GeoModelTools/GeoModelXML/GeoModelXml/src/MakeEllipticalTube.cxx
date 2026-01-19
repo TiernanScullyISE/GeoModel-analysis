@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelXml/shape/MakeEllipticalTube.h"
@@ -8,21 +8,16 @@
 #include "GeoModelKernel/GeoEllipticalTube.h"
 #include "xercesc/util/XMLString.hpp"
 #include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
 #include <array>
 
 using namespace xercesc;
+using namespace GeoXML;
 
 
 GeoIntrusivePtr<RCBase>MakeEllipticalTube::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
-    constexpr int nParams = 3; 
+    constexpr std::size_t nParams = 3; 
     static const std::array<std::string, nParams> parName{"xhalflength", "yhalflength", "zhalflength"};
-    std::array<double, nParams> p{};
-    char *toRelease;
-
-    for (int i = 0; i < nParams; ++i) {
-        toRelease = XMLString::transcode(element->getAttribute(XMLString::transcode(parName[i].data())));
-        p[i] = gmxUtil.evaluate(toRelease);
-        XMLString::release(&toRelease);
-    }
+    const std::array<double, nParams> p{fetchAttributes(gmxUtil, *element, parName)};
     return  const_pointer_cast(cacheShape(make_intrusive<GeoEllipticalTube>(p[0], p[1], p[2])));
 }

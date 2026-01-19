@@ -12,12 +12,13 @@
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/throwExcept.h"
+#include "GeoModelXml/StringWrappers.h"
 
 #include "xercesc/util/XMLString.hpp"
 #include "GeoModelXml/GmxUtil.h"
 #include <array>
 using namespace xercesc;
-using namespace std;
+using namespace GeoXML;
 
 
 GeoIntrusivePtr<RCBase>MakeSubtraction::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
@@ -35,10 +36,7 @@ GeoIntrusivePtr<RCBase>MakeSubtraction::make(const xercesc::DOMElement *element,
               break;
             }
             case 1: { // Second element is transformation or transformationref
-              char *toRelease = XMLString::transcode(child->getNodeName());
-              string nodeName(toRelease);
-              XMLString::release(&toRelease);
-              GeoTrfPtr geoXf = (nodeName == "transformation") ? 
+              GeoTrfPtr geoXf = (nodeName(*child) == "transformation") ? 
                     dynamic_pointer_cast<GeoTransform>(gmxUtil.tagHandler.transformation.process(dynamic_cast<DOMElement *>(child), gmxUtil))
                 :   dynamic_pointer_cast<GeoTransform>(gmxUtil.tagHandler.transformationref.process(dynamic_cast<DOMElement *>(child), gmxUtil));
               hepXf = geoXf->getTransform();

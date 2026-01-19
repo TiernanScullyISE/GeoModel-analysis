@@ -26,26 +26,19 @@
 #include <xercesc/dom/DOM.hpp>
 #include "GeoModelKernel/RCBase.h"
 #include "GeoModelKernel/GeoTwistedTrap.h"
-#include "xercesc/util/XMLString.hpp"
 #include "GeoModelXml/GmxUtil.h"
-
+#include "GeoModelXml/StringWrappers.h"
 #include <array>
 
 using namespace xercesc;
+using namespace GeoXML;
 
 
 GeoIntrusivePtr<RCBase>MakeTwistedTrap::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
-  constexpr int nParams = 11; 
-  static const std::array<std::string, nParams> parName {"twist", "dz", "theta","phi","dy1","dx1","dx2","dy2","dx3","dx4","alpha"};
-  std::array<double, nParams> p{};
-  char *toRelease;
-
-  for (int i = 0; i < nParams; ++i) {
-        toRelease = XMLString::transcode(element->getAttribute(XMLString::transcode(parName[i].data())));
-        p[i] = gmxUtil.evaluate(toRelease);
-        XMLString::release(&toRelease);
-    }
-
+    constexpr std::size_t nParams = 11; 
+    static const std::array<std::string, nParams> parName {"twist", "dz", "theta","phi","dy1","dx1","dx2","dy2","dx3","dx4","alpha"};
+    const std::array<double, nParams> p{fetchAttributes(gmxUtil, *element, parName)};
+ 
     return const_pointer_cast(cacheShape(make_intrusive<GeoTwistedTrap>(p[0], p[1], p[2], p[3], 
                                                                         p[4], p[5], p[6], p[7], 
                                                                         p[8], p[9], p[10])));

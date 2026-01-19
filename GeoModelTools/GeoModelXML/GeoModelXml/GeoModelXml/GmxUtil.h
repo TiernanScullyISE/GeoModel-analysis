@@ -58,7 +58,6 @@
 
 
 #include "GeoModelXml/PositionIndex.h"
-//#include "GeoModelXml/SensitiveId.h"
 #include "GeoModelXml/GmxInterface.h"
 
 class GmxUtil {
@@ -66,7 +65,7 @@ public:
     GmxUtil(GmxInterface &gmxInterface);
     virtual ~GmxUtil() = default;
     GmxInterface& gmxInterface();
-    double evaluate(char const *expression);
+    double evaluate(const std::string& expression);
     std::string debracket(std::string expression);
     GeoModelTools::Evaluator eval;
     PositionIndex positionIndex;
