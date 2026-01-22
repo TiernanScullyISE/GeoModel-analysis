@@ -31,8 +31,15 @@ std::ostream& operator<<(std::ostream& ostr, const std::vector<double>& v) {
 }
 
 GeoIntrusivePtr<RCBase> MakeSimplePolygonBrep::make(const xercesc::DOMElement *element, GmxUtil &gmxUtil) const {
-    std::vector <double> x{tokenizeDouble(fetchAttribute(*element, "xpoints"), ";")};
-    std::vector <double> y{tokenizeDouble(fetchAttribute(*element, "ypoints"), ";")};
+    std::vector <double> x{},y{};
+    std::ranges::transform(tokenize(fetchAttribute(*element, "xpoints"), ";"), std::back_inserter(x), 
+                            [&](const std::string& point){
+                                return gmxUtil.evaluate(point);
+                            });
+    std::ranges::transform(tokenize(fetchAttribute(*element, "ypoints"), ";"), std::back_inserter(y), 
+                            [&](const std::string& point){
+                                return gmxUtil.evaluate(point);
+                            });
     const double z = gmxUtil.evaluate(fetchAttribute(*element, "zhalflength"));
     
     GeoIntrusivePtr<GeoSimplePolygonBrep> poly = make_intrusive<GeoSimplePolygonBrep>(z);
