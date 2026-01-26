@@ -57,21 +57,8 @@
 #include <QScrollBar>
 
 
-/* FIXME: LCG does not ship QWebEngine with Qt5 at the moment,
- * but later you want to put it back again!
- */
-/*
-#include <QtGlobal>
-#if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
-  #include <QWebEngineView> // Qt 5.6
-#else
-  #include <QtWebKit>
-#endif
-*/
-
 #include <cassert>
 #include <iostream>
-
 
 //_________________________________________________________________________________
 GXMainWindow::GXMainWindow(GXExecutionScheduler*sched,QWidget * parent)

@@ -15,11 +15,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # set the project, with the version taken from the GeoModel parent project
     project( "gmgraphbrowser" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
-    if (GEOMODEL_USE_QT5)
-      set (QT_VERSION 5)
-    else()
-      set (QT_VERSION 6)
-    endif()
+    set (QT_VERSION 6)
 
     # Define color codes for CMake messages
     include( cmake_colors_defs )

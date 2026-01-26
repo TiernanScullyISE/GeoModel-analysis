@@ -221,14 +221,9 @@ void VP1CustomTourFrameWidget::mouseMoveEvent(QMouseEvent *event)
   mimeData->setData("vp1/customtourframe", QByteArray() );
   drag->setMimeData(mimeData);//drag assumes ownership of mimeData
 
-#if QT_VERSION >= 0x060000
   QPixmap pm =m_d->ui.label_snapshot->pixmap();
-#else
-  QPixmap pm = m_d->ui.label_snapshot->pixmap() ? *(m_d->ui.label_snapshot->pixmap()) : QPixmap();
-#endif
   if (!pm.isNull()) drag->setPixmap(pm );
   drag->exec(Qt::CopyAction | Qt::MoveAction);
-
 }
 
 //____________________________________________________________________

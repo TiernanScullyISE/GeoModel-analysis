@@ -25,11 +25,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # set the project, with the version taken from the GeoModel parent project
     project( "GeoModelVisualization" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
-    if (GEOMODEL_USE_QT5)
-      set (QT_VERSION 5)
-    else()
-      set (QT_VERSION 6)
-    endif()
+    set (QT_VERSION 6)
 
     # Define color codes for CMake messages
     include( cmake_colors_defs )
@@ -55,11 +51,7 @@ endif()
 
 # Find the dependencies of the project.
 
-if (GEOMODEL_USE_QT5)
-  find_package( Qt${QT_VERSION} COMPONENTS Core Gui Widgets Sql PrintSupport OpenGL REQUIRED )
-else ()
-  find_package( Qt${QT_VERSION} COMPONENTS Core Gui Widgets Sql PrintSupport OpenGL Core5Compat REQUIRED )
-endif()
+find_package( Qt${QT_VERSION} COMPONENTS Core Gui Widgets Sql PrintSupport OpenGL Core5Compat REQUIRED )
 find_package( OpenGL REQUIRED )
 find_package( HDF5 REQUIRED COMPONENTS CXX )
 # Set up how the project should handle some of its dependenices. Either by

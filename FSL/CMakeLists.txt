@@ -15,11 +15,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     # set the project, with the version taken from the GeoModel parent project
     project( "fsl" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
 
-    if (GEOMODEL_USE_QT5)
-      set (QT_VERSION 5)
-    else()
-      set (QT_VERSION 6)
-    endif()
+    set (QT_VERSION 6)
 
     # Define color codes for CMake messages
     include( cmake_colors_defs )
@@ -36,14 +32,14 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     add_definitions (-DFSLPLUGINROOT="${FullSimLight_DIR}/../../../${CMAKE_INSTALL_DATAROOTDIR}" )
     message  ( STATUS "FSL plugin files sought here: ${FullSimLight_DIR}/../../../${CMAKE_INSTALL_DATAROOTDIR}" )
     if(FullSimLight_HAS_HEPMC3)
-	add_compile_definitions( USE_HEPMC3 )
-	message (STATUS "HEPMC3 Enabled in FullSimLight")
+	    add_compile_definitions( USE_HEPMC3 )
+	    message (STATUS "HEPMC3 Enabled in FullSimLight")
     else()
         message (STATUS "HEPMC3 Disabled in FullSimLight")
-    endif()	
+    endif()
     if(FullSimLight_HAS_Pythia)
-	add_compile_definitions( USE_Pythia )
-	message (STATUS "Pythia Enabled in FullSimLight")
+	    add_compile_definitions( USE_Pythia )
+	    message (STATUS "Pythia Enabled in FullSimLight")
     else()
         message (STATUS "Pythia Disabled in FullSimLight")
     endif()	
@@ -54,19 +50,14 @@ else()
     project( "fsl" VERSION ${GeoModel_VERSION} LANGUAGES CXX )
     add_definitions (-DFSLPLUGINROOT="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATAROOTDIR}" )
     if(GEOMODEL_USE_HEPMC3)
-	add_compile_definitions( USE_HEPMC3 )
-     endif()	
+	    add_compile_definitions( USE_HEPMC3 )
+    endif()
     if(GEOMODEL_USE_PYTHIA)
-	add_compile_definitions( USE_Pythia )
-     endif()	
+	    add_compile_definitions( USE_Pythia )
+    endif()
 endif()
 
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-
-
-
 
 # Find the dependencies of the project.
 find_package( Qt${QT_VERSION} COMPONENTS Core Gui Widgets Sql PrintSupport OpenGL REQUIRED )
