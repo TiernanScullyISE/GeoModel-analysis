@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -51,6 +51,7 @@
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoXF.h"
 #include "GeoModelKernel/GeoVSurfaceShape.h"
+#include "GeoModelKernel/GeoPublisher.h"
 
 // C++ includes
 #include <set>
@@ -349,12 +350,9 @@ class WriteGeoModel : public GeoNodeAction {
 
     void storePublishedNodes(GeoPublisher *store);
     template <typename TT>
-    // void storeRecordPublishedNodes(
-    //     const TT storeMap,
-    //     std::vector<std::vector<std::string>> *cachePublishedNodes);
     void storeRecordPublishedNodes(
-        const TT storeMap,
-        DBRowsList *cachePublishedNodes);
+        const GeoPublisher::RecordMap_t<TT> &storeMap,
+        DBRowsList& cachePublishedNodes);
 
     void storePublishedAuxiliaryData(GeoPublisher *store);
 

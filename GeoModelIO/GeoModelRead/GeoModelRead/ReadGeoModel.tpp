@@ -36,13 +36,17 @@ namespace GeoModelIO {
         if constexpr( std::is_same_v<GeoFullPhysVol*, N> ) {
             if(doCheckTable){ 
                 bool tableExists = m_dbManager->checkTableFromDB("PublishedFullPhysVols_"+publisherName);
-                if(!tableExists) return mapNodes;
+                if(!tableExists) {
+                    return mapNodes;
+                }
             }
             vecRecords = m_dbManager->getPublishedFPVTable( publisherName );
         } else if constexpr ( std::is_same_v<GeoAlignableTransform*, N> ) {
             if(doCheckTable){ 
                 bool tableExists = m_dbManager->checkTableFromDB("PublishedAlignableTransforms_"+publisherName);
-                if(!tableExists) return mapNodes;
+                if(!tableExists) {
+                    return mapNodes;
+                }
             }
             vecRecords = m_dbManager->getPublishedAXFTable( publisherName );
         }
@@ -68,19 +72,22 @@ namespace GeoModelIO {
             //TODO: check if we can get rid of stoul/stoi...
             if constexpr ( std::is_same_v<unsigned, T> ) {
                 unsigned key = std::stoul( keyStr );
-                if (!mapNodes.insert( {key, volPtr} ).second && doCheckTable) {
+                const auto insert_itr = mapNodes.insert(std::make_pair(key, volPtr));
+                if (insert_itr.second  && insert_itr.first->second != volPtr && doCheckTable) {
                     THROW_EXCEPTION("The key "<<key <<" is given twice");
                 }
             } 
             else if constexpr ( std::is_same_v<int, T> ) {
                 int key = std::stoi( keyStr );
-                if (!mapNodes.insert( {key, volPtr} ).second && doCheckTable) {
+                const auto insert_itr = mapNodes.insert(std::make_pair(key, volPtr));                
+                if (insert_itr.second  && insert_itr.first->second != volPtr && doCheckTable) {
                     THROW_EXCEPTION("The key "<<key <<" is given twice");
                 }
             } 
             else if constexpr ( std::is_same_v<std::string, T> ) {
                 // OK! key is string already, so we use keyStr.
-                if (!mapNodes.insert( {keyStr, volPtr} ).second && doCheckTable) {
+                const auto insert_itr = mapNodes.insert(std::make_pair(keyStr, volPtr));                
+                if (insert_itr.second  && insert_itr.first->second != volPtr && doCheckTable) {
                     THROW_EXCEPTION("The key "<<keyStr << " is given twice");
                 }
             } else {

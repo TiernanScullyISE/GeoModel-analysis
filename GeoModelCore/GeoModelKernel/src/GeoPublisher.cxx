@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Riccardo Maria Bianchi @ CERN
@@ -15,13 +15,11 @@
 #include <iostream>
 #include <utility>
 
-
-
-std::multimap<GeoVFullPhysVol*, std::any> GeoPublisher::getPublishedFPV() const {
+GeoPublisher::RecordMap_t<GeoVFullPhysVol*> GeoPublisher::getPublishedFPV() const {
     return m_publishedFPV;
 }
 
-std::multimap<GeoAlignableTransform*, std::any> GeoPublisher::getPublishedAXF() const {
+GeoPublisher::RecordMap_t<GeoAlignableTransform*> GeoPublisher::getPublishedAXF() const {
     return m_publishedAXF;
 }
 

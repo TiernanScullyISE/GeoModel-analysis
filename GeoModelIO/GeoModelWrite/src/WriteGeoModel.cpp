@@ -56,7 +56,6 @@
 #include "GeoModelKernel/GeoPara.h"
 #include "GeoModelKernel/GeoPcon.h"
 #include "GeoModelKernel/GeoPgon.h"
-#include "GeoModelKernel/GeoPublisher.h"
 #include "GeoModelKernel/GeoShapeIntersection.h"
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
@@ -2326,16 +2325,14 @@ void WriteGeoModel::storePublishedAuxiliaryData(GeoPublisher* publisher) {
 
 void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     // loop over the published AlignableTransform nodes
-    auto mapAXF = store->getPublishedAXF();
-    storeRecordPublishedNodes(mapAXF, &m_publishedAlignableTransforms);
+    storeRecordPublishedNodes(store->getPublishedAXF(), m_publishedAlignableTransforms);
 
     // loop over the published GeoVFullPhysVol nodes
-    auto mapFPV = store->getPublishedFPV();
-    storeRecordPublishedNodes(mapFPV, &m_publishedFullPhysVols);
+    storeRecordPublishedNodes(store->getPublishedFPV(), m_publishedFullPhysVols);
 
     // save the list of matching published nodes to the DB
     std::string storeName = store->getName();
-    if (mapAXF.size() > 0) {
+    if (!store->getPublishedAXF().empty()) {
         m_dbManager->addListOfPublishedAlignableTransforms(
             m_publishedAlignableTransforms, storeName);
     } else {
@@ -2345,7 +2342,7 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
                      "in doubt, please ask to 'geomodel-developers@cern.ch')\n"
                   << std::endl;
     }
-    if (mapFPV.size() > 0) {
+    if (!store->getPublishedFPV().empty()) {
         m_dbManager->addListOfPublishedFullPhysVols(
             m_publishedFullPhysVols, storeName);
     } else {
@@ -2361,10 +2358,10 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     m_publishedFullPhysVols.clear();
 }
 
-template <typename TT>
-void WriteGeoModel::storeRecordPublishedNodes(
-    const TT storeMap,
-    DBRowsList* cachePublishedNodes) {
+ template <typename TT>
+    void WriteGeoModel::storeRecordPublishedNodes(
+        const GeoPublisher::RecordMap_t<TT> &storeMap,
+        DBRowsList& cachePublishedNodes){
     // NOTE: We store all keys as strings, independently of their original
     // format.
     //       However, we store the original format as well,
@@ -2372,24 +2369,17 @@ void WriteGeoModel::storeRecordPublishedNodes(
     //       when clients will read them back.
     //
     for (const auto& [vol, key] : storeMap) {
-        auto& keyType = key.type();
-
+      
         // get key type and convert to std::string to store into the cache
-        DBRecordEntry keyEntry;
-        std::string keyTypeStr;
-        std::string keyStr; // for debug only
-        if (typeid(std::string) == keyType) {
+        DBRecordEntry keyEntry = key;
+        std::string keyTypeStr{};
+        std::string keyStr{}; // for debug only
+        if (std::holds_alternative<std::string>(key)) {
             keyTypeStr = "string";
-            keyEntry = std::any_cast<std::string>(key);
-            keyStr = std::any_cast<std::string>(key);
-        } else if (typeid(int) == keyType) {
+            keyStr = std::get<std::string>(key);
+        } else if (std::holds_alternative<int>(key)) {
             keyTypeStr = "int";
-            keyEntry = std::any_cast<int>(key); // INT
-            keyStr = std::to_string(std::any_cast<int>(key));
-        } else if (typeid(unsigned) == keyType) {
-            keyTypeStr = "uint";
-            keyEntry = std::any_cast<unsigned>(key); // INT
-            keyStr = std::to_string(std::any_cast<unsigned>(key));
+            keyStr = std::to_string(std::get<int>(key));
         } else {
             THROW_EXCEPTION("ERROR! The type of the key used to publish FPV and AXF nodes is not 'std::string', nor 'int', nor 'unsigned int'.  The format you are trying to use is not supported, at the moment...\n If in doubt, please ask to geomodel-developers@cern.ch'.")
         }
@@ -2403,10 +2393,8 @@ void WriteGeoModel::storeRecordPublishedNodes(
         if (isAddressStored(volStr)) {
             volID = getStoredIdFromAddress(volStr);
         } else {
-            std::cout
-                << "ERROR!!! Address of node is not stored, but it should! Ask "
-                   "'geomodel-developers@cern.ch'. Exiting...\n\n";
-            exit(EXIT_FAILURE);
+            THROW_EXCEPTION("Address of node is not stored, but it should! Ask "
+                   "'geomodel-developers@cern.ch'. Exiting...\n\n");
         }
 
         // debug msg
@@ -2426,7 +2414,7 @@ void WriteGeoModel::storeRecordPublishedNodes(
                                        // it can be stored once only.
 
         // save the published nodes to the cache, to be later stored into the DB
-        /*unsigned int recordID = */ addRecord(cachePublishedNodes, values);
+        /*unsigned int recordID = */ addRecord(&cachePublishedNodes, values);
         // std::cout << "Pushed record: " << recordID << std::endl; // debug msg
     }
 }

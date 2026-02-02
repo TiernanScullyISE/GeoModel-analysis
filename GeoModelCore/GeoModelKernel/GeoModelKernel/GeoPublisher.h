@@ -54,8 +54,11 @@ class GeoPublisher
 
   template<class N, typename T> void publishNode(N node,T keyT);
 
-  std::multimap<GeoVFullPhysVol*, std::any> getPublishedFPV() const ;
-  std::multimap<GeoAlignableTransform*, std::any> getPublishedAXF() const;
+  template <typename Node_t> 
+  using RecordMap_t = std::multimap<Node_t, DBRecord>;
+
+  RecordMap_t<GeoVFullPhysVol*> getPublishedFPV() const ;
+  RecordMap_t<GeoAlignableTransform*> getPublishedAXF() const;
 
   void setName(const std::string& name);
   std::string getName()  const { return m_name; }
@@ -70,16 +73,25 @@ class GeoPublisher
     }
 
  private:
+    template <typename Key_t> 
+      /** @brief Checks whether the AlignableNode / FullPhysVol has already
+       *         been published under the given record
+       *  @param storeage: Map to scan
+       *  @param node: Pointer to the AlignableNode / FullPhysVol
+       *  @param record: The record to check */
+      bool containsRecord(const RecordMap_t<Key_t>& storeage,
+                          const Key_t node, 
+                          const DBRecord record) const;
 
-  std::multimap<GeoVFullPhysVol*, std::any> m_publishedFPV{};
-  std::multimap<GeoAlignableTransform*, std::any> m_publishedAXF{};
+  RecordMap_t<GeoVFullPhysVol*> m_publishedFPV{};
+  RecordMap_t<GeoAlignableTransform*> m_publishedAXF{};
 
   std::string m_name{};
 
   // cache to store custom tables to store auxiliary data in the DB:
-    // ---> map( tableName, columnsNames, columnsTypes )
-    AuxTableDefs m_auxiliaryTablesVar{};
-    AuxTableData m_auxiliaryTablesVarData{};
+  // ---> map( tableName, columnsNames, columnsTypes )
+  AuxTableDefs m_auxiliaryTablesVar{};
+  AuxTableData m_auxiliaryTablesVarData{};
 
 
 }; 
