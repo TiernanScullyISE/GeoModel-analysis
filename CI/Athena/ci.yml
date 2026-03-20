@@ -152,7 +152,7 @@ simulation_tests_run3_sqlite:
   extends: .run_base
   script:
     - cd run
-    - RunWorkflowTests_Run3.py --CI -s -w FullSim -a s4454 --threads 4 -e '--maxEvents 50 --geometrySQLiteFullPath /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV02.db' --detailed-comparison
+    - RunWorkflowTests_Run3.py --CI -s -w FullSim -a s4454 --threads 4 -e '--maxEvents 50 --geometrySQLiteFullPath /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV06.db' --detailed-comparison
     - mv run_s4454/log.EVNTtoHITS ./
     - mv run_s4454/myHITS.pool.root ./
   artifacts:
@@ -189,7 +189,7 @@ run_workflow_tests_run3_mc:
   extends: .run_base
   script:
     - cd run
-    - RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-08' --detailed-comparison
+    - RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-11-02' --detailed-comparison
 
 run_workflow_tests_run4_reco:
   extends: .run_base
