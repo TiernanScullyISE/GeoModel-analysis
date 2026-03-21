@@ -249,7 +249,7 @@
                      sensitive  IDREF #IMPLIED 
                      alignable  (true|false) "false"
                      named      (true|false) "false"
-                     identifier (true|false) "false"
+                     identifier (true|false) "true"
                      envelope   (true|false) "false"
                      splitLevel CDATA #IMPLIED>
 
