@@ -8,6 +8,7 @@
 #include <exception>
 #include <gtest/gtest.h>
 
+
 #define GTEST_COUT std::cerr << "[ MESSAGE  ] "
 
 class CellBinningFixture : public ::testing::Test {

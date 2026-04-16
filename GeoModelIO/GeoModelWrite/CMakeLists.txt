@@ -33,6 +33,7 @@ install( FILES ${HEADERS}
    COMPONENT Development )
 
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING)
+    add_compile_options(-Wno-character-conversion)
     add_executable(testWriteGeoModel 
     	tests/testWriteGeoModel.cxx 
     )

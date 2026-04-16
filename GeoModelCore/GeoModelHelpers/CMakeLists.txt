@@ -47,6 +47,7 @@ install( FILES ${HEADERS}
    COMPONENT Development )
 
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    add_compile_options(-Wno-character-conversion)
     file(GLOB_RECURSE files "tests/*.cxx")
     foreach(_exeFile ${files})
       get_filename_component(_theExec ${_exeFile} NAME_WE)

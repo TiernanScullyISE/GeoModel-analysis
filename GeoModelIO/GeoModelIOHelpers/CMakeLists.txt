@@ -48,6 +48,7 @@ install( FILES ${HEADERS}
    COMPONENT Development )
 
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    add_compile_options(-Wno-character-conversion)
     # global I/O tests
       file(GLOB_RECURSE files "tests/*.cxx")
     foreach(_exeFile ${files})

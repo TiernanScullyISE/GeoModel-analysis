@@ -49,6 +49,7 @@ install( FILES ${HEADERS}
 
 
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
+    add_compile_options(-Wno-character-conversion)
     file(GLOB_RECURSE files "tests/*.cxx")
     foreach(_exeFile ${files})
       get_filename_component(_theExec ${_exeFile} NAME_WE)
@@ -59,7 +60,9 @@ if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     endif()
 
     add_executable(${_theExec} ${_exeFile})
+    
     target_link_libraries( ${_theExec} GeoModelKernel GTest::GTest GTest::Main)
+    
     add_test(NAME ${_theExec}
 	     COMMAND ${_theExec})
     endforeach()
