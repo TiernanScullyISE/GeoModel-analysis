@@ -110,38 +110,19 @@ TEST(StrictErrorHandlerTest, HandleFatalAlsoSetsErrorFlag) {
   EXPECT_TRUE(handler.getSawErrors());
 }
 
-TEST(StrictErrorHandlerDeathTest, NullLocationDies) {
+TEST(StrictErrorHandlerDeathTest, NullLocationGivesAppropriateMessage) {
   XMLChGuard message("bad element");
   TestDOMError error(DOMError::DOM_SEVERITY_ERROR, message.get(), nullptr);
-
   StrictErrorHandler handler;
-
-  EXPECT_DEATH(
-    {
-      handler.handleError(error);
-    },
-    ""
-  );
+  EXPECT_TRUE(handler.handleError(error));
 }
 
-TEST(StrictErrorHandlerDeathTest, NullUriDies) {
+TEST(StrictErrorHandlerDeathTest, NullUriGivesAppropriateMessage) {
   XMLChGuard message("bad element");
   TestDOMLocator locator(nullptr, 12, 34);
   TestDOMError error(DOMError::DOM_SEVERITY_ERROR, message.get(), &locator);
-
   StrictErrorHandler handler;
- //on a mac, this will die (test passes). 
-  #if defined(__APPLE__)
-  EXPECT_DEATH(
-    {
-      handler.handleError(error);
-    },
-    ""
-  );
-  #else
-  //On ubuntu, it doesn't die but further output is truncated
   EXPECT_TRUE(handler.handleError(error));
-  #endif
 }
 
 int main(int argc, char** argv) {

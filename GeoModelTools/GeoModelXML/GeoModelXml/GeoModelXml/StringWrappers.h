@@ -5,11 +5,13 @@
 #define GEOMODELXML_STRINGWRAPPERS_H
 
 #include "GeoModelXml/GmxUtil.h"
+#include <xercesc/dom/DOM.hpp>
 #include <string>
 #include <array>
-#include <xercesc/dom/DOM.hpp>
 
 namespace GeoXML{
+    ///@brief Translates an XmlCh safely to a std::string
+    std::string xml2Str(const XMLCh * xstr);
 
     /** @brief Translates the Node name into a std::string */
     std::string nodeName(const xercesc::DOMNode& element);

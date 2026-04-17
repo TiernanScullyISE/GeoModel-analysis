@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -8,15 +8,12 @@
 #ifndef GEO_MODEL_XML_STRICT_ERROR_HANDLER_H
 #define GEO_MODEL_XML_STRICT_ERROR_HANDLER_H
 #include <xercesc/util/XercesDefs.hpp>
-
 #include <xercesc/dom/DOMErrorHandler.hpp>
-#include <xercesc/util/XMLString.hpp>
+
 
 class StrictErrorHandler: public xercesc::DOMErrorHandler {
 
 public:
-    StrictErrorHandler();
-    ~StrictErrorHandler();
     bool getSawErrors() const;
     //
     //  Implementation of the DOM ErrorHandler interface
@@ -30,7 +27,7 @@ private :
     //      method. It's used by the main code to suppress output if there are
     //      errors.
     //
-    bool    m_SawErrors;
+    bool    m_SawErrors{};
 };
 
 inline bool StrictErrorHandler::getSawErrors() const {
