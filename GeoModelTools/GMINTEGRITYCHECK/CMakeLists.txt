@@ -5,10 +5,15 @@ cmake_minimum_required(VERSION 3.16...4.0)
 
 
 file( GLOB MANPAGES man/man1/* )
+
 find_package( SQLite3 3.7.17 )
+if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+  add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
+
 # Declare the package's executable.
 add_executable( gmintegritycheck src/gmintegritycheck.cxx  src/GeoIntegrityCheckAction.cxx )
-target_link_libraries( gmintegritycheck PRIVATE SQLite::SQLite3
+target_link_libraries( gmintegritycheck PRIVATE SQLite3::SQLite3
 		       			    GeoModelCore::GeoModelKernel
                                             GeoModelIO::GeoModelRead 
                                             GeoModelIO::GeoModelWrite

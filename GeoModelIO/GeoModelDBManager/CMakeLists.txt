@@ -15,7 +15,7 @@ file( GLOB HEADERS GeoModelDBManager/*.h )
 
 # Set up the library.
 add_library( GeoModelDBManager SHARED ${HEADERS} ${SOURCES} )
-target_link_libraries( GeoModelDBManager PRIVATE SQLite::SQLite3 GeoModelHelpers GeoModelKernel )
+target_link_libraries( GeoModelDBManager PRIVATE SQLite3::SQLite3 GeoModelHelpers GeoModelKernel )
 target_include_directories( GeoModelDBManager PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
@@ -60,11 +60,11 @@ if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
     add_test(NAME testGMDBManagerQuery COMMAND testGMDBManagerQuery)
     #
     add_executable(testGMSQLiteConnection tests/testGMSQLiteConnection.cpp)
-    target_link_libraries(testGMSQLiteConnection GeoModelDBManager GTest::GTest GTest::Main SQLite::SQLite3 GeoModelKernel )
+    target_link_libraries(testGMSQLiteConnection GeoModelDBManager GTest::GTest GTest::Main SQLite3::SQLite3 GeoModelKernel )
     add_test(NAME testGMSQLiteConnection COMMAND testGMSQLiteConnection)
     #
     add_executable(testGMSQLiteConnectionQuery tests/testGMSQLiteConnectionQuery.cpp)
-    target_link_libraries(testGMSQLiteConnectionQuery GeoModelDBManager GTest::GTest GTest::Main SQLite::SQLite3 GeoModelKernel )
+    target_link_libraries(testGMSQLiteConnectionQuery GeoModelDBManager GTest::GTest GTest::Main SQLite3::SQLite3 GeoModelKernel )
     add_test(NAME testGMSQLiteConnectionQuery COMMAND testGMSQLiteConnectionQuery)
     #
     add_executable(testCreateValidDBFile tests/testCreateValidDBFile.cpp)

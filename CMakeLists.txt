@@ -42,6 +42,9 @@ include( SetupJSON )
 
 # Find the dependencies that the project always picks up from its environment.
 find_package( SQLite3 3.7.17 )
+if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+  add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+endif()
 
 # === Main targets built by this project ===
 
