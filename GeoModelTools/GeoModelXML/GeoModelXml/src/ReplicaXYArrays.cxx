@@ -23,6 +23,7 @@
 #include "GeoModelXml/GeoNodeList.h"
 #include "GeoModelXml/ProcessorRegistry.h"
 #include "GeoModelXml/GmxUtil.h"
+#include "GeoModelXml/StringWrappers.h"
 
 
 using namespace xercesc;
@@ -133,7 +134,7 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
         //    If varname not given, we get the CLHEP xForm and raise it to the power i, so NOT applied to first object.
         //    No transform (i.e. identity) for the first; so one less transform than objects
         //
-        GeoTrf::Transform3D hepXf0=GeoTrf::Transform3D::Identity();
+       GeoTrf::Transform3D hepXf0=GeoTrf::Transform3D::Identity();
         if (alignable) {
             geoAXf = make_intrusive<GeoAlignableTransform>(hepXf0) ;
             hepXf0 = geoAXf->getTransform();
@@ -142,13 +143,33 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
             hepXf0 = geoXf->getTransform();
         }
         GeoTrf::Transform3D hepXf=hepXf0; 
+
         for (int i = 0; i < nCopies; ++i) {
+
             hepXf = GeoTrf::Translate3D(xPos[i], yPos[i], zVal);
-            xfList->push_back(makeTransform(hepXf));
+            std::cout << "alignable = " << alignable << std::endl;
+            if (alignable) {
+                geoAXf = make_intrusive<GeoAlignableTransform>(hepXf);
+                xfList->push_back(geoAXf);
+
+                std::cout << "Created alignable transform for copy " << i << std::endl;
+                
+            } else {
+                geoXf = makeTransform(hepXf);
+                xfList->push_back(geoXf);
+            }
+
+            std::cout << "Copy " << i 
+                     << " x=" << xPos[i] 
+                     << " y=" << yPos[i] 
+                     << std::endl;
+
         }
     }else {
         xfList = &entry->second;
     }
+    //
+
     //
     //    Get object to be copied
     //
@@ -206,51 +227,108 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
     //
     int level{0};
     if (alignable) {
-        istringstream(XMLString::transcode(element->getAttribute(alignable_tmp))) >> level;
+        const auto val = GeoXML::fetchAttribute(*element, "alignable");
+        if (!val.empty()) {
+            level = std::stoi(val);
+        }
     }
     //
     //    Add transforms and physvols etc. to list to be added
     //
     map<string, int> index;
+    static std::map<std::string, int> layerCounters;
+    static std::set<std::string> initializedLayers;
+
     for (int copy = 0; copy < nCopies; ++copy) {
+
         toAdd.push_back((*xfList)[copy]);
         int lastTransform = toAdd.size() - 1;
-        objectProcessor->process(object, gmxUtil, toAdd);
-        if (alignable) {
-            cout << "copy = " << copy << "; level = " << level << endl;
-            cout << "\nAdd Alignable named " << endl;
-            cout << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << endl;
-            cout << " with id " << endl;
-            cout << (dynamic_pointer_cast<GeoIdentifierTag>(toAdd[lastTransform + 2]))->getIdentifier() << endl;
 
-            gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
-            gmxUtil.positionIndex.indices(index, gmxUtil.eval);
-            //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)
-            XMLCh * splitLevel_tmp = XMLString::transcode("splitLevel");
-            bool split = element->hasAttribute(splitLevel_tmp);
-            char* splitString;
-            int splitLevel = 1;
-            if (split) {
-                splitString = XMLString::transcode(element->getAttribute(splitLevel_tmp));
-                splitLevel = gmxUtil.evaluate(splitString);
-                XMLString::release(&splitString);
-                for(int i=0;i<splitLevel;i++){
-                    std::string field = "eta_module";//eventually specify in Xml the field to split in?
-                    std::pair<std::string,int> extraIndex(field,i);
-                    gmxUtil.gmxInterface().addSplitAlignable(level, index, extraIndex,
-                                                             dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[lastTransform + 3]),
-                                                             dynamic_pointer_cast<GeoAlignableTransform>(toAdd[lastTransform]));
+        objectProcessor->process(object, gmxUtil, toAdd);
+
+        if (alignable) {
+
+            int fpvIndex{-1}, gatIndex{-1};
+
+            for (int iNodeI = toAdd.size() - 1; iNodeI >= lastTransform; --iNodeI) {
+
+                if (fpvIndex == -1) {
+                    auto fpv = dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[iNodeI]);
+                    if (fpv) fpvIndex = iNodeI;
                 }
-            } else gmxUtil.gmxInterface().addAlignable(level, index, 
-                                                     dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[lastTransform + 3]),
-                                                     dynamic_pointer_cast<GeoAlignableTransform>(toAdd[lastTransform]));
-            gmxUtil.positionIndex.decrementLevel(); // Put it back where it was
+
+                if (gatIndex == -1) {
+                    auto gat = dynamic_pointer_cast<GeoAlignableTransform>(toAdd[iNodeI]);
+                    if (gat) gatIndex = iNodeI;
+                }
+            }
+
+            // Safety checks
+            if (fpvIndex == -1 || gatIndex == -1) {
+                msglog << MSG::WARNING
+                       << "ReplicaXYarraysProcessor: skipping alignable, missing "
+                       << (fpvIndex == -1 ? "GeoVFullPhysVol " : "")
+                       << (gatIndex == -1 ? "GeoAlignableTransform" : "")
+                       << endmsg;
+                continue;
+            }
+            
+            gmxUtil.positionIndex.incrementLevel();
+            gmxUtil.positionIndex.indices(index, gmxUtil.eval);
+
+            std::string layerKey =
+                std::to_string(index["endcap"]) + "_" +
+                std::to_string(index["layer"]);
+
+            if (initializedLayers.find(layerKey) == initializedLayers.end()) {
+                layerCounters[layerKey] = 0;
+                initializedLayers.insert(layerKey);
+            }
+
+            int& counter = layerCounters[layerKey];
+            counter++;
+
+            index["moduleInLayer"] = counter;
+
+            if (GeoXML::hasAttribute(*element, "splitLevel")) {
+                int splitLevel = gmxUtil.evaluate(
+                    GeoXML::fetchAttribute(*element, "splitLevel")
+                );
+
+                for (int i = 0; i < splitLevel; i++) {
+
+                    std::pair<std::string,int> extraIndex("split", i);
+
+                    gmxUtil.gmxInterface().addSplitAlignable(
+                        level,
+                        index,
+                        extraIndex,
+                        dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),
+                        dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex])
+                    );
+                }
+
+            } else {
+
+                msglog << MSG::INFO
+                        << "HGTD ALIGNABLE: copy=" << copy
+                        << " level=" << level
+                        << " moduleInLayer=" << index["moduleInLayer"]
+                        << endmsg;
+                                    
+                gmxUtil.gmxInterface().addAlignable(
+                    level,
+                    index,
+                    dynamic_pointer_cast<GeoVFullPhysVol>(toAdd[fpvIndex]),
+                    dynamic_pointer_cast<GeoAlignableTransform>(toAdd[gatIndex])
+                );
+            }
+
+            gmxUtil.positionIndex.decrementLevel();
             index.clear();
-            XMLString::release(&splitLevel_tmp);
+
         }
     }
-
     XMLString::release(&ref);
     XMLString::release(&alignable_tmp);
-
 }
