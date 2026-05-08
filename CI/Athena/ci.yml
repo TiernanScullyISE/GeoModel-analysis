@@ -42,7 +42,6 @@ build_geomodel_athena:
     expire_in: 8 hours
 
   before_script:
-    # - sudo dnf install -y jq
     - git config --global --add safe.directory ${CI_PROJECT_DIR}
 
 
@@ -51,8 +50,7 @@ build_geomodel_athena:
     - git config --global user.email cijob@example.com
     - echo $CI_MERGE_REQUEST_PROJECT_ID
     - echo $CI_MERGE_REQUEST_IID
-    #- export HEADERS_CHANGED=$(curl -s https://gitlab.cern.ch/api/v4/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes | jq -r .changes[].new_path | grep -e "\.h$" > /dev/null ; printf $?)
-    - export HEADERS_CHANGED=0
+    - export HEADERS_CHANGED=$(curl -s https://gitlab.cern.ch/api/v4/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes | jq -r .changes[].new_path | grep -e "\.h$" > /dev/null ; printf $?)
     - export IS_MERGE_REQUEST=$([ $CI_PIPELINE_SOURCE = "merge_request_event" ]; printf $?)
     - CI/Athena/athena_build.sh
 
