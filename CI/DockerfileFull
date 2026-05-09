@@ -12,10 +12,10 @@ RUN mkdir -p /workdir/build_geomodel/ && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/GeoModel \
           -DGEOMODEL_BUILD_FULLSIMLIGHT=1 \
           -DGEOMODEL_BUILD_VISUALIZATION=1 \
-          -DGEOMODEL_USE_BUILTIN_JSON=1 \
+          -DGEOMODEL_USE_BUILTIN_JSON=0 \
           -DGEOMODEL_BUILD_TOOLS=1 \
           -DGEOMODEL_USE_BUILTIN_XERCESC=0 \
-          -DGEOMODEL_USE_BUILTIN_COIN3D=1 \
+          -DGEOMODEL_USE_BUILTIN_COIN3D=0 \
           -DGEOMODEL_BUILD_ATLASEXTENSIONS=1 \
         ../GeoModel_src/ && \
     make -j2   && \
