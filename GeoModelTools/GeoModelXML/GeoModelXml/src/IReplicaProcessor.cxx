@@ -129,11 +129,11 @@ void IReplicaProcessor::process(const DOMElement *element,
         int lastTransform = toAdd.size() - 1;
         objectProcessor->process(object, gmxUtil, toAdd);
         if (alignable) {
-            std::cout << "copy = " << copy << "; level = " << level << std::endl;
-            std::cout << "\nAdd Alignable named " << std::endl;
-            std::cout << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << std::endl;
-            std::cout << " with id " << std::endl;
-            std::cout << (dynamic_pointer_cast<GeoIdentifierTag>(toAdd[lastTransform + 2]))->getIdentifier() << std::endl;
+            msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
+            msglog << MSG::DEBUG << "\nAdd Alignable named " << endmsg;
+            msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << endmsg;
+            msglog << MSG::DEBUG << " with id " << endmsg;
+            msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoIdentifierTag>(toAdd[lastTransform + 2]))->getIdentifier() << endmsg;
 
             gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
             gmxUtil.positionIndex.indices(index, gmxUtil.eval);

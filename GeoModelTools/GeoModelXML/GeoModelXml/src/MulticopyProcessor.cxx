@@ -241,19 +241,19 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
                 }
             } 
             if((idTagIndex!=-1) && (nameTagIndex!=-1)){
-                msglog << "copy = " << copy << "; level = " << level << endmsg;
-                msglog << "Add Alignable named ";
-                msglog << dynamic_pointer_cast<GeoNameTag>(toAdd[nameTagIndex])->getName();
-                msglog << " with id ";
-                msglog << dynamic_pointer_cast<GeoIdentifierTag>(toAdd[idTagIndex])->getIdentifier() << endmsg;  
+                msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
+                msglog << MSG::DEBUG << "Add Alignable named ";
+                msglog << MSG::DEBUG << dynamic_pointer_cast<GeoNameTag>(toAdd[nameTagIndex])->getName();
+                msglog << MSG::DEBUG <<" with id ";
+                msglog << MSG::DEBUG << dynamic_pointer_cast<GeoIdentifierTag>(toAdd[idTagIndex])->getIdentifier() << endmsg;  
             }
             else{
-                msglog << "copy = " << copy << "; level = " << level << endmsg;
-                msglog << "Add Alignable (no name/ID detected)" << endmsg;
+                msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
+                msglog << MSG::DEBUG << "Add Alignable (no name/ID detected)" << endmsg;
             }
 
-            if(gatIndex == -1) msglog <<"WARNING: no GeoAlignableTransform found!"<<endmsg;
-            if(fpvIndex == -1) msglog <<"WARNING: no GeoFullPhysVol found!"<<endmsg;
+            if(gatIndex == -1) msglog << MSG::WARNING <<"no GeoAlignableTransform found!"<<endmsg;
+            if(fpvIndex == -1) msglog << MSG::WARNING <<"no GeoFullPhysVol found!"<<endmsg;
 
             gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
             gmxUtil.positionIndex.indices(index, gmxUtil.eval);
