@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeometryMap.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include <map>
+#include <string>
 #include <sys/types.h>
 #include <regex.h>
 // '^to\w*re$'   
@@ -33,10 +34,10 @@ GeometryMap::~GeometryMap() {
   delete m_c;
 }
 
-void GeometryMap::add(const std::string & Path) {
+void GeometryMap::add(std::string_view Path) {
   std::vector <std::string> pathList;
 
-  std::string path=Path;
+  std::string path{Path};
   // First look for the character "/":
   size_t pos = 0;
   while (1) {

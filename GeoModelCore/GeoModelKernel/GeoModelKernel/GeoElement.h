@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOELEMENT_H
@@ -16,11 +16,12 @@
 #include "GeoModelKernel/RCBase.h"
 #include "GeoModelKernel/Units.h"
 #include <string>
+#include <string_view>
 
 class GeoElement : public RCBase
 {
  public:
-  GeoElement (const std::string &Name, const std::string &Symbol, double Z, double A);
+  GeoElement (std::string_view Name, std::string_view Symbol, double Z, double A);
   
   int operator==(const GeoElement &right) const;
   int operator!=(const GeoElement &right) const;

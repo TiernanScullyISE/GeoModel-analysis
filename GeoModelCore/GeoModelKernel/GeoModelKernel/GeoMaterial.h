@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOMATERIAL_H
@@ -30,10 +30,11 @@
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 #include <vector>
+#include <string_view>
 
 class GeoMaterial : public RCBase {
  public:
-  GeoMaterial (const std::string& name, double density);
+  GeoMaterial (std::string_view name, double density);
   
   // Add an element to the material.
   void add (const GeoElement* element, double fraction = 1.0);

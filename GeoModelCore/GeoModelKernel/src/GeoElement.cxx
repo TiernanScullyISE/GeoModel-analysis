@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeoElement.h"
 #include <cmath>
 #include <array>
 
-GeoElement::GeoElement (const std::string &Name, const std::string &Symbol, double Z, double A): 
+GeoElement::GeoElement (std::string_view Name, std::string_view Symbol, double Z, double A): 
     m_name{Name},
     m_symbol{Symbol},
     m_z {Z},

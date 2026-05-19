@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELKERNEL_GEOLOGVOL_H
@@ -19,10 +19,12 @@
 #include <thread>
 #include <shared_mutex>
 #include <mutex>
+#include <string_view>
+
 class GeoLogVol : public RCBase
 {
  public:
-  GeoLogVol (const std::string &Name, const GeoShape *Shape, const GeoMaterial *Material);
+  GeoLogVol (std::string_view Name, const GeoShape *Shape, const GeoMaterial *Material);
 
   //	Returns the name of the logical volume.
   const std::string & getName () const {

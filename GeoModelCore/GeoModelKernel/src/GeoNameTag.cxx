@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoNodeAction.h"
 
-GeoNameTag::GeoNameTag (const std::string &BaseName)
+GeoNameTag::GeoNameTag (std::string_view BaseName)
  : m_name (BaseName)
 {
 }

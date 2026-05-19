@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelKernel/GeoMaterial.h"
@@ -214,7 +214,7 @@ constexpr std::array<double, 93> s_ionizationPotential{
 
 std::atomic<unsigned int> GeoMaterial::s_lastID = 0;
 
-GeoMaterial::GeoMaterial (const std::string& name, double density): 
+GeoMaterial::GeoMaterial (std::string_view name, double density): 
     m_name{name},
     m_density{density},
     m_iD{s_lastID++}{}
