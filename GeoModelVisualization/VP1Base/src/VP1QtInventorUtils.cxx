@@ -183,7 +183,12 @@ public:
         } **/
 
 		if (swapFlag) {
-			ConvertShort(&image->imagic, 6);
+			ConvertShort(&image->imagic, 1);
+			ConvertShort(&image->type, 1);
+			ConvertShort(&image->dim, 1);
+			ConvertShort(&image->xsize, 1);
+			ConvertShort(&image->ysize, 1);
+			ConvertShort(&image->zsize, 1);
 		}
 
         
