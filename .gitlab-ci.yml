@@ -43,6 +43,8 @@ variables:
   #allow_failure: true
   timeout: 30 minutes
   before_script:
+    - brew trust atlas/geomodel
+    - brew trust davidchall/hep
     - brew tap davidchall/hep
     - brew bundle --file=CI/Brewfile # install third-party dependencies, if needed
     - export PATH="/opt/homebrew/opt/expat/bin:$PATH" # to make CMake use expat from Homebrew instead of the one in /usr/lib
