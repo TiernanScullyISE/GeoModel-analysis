@@ -40,10 +40,19 @@ install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelDBManager
    COMPONENT Development )
 
-
+include(CheckCXXCompilerFlag)
 ### --- Add Tests ---
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
-    add_compile_options(-Wno-character-conversion)
+
+    # add "-Wno-character-conversion" if supported by the compiler 
+    check_cxx_compiler_flag(
+        "-Wno-character-conversion"
+        GEOMODEL_HAS_WNO_CHARACTER_CONVERSION
+    )
+    if(GEOMODEL_HAS_WNO_CHARACTER_CONVERSION)
+        add_compile_options(-Wno-character-conversion)
+    endif()
+
     #++ Create a 'simple' unit test
     add_executable(test_create_db_file tests/test_create_db_file.cpp)
     target_link_libraries( test_create_db_file GeoModelIO::GeoModelDBManager)

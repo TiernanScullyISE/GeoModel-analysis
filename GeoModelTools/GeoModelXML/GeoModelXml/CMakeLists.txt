@@ -46,8 +46,19 @@ install(TARGETS GeoModelXml
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+include(CheckCXXCompilerFlag)
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING )
-    add_compile_options(-Wno-character-conversion)
+
+    # add "-Wno-character-conversion" if supported by the compiler
+    check_cxx_compiler_flag(
+        "-Wno-character-conversion"
+        GEOMODEL_HAS_WNO_CHARACTER_CONVERSION
+    )
+    if(GEOMODEL_HAS_WNO_CHARACTER_CONVERSION)
+        add_compile_options(-Wno-character-conversion)
+    endif()
+
+
     file(GLOB_RECURSE files "tests/*.cxx")
     foreach(_exeFile ${files})
       get_filename_component(_theExec ${_exeFile} NAME_WE)

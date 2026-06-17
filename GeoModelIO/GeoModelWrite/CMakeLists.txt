@@ -32,8 +32,18 @@ install( FILES ${HEADERS}
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GeoModelWrite
    COMPONENT Development )
 
+include(CheckCXXCompilerFlag)
 if( BUILD_TESTING AND GEOMODEL_BUILD_TESTING)
-    add_compile_options(-Wno-character-conversion)
+    
+    # add "-Wno-character-conversion" if supported by the compiler 
+    check_cxx_compiler_flag(
+        "-Wno-character-conversion"
+        GEOMODEL_HAS_WNO_CHARACTER_CONVERSION
+    )
+    if(GEOMODEL_HAS_WNO_CHARACTER_CONVERSION)
+        add_compile_options(-Wno-character-conversion)
+    endif()
+    
     add_executable(testWriteGeoModel 
     	tests/testWriteGeoModel.cxx 
     )
