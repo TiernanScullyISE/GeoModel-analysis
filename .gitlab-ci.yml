@@ -181,14 +181,32 @@ mac-gm-fsl:
   variables:
     CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_FSL=TRUE
 
-#mac-gm-all:
-#  <<: *macos-job
-#  <<: *geomodel-job
-#  stage: step-C
-#  needs: ["mac-coin", "mac-soqt"]
-#  variables:
+
+# build all packages and tests on mac
+mac-gm-all-tests:
+  <<: *macos-job
+  <<: *geomodel-job
+  stage: step-A
+  variables:
+   CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE -DGEOMODEL_BUILD_TESTING=TRUE
+  script: 
+     - mv ${CI_PROJECT_DIR}/../build ./
+  artifacts:
+    paths:
+      - build
+      - install
+    expire_in: 30 minutes
+
+
+# mac-gm-all:
+#   <<: *macos-job
+#   <<: *geomodel-job
+#   stage: step-C
+#   needs: ["mac-coin", "mac-soqt"]
+#   variables:
 #    CMAKE_CONFIG_FLAGS: -DGEOMODEL_BUILD_ALL=TRUE
-  
+
+
 mac-gm-atlasextras:
   <<: *macos-job
   <<: *geomodel-job
@@ -534,6 +552,8 @@ persist-tag-artifacts:
       - install
     expire_in: never
 
+
+# run unit tests on Ubuntu
 tests-ubuntu:
   <<: *ubuntu-job
   stage: test
@@ -545,7 +565,21 @@ tests-ubuntu:
       - TestsOutput
       - CTest.log
     expire_in: 1 month
+
+# run unit tests on mac
+tests-mac:
+  <<: *macos-job
+  stage: test
+  needs: ["mac-gm-all-tests"]
+  script:
+    - ${CI_PROJECT_DIR}/CI/runUnitTests.sh
+  artifacts:
+    paths:
+      - TestsOutput
+      - CTest.log
+    expire_in: 1 month
   
+
 include:
   - CI/Athena/ci.yml
 
