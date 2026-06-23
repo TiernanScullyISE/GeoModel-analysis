@@ -1,7 +1,7 @@
 /* vim: set ft=cpp: */ // VIM modeline settings
 
 /* 
- *  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "GeoModelKernel/throwExcept.h"
@@ -51,6 +51,6 @@ void GeoPublisher::publishNode(N node, T keyT) {
         }
     }
     if (duplicateKey) {
-        THROW_EXCEPTION("The key " << keyT << " has been used to publish a " << nodeClass << " already! Please use a different key. Also, you can  publish the same '" << nodeClass << "' node multiple times; but you have to use a different key for each of them.");
+        THROW_EXCEPTION("The key " << keyT << " has been used to publish a " << nodeClass << " already! Please use a different key. Also, you can publish the same '" << nodeClass << "' node multiple times; but you have to use a different key for each of them.");
     }
 }
