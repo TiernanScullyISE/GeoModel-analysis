@@ -24,6 +24,7 @@
 // Author: Riccardo Maria Bianchi <riccardo.maria.bianchi@cern.ch> - Aug 2020
 // Major updates: 
 // - Jan 2021 - riccardo.maria.bianchi@cern.ch - Added support for XML auxiliary data
+// - Jun 2026 - riccardo.maria.bianchi@cern.ch - Moved to std::map with user-defined key as "key" and Geo node as "value"
 
 
 // C++ includes
@@ -52,10 +53,10 @@ class GeoPublisher
   using AuxTableData =  std::unordered_map<std::string, std::vector<std::vector<DBRecord>>>;
 
 
-  template<class N, typename T> void publishNode(N node,T keyT);
+  template<class N, typename T> void publishNode(N node, T keyT);
 
   template <typename Node_t> 
-  using RecordMap_t = std::multimap<Node_t, DBRecord>;
+  using RecordMap_t = std::map<DBRecord, Node_t>;
 
   RecordMap_t<GeoVFullPhysVol*> getPublishedFPV() const ;
   RecordMap_t<GeoAlignableTransform*> getPublishedAXF() const;
@@ -77,11 +78,13 @@ class GeoPublisher
       /** @brief Checks whether the AlignableNode / FullPhysVol has already
        *         been published under the given record
        *  @param storeage: Map to scan
+       *  @param record: The record to check (the user-defined 'key')
        *  @param node: Pointer to the AlignableNode / FullPhysVol
-       *  @param record: The record to check */
+       **/
       bool containsRecord(const RecordMap_t<Key_t>& storeage,
-                          const Key_t node, 
-                          const DBRecord record) const;
+                          const DBRecord record,
+                          const Key_t node
+                          ) const;
 
   RecordMap_t<GeoVFullPhysVol*> m_publishedFPV{};
   RecordMap_t<GeoAlignableTransform*> m_publishedAXF{};

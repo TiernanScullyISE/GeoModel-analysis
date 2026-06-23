@@ -2368,7 +2368,7 @@ void WriteGeoModel::storePublishedNodes(GeoPublisher* store) {
     //       so we will be able to convert the keys to their original format
     //       when clients will read them back.
     //
-    for (const auto& [vol, key] : storeMap) {
+    for (const auto& [key, vol] : storeMap) {
       
         // get key type and convert to std::string to store into the cache
         DBRecordEntry keyEntry = key;

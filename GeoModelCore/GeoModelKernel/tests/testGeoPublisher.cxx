@@ -141,8 +141,8 @@ TEST(GeoPublisher, PublishFullPhysVol)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, fpvBase);
-  EXPECT_EQ(std::get<int>(it->second), 42);
+  EXPECT_EQ(std::get<int>(it->first), 42);
+  EXPECT_EQ(it->second, fpvBase);
 }
 
 
@@ -178,7 +178,7 @@ TEST(GeoPublisher, SameFullPhysVolMayBePublishedWithDifferentKeys)
   bool foundKey1 = false;
   bool foundKey2 = false;
 
-  for (const auto& [node, key] : records) {
+  for (const auto& [key, node] : records) {
 
     EXPECT_EQ(node, fpvBase);
 
@@ -213,10 +213,10 @@ TEST(GeoPublisher, PublishAlignableTransform)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, axf.get());
   EXPECT_EQ(
-      std::get<std::string>(it->second),
+      std::get<std::string>(it->first),
       "AXF");
+  EXPECT_EQ(it->second, axf.get());
 }
 
 
@@ -303,8 +303,8 @@ TEST(GeoPublisher, PublishFullPhysVolWithLongKey)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, fpvBase);
-  EXPECT_EQ(std::get<long>(it->second), key);
+  EXPECT_EQ(std::get<long>(it->first), key);
+  EXPECT_EQ(it->second, fpvBase);
 }
 
 
@@ -325,10 +325,10 @@ TEST(GeoPublisher, PublishFullPhysVolWithFloatKey)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, fpvBase);
   EXPECT_FLOAT_EQ(
-      std::get<float>(it->second),
+      std::get<float>(it->first),
       key);
+  EXPECT_EQ(it->second, fpvBase);
 }
 
 
@@ -349,10 +349,10 @@ TEST(GeoPublisher, PublishFullPhysVolWithDoubleKey)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, fpvBase);
   EXPECT_DOUBLE_EQ(
-      std::get<double>(it->second),
+      std::get<double>(it->first),
       key);
+  EXPECT_EQ(it->second, fpvBase);
 }
 
 
@@ -390,7 +390,7 @@ TEST(GeoPublisher, SameAlignableTransformMayBePublishedWithDifferentKeys)
   bool foundKey1 = false;
   bool foundKey2 = false;
 
-  for (const auto& [node, key] : records) {
+  for (const auto& [key, node] : records) {
 
     EXPECT_EQ(node, axf.get());
 
@@ -424,8 +424,8 @@ TEST(GeoPublisher, DuplicateAlignableTransformPublicationIsIgnored)
 
   auto it = records.begin();
 
-  EXPECT_EQ(it->first, axf.get());
-  EXPECT_EQ(std::get<int>(it->second), 123);
+  EXPECT_EQ(std::get<int>(it->first), 123);
+  EXPECT_EQ(it->second, axf.get());
 }
 
 
