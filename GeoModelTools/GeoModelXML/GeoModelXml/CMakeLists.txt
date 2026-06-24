@@ -8,7 +8,7 @@ file( GLOB DATA data/*.dtd )
 
 # External dependencies
 find_package( ZLIB REQUIRED )
-
+find_package( XercesC  REQUIRED ) 
 
 # Create the library.
 add_library( GeoModelXml SHARED ${HEADERS} ${SOURCES} )
