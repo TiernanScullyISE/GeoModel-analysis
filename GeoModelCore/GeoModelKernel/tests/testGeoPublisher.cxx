@@ -154,8 +154,12 @@ TEST(GeoPublisher, DuplicateFullPhysVolRecordIsIgnored)
 
   GeoVFullPhysVol* fpvBase = fpv.get();
 
+  // first publication is OK
   pub.publishNode(fpvBase, 7);
-  pub.publishNode(fpvBase, 7);
+
+  // second publication with the same key throws an exception 
+  // and warns the user
+  EXPECT_THROW(pub.publishNode(fpvBase, 7), std::runtime_error);
 
   EXPECT_EQ(pub.getPublishedFPV().size(), 1u);
 }
@@ -228,8 +232,12 @@ TEST(GeoPublisher, DuplicateAlignableTransformRecordIsIgnored)
       make_intrusive<GeoAlignableTransform>(
           GeoTrf::Transform3D::Identity());
 
+  // first publication is OK
   pub.publishNode(axf.get(), 5);
-  pub.publishNode(axf.get(), 5);
+  
+  // second publication with the same key throws an exception 
+  // and warns the user
+  EXPECT_THROW(pub.publishNode(axf.get(), 5), std::runtime_error);
 
   EXPECT_EQ(pub.getPublishedAXF().size(), 1u);
 }
@@ -415,8 +423,12 @@ TEST(GeoPublisher, DuplicateAlignableTransformPublicationIsIgnored)
       make_intrusive<GeoAlignableTransform>(
           GeoTrf::Transform3D::Identity());
 
+  // first publication is OK
   pub.publishNode(axf.get(), 123);
-  pub.publishNode(axf.get(), 123);
+  
+  // second publication with the same key throws an exception 
+  // and warns the user
+  EXPECT_THROW(pub.publishNode(axf.get(), 123), std::runtime_error);
 
   auto records = pub.getPublishedAXF();
 
