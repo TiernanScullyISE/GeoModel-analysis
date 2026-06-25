@@ -295,8 +295,7 @@ DetVisAttributes::DetVisAttributes() {
   if (gxShareDir) locations.insert(locations.begin(), gxShareDir+std::string("/"));
   // Add 4)
   //const char * installPath = STR_NAME( GEOMODEL_INSTALL_PREFIX ); // old CMake setup
-  const char * installPath = GEOMODEL_INSTALL_PREFIX; // new CMake setup
-  std::string installedShare = installPath + std::string("/share/gmex/");
+  std::string installedShare = std::string(GEOMODEL_INSTALL_PREFIX) + "/share/gmex/";
   locations.push_back(installedShare);
   // Add 5) and 6)
   locations.push_back("/usr/local/share/gmex/");
@@ -368,8 +367,7 @@ MatVisAttributes::MatVisAttributes() {
   if (gxShareDir) locations.insert(locations.begin(), gxShareDir+std::string("/"));
   // Add 4)
   //const char * installPath = STR_NAME( GEOMODEL_INSTALL_PREFIX ); // old CMake setup
-  const char * installPath = GEOMODEL_INSTALL_PREFIX; // new CMake setup
-  std::string installedShare = installPath + std::string("/share/gmex/");
+  std::string installedShare = std::string(GEOMODEL_INSTALL_PREFIX) + "/share/gmex/";
   locations.push_back(installedShare);
   // Add 5) and 6)
   locations.push_back("/usr/local/share/gmex/");
@@ -441,8 +439,7 @@ VolVisAttributes::VolVisAttributes() {
   if (gxShareDir) locations.insert(locations.begin(), gxShareDir+std::string("/"));
   // Add 4)
   //const char * installPath = STR_NAME( GEOMODEL_INSTALL_PREFIX ); // old CMake setup
-  const char * installPath = GEOMODEL_INSTALL_PREFIX; // new CMake setup
-  std::string installedShare = installPath + std::string("/share/gmex/");
+  std::string installedShare = std::string(GEOMODEL_INSTALL_PREFIX) + "/share/gmex/";
   locations.push_back(installedShare);
   // Add 5) and 6)
   locations.push_back("/usr/local/share/gmex/");
