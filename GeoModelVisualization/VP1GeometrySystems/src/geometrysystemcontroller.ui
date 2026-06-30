@@ -132,7 +132,18 @@
      <property name="title">
       <string>Subsystems</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3"/>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QPushButton" name="pushButton_enableAllSubsystems">
+        <property name="toolTip">
+         <string>Enable the display of all available subsystems</string>
+        </property>
+        <property name="text">
+         <string>Enable All Volumes</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

@@ -312,6 +312,7 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(signalFilterVolumes(QString, bool, int, bool, bool, bool)),this,SLOT(filterVolumes(QString, bool, int, bool, bool, bool)));
   
   connect(m_d->controller->requestOutputButton(), SIGNAL(clicked()), this, SLOT(saveTrees()));
+  connect(m_d->controller->enableAllSubSystemsButton(), SIGNAL(clicked()), this, SLOT(enableAllSubSystems()));
   connect(m_d->controller,SIGNAL(displayLocalAxesChanged(int)), this, SLOT(toggleLocalAxes(int)));
   connect(m_d->controller,SIGNAL(axesScaleChanged(int)), this, SLOT(setAxesScale(int)));
 
@@ -671,6 +672,15 @@ void VP1GeometrySystem::checkboxChanged()
     if (sw->whichChild.getValue() != SO_SWITCH_NONE)
       sw->whichChild = SO_SWITCH_NONE;
     m_d->volumetreemodel->disableSubSystem(subsys->flag);
+  }
+}
+
+//_____________________________________________________________________________________
+void VP1GeometrySystem::enableAllSubSystems()
+{
+  foreach (Imp::SubSystemInfo * subsys, m_d->subsysInfoList) {
+    if (subsys->checkbox->isEnabled() && !subsys->checkbox->isChecked())
+      subsys->checkbox->setChecked(true);
   }
 }
 
@@ -1853,5 +1863,4 @@ void VP1GeometrySystem::actionOnAllVolumes(bool zap, bool standardVolumes /* def
     m_d->sceneroot->touch();
   }
 }
-
 

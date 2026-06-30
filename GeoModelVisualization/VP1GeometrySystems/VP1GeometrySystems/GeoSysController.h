@@ -60,6 +60,7 @@ public:
   SoPickStyle * pickStyle() const;
   VP1GeoTreeView * volumeTreeBrowser() const;
   QPushButton * requestOutputButton () const;
+  QPushButton * enableAllSubSystemsButton() const;
   PhiSectionWidget * phiSectionWidget() const;
   ZappedVolumeListModel * zappedVolumeListModel() const;
 

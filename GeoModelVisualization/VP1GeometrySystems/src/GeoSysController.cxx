@@ -266,6 +266,12 @@ VP1GeoTreeView * GeoSysController::volumeTreeBrowser() const
 QPushButton * GeoSysController::requestOutputButton () const {
   return m_d->ui.pushButton_settings_persistify;
 }
+
+QPushButton * GeoSysController::enableAllSubSystemsButton() const
+{
+  return m_d->ui.pushButton_enableAllSubsystems;
+}
+
 //____________________________________________________________________
 PhiSectionWidget * GeoSysController::phiSectionWidget() const
 {
@@ -500,6 +506,5 @@ void GeoSysController::actualRestoreSettings(VP1Deserialise& s)
 #include "VP1Base/VP1ControllerMacros.h"
 POSSIBLECHANGE_IMP(transparency)
 POSSIBLECHANGE_IMP(showVolumeOutLines)
-
 
 

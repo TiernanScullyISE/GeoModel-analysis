@@ -74,6 +74,7 @@ public slots:
   void setCurvedSurfaceRealism(int);//Accepts values in the range 0..100.
 protected slots:
   void checkboxChanged();
+  void enableAllSubSystems();
   void updateTransparency();
 
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);

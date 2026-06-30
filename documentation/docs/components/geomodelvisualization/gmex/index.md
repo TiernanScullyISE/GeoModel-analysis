@@ -33,6 +33,8 @@ Once the geometry is selected, by clicking on the `Geo`tab on the left, gmex wil
 
 In order to visualize all or some of them you have to click on the respective checkbox and click on the `eye icon` on the right (3rd icon from the top, in the right panel).
 
+If you want to display every top-level volume at once, use the `Enable All Volumes` button at the top of the `Subsystems` panel in the `Geo` window. This button checks all available volume entries in the list below it, enabling their visualization without having to select each subsystem checkbox individually.
+
 {{ imgutils_image_caption('Fig 3.png', 
    alt='SelectedGeometry', 
    cap='Figure 3: Visualization of the selected geometry.',
