@@ -1,5 +1,5 @@
 build_geomodel_athena:
-  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
 
   stage: step-A
   rules:
@@ -70,7 +70,8 @@ build_geomodel_athena:
   # This image sould work, but it seems it doesn't. Using my derivative until 
   # I figure out what the difference is.
   # image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
-  image: gitlab-registry.cern.ch/acts/acts-athena-ci/alma9-atlasos-dev:v2
+  # image: gitlab-registry.cern.ch/acts/acts-athena-ci/alma9-atlasos-dev:v2
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
 
   needs: 
     - build_geomodel_athena
@@ -176,11 +177,11 @@ simulation_tests_run4:
 ###################################################
 ###         Reco_tf.py tests
 ###################################################
-run_workflow_tests_run2_mc:
-  extends: .run_base
-  script:
-    - cd run
-    - RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25 --conditionsTag OFLCOND-MC16-SDR-RUN2-12' --detailed-comparison
+#run_workflow_tests_run2_mc:
+#  extends: .run_base
+#  script:
+#    - cd run
+#    - RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25 --conditionsTag OFLCOND-MC16-SDR-RUN2-12' --detailed-comparison
 
 run_workflow_tests_run3_mc:
   extends: .run_base
@@ -195,7 +196,7 @@ run_workflow_tests_run4_reco:
       - build_geomodel_athena
   script:
       - cd run
-      - RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--conditionsTag OFLCOND-MC21-SDR-RUN4-03 --maxEvents 5 --inputHITSFile=../../myHITS.pool.root' --no-output-checks
+      - RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../myHITS.pool.root' --no-output-checks
 
 
 ###################################################

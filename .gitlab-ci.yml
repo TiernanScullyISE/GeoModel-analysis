@@ -554,7 +554,7 @@ CopyDB_R3-ATLAS:
   stage: step-A
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
   tags:
     - cvmfs
   script:
@@ -568,7 +568,7 @@ CopyDB_R4-ATLAS:
   stage: step-A
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
   tags:
     - cvmfs
   script:
