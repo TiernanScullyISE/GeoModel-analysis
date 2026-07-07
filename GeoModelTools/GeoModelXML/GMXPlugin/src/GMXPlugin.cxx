@@ -62,8 +62,10 @@ void GMXPlugin::create(GeoVPhysVol *world, bool publish) {
   const bool deDuplicatePhysVol = GeoStrUtils::atoi(GeoStrUtils::resolveEnviromentVariables("${GMX_USE_PHYSVOLDEDUPL}"));
   const bool deDuplicateTrfVol = GeoStrUtils::atoi(GeoStrUtils::resolveEnviromentVariables("${GMX_USE_TRANSFDEDUPL}"));
   
+  const std::string setLogLevel = GeoStrUtils::resolveEnviromentVariables("${GMX_LOG_LEVEL}");
   
-  
+
+
   if (matManager.size()){
   	std::cout<<" Environment variable GMX_USE_MATMANAGER set to "<<matManager<<std::endl;
     matman = GeoStrUtils::atoi(matManager);
@@ -83,6 +85,18 @@ void GMXPlugin::create(GeoVPhysVol *world, bool publish) {
     gmxInterface.enableLogVolDeDuplication(deDuplicateLogVol);
     gmxInterface.enablePhysVolDeDuplication(deDuplicatePhysVol);
     gmxInterface.enableTransformDeDuplication(deDuplicateTrfVol);
+
+    //Could be simpler if we used an int to label the log levels but  prefer to make it explicit
+    //so that the environment variable can be more intuitive
+
+    if(setLogLevel == "FATAL") gmxInterface.setLogLevel(LogLevel::FATAL);
+    else if(setLogLevel == "ERROR") gmxInterface.setLogLevel(LogLevel::ERROR);
+    else if(setLogLevel == "WARNING") gmxInterface.setLogLevel(LogLevel::WARNING);
+    else if(setLogLevel == "INFO") gmxInterface.setLogLevel(LogLevel::INFO);
+    else if(setLogLevel == "DEBUG") gmxInterface.setLogLevel(LogLevel::DEBUG);
+    else if(setLogLevel == "VERBOSE") gmxInterface.setLogLevel(LogLevel::VERBOSE);
+    else if(setLogLevel == "ALWAYS") gmxInterface.setLogLevel(LogLevel::ALWAYS);
+
     //If we want to write the SQLite, pass a publisher through to fill Aux tables
     //(needed for ReadoutGeometry)
     if(publish) gmxInterface.setPublisher(getPublisher());

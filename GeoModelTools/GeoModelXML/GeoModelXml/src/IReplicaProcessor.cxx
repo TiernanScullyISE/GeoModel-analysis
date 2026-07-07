@@ -129,12 +129,13 @@ void IReplicaProcessor::process(const DOMElement *element,
         int lastTransform = toAdd.size() - 1;
         objectProcessor->process(object, gmxUtil, toAdd);
         if (alignable) {
-            msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
-            msglog << MSG::DEBUG << "\nAdd Alignable named " << endmsg;
-            msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << endmsg;
-            msglog << MSG::DEBUG << " with id " << endmsg;
-            msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoIdentifierTag>(toAdd[lastTransform + 2]))->getIdentifier() << endmsg;
-
+            if(gmxUtil.gmxInterface().msgLvl(LogLevel::DEBUG)){
+                msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
+                msglog << MSG::DEBUG << "\nAdd Alignable named " << endmsg;
+                msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << endmsg;
+                msglog << MSG::DEBUG << " with id " << endmsg;
+                msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoIdentifierTag>(toAdd[lastTransform + 2]))->getIdentifier() << endmsg;
+            }
             gmxUtil.positionIndex.incrementLevel(); // Logvol has unfortunately already decremented this; temp. restore it
             gmxUtil.positionIndex.indices(index, gmxUtil.eval);
             //splitting sensors where we would like multiple DetectorElements per GeoVFullPhysVol (e.g.ITk Strips)

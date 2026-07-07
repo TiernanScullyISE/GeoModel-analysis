@@ -23,6 +23,8 @@
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/throwExcept.h"
 
+enum class LogLevel{NIL = 0, VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS, NUM_LEVELS};
+
 class GeoPublisher;
 
 class GmxInterface {
@@ -112,6 +114,13 @@ public:
    bool doTransformDeDuplication() const;
 
    bool useMaterialManager() const;
+
+   void setLogLevel(LogLevel logLevel);
+   void setLogLevel(const int intLogLevel);
+   LogLevel logLevel() const;
+   bool msgLvl(const LogLevel lvl) const { return m_logLevel <= lvl; }
+
+
 private:
     GeoPublisher* m_publisher{nullptr};
     /// @brief  Flags to steer whether the deduplication shall take place
@@ -121,6 +130,6 @@ private:
     bool m_deDuplicatePhysVols{false};
     /// @brief 
     bool m_useMatManger{false};
-
+    LogLevel m_logLevel{LogLevel::INFO};
 };
 #endif // GMX_INTERFACE_H

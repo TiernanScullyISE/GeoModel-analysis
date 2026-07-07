@@ -44,8 +44,6 @@ Gmx2Geo::Gmx2Geo(const string& xmlFile,
 //    Create the xml tree (DOMDocument)
 //
 
-// Logging: ref https://wiki.bnl.gov/dayabay/index.php?title=Logging
-// Turn on logging in job-options with: MessageSvc.setDebug += {"GeoModelXml"}
 
     DOMLSParser *parser = 0;
     DOMDocument *doc = createDOMDocument(xmlFile, parser, flags);
@@ -81,7 +79,18 @@ Gmx2Geo::Gmx2Geo(const string& xmlFile,
     XMLCh * name_tmp = XMLString::transcode("name");
     const XMLCh *attribute = element->getAttribute(name_tmp);
     msglog << XMLString::transcode(attribute) << endmsg;
-    
+
+    if(gmxUtil.gmxInterface().msgLvl(LogLevel::NIL)){
+        msglog << MSG::INFO << "Invalid log level set " << (int) gmxUtil.gmxInterface().logLevel() <<endmsg;
+        gmxUtil.gmxInterface().setLogLevel(LogLevel::INFO);
+        msglog << MSG::INFO << "Setting logging to INFO level " <<endmsg;
+    }
+
+
+    if(gmxUtil.gmxInterface().msgLvl(LogLevel::INFO)){
+         msglog << MSG::INFO << "LogLevel set to " << (int) gmxUtil.gmxInterface().logLevel() <<endmsg;
+    }
+
 // 
 // if the material manager is set, create a namespace
 // 
@@ -122,7 +131,7 @@ Gmx2Geo::Gmx2Geo(const string& xmlFile,
 	GeoVPhysVol* tmpVol=GeoVolumeTagCatalog::VolumeTagCatalog()->getTaggedVolume("Envelope",envel);
 	if (tmpVol) 
 	{
-		std::cout<< " Volume "<<envel<<" found in the envelope catalog"<<std::endl;
+		msglog << MSG::INFO<< " Volume "<<envel<<" found in the envelope catalog"<<endmsg;
 		physVol=tmpVol;
 	}
     }
@@ -156,9 +165,7 @@ const DOMElement *element;
 //
 //-------------------------------------------------------------------------------------------
 //
-// Turn var printout on and off with message level
-    //msglog << MSG::DEBUG << "\n\nGmx2Geo GmxUtil matrix, vector and var values:\n";
-    //msglog << MSG::DEBUG <<     "==============================================\n\n";
+
 
     XMLCh * defines_tmp = XMLString::transcode("defines");
     XMLCh * vector_tmp = XMLString::transcode("vector");

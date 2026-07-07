@@ -147,22 +147,24 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
         for (int i = 0; i < nCopies; ++i) {
 
             hepXf = GeoTrf::Translate3D(xPos[i], yPos[i], zVal);
-            std::cout << "alignable = " << alignable << std::endl;
+                        
+            if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "alignable = " << alignable << endmsg;
             if (alignable) {
                 geoAXf = make_intrusive<GeoAlignableTransform>(hepXf);
                 xfList->push_back(geoAXf);
 
-                std::cout << "Created alignable transform for copy " << i << std::endl;
+                if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "Created alignable transform for copy " << i << endmsg;
                 
             } else {
                 geoXf = makeTransform(hepXf);
                 xfList->push_back(geoXf);
             }
-
-            std::cout << "Copy " << i 
+            if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)){
+                msglog << MSG::VERBOSE << "Copy " << i 
                      << " x=" << xPos[i] 
                      << " y=" << yPos[i] 
-                     << std::endl;
+                     << endmsg;
+            }
 
         }
     }else {
@@ -265,11 +267,13 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
 
             // Safety checks
             if (fpvIndex == -1 || gatIndex == -1) {
+                if (gmxUtil.gmxInterface().msgLvl(LogLevel::WARNING)){
                 msglog << MSG::WARNING
                        << "ReplicaXYarraysProcessor: skipping alignable, missing "
                        << (fpvIndex == -1 ? "GeoVFullPhysVol " : "")
                        << (gatIndex == -1 ? "GeoAlignableTransform" : "")
                        << endmsg;
+                }
                 continue;
             }
             
@@ -310,12 +314,13 @@ void ReplicaXYarraysProcessor::process(const DOMElement *element, GmxUtil &gmxUt
 
             } else {
 
-                msglog << MSG::INFO
-                        << "HGTD ALIGNABLE: copy=" << copy
-                        << " level=" << level
-                        << " moduleInLayer=" << index["moduleInLayer"]
-                        << endmsg;
-                                    
+                if (gmxUtil.gmxInterface().msgLvl(LogLevel::DEBUG)){
+                    msglog << MSG::DEBUG
+                            << "XY Replica ALIGNABLE: copy=" << copy
+                            << " level=" << level
+                            << "     moduleInLayer=" << index["moduleInLayer"]
+                            << endmsg;
+                }       
                 gmxUtil.gmxInterface().addAlignable(
                     level,
                     index,

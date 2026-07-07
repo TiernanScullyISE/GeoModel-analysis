@@ -166,7 +166,7 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
     XMLString::release(&materials_tmp);
   }
   else { // Already in the registry; use it.
-    //msglog << MSG::DEBUG << "LogVol w/ name '" << name << "' already present, picking it from cache..." << endmsg;
+    if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "LogVol w/ name '" << name << "' already present, picking it from cache..." << endmsg;
     if(isNamed) {
         nameTag_physVolName = entry->second.name;
     }
@@ -223,7 +223,7 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
   
 
   if (sensitive || alignable == "true") {
-    //msglog << MSG::DEBUG << "Handling a FullPhysVol (i.e., an 'alignable' or 'sensitive' volume) ..." << endmsg;
+    if(gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "Handling a FullPhysVol (i.e., an 'alignable' or 'sensitive' volume) ..." << endmsg;
     auto pv = make_intrusive<GeoFullPhysVol>(cacheVolume(lv));
     if (is_envelope) GeoVolumeTagCatalog::VolumeTagCatalog()->addTaggedVolume("Envelope",name,pv);
     for (const auto& node : childrenAdd) {
@@ -249,15 +249,14 @@ void LogvolProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, GeoNo
     }
   }
   else {
-      //msglog << MSG::DEBUG << "Handling a standard PhysVol..." << endmsg;
+      if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "Handling a standard PhysVol..." << endmsg;
       auto pv = make_intrusive<GeoPhysVol>(cacheVolume(lv));
       if (is_envelope) GeoVolumeTagCatalog::VolumeTagCatalog()->addTaggedVolume("Envelope",name,pv);
-      //msglog << MSG::DEBUG << "Now, looping over all the children of the LogVol (in the GMX meaning)..." << endmsg; 
+      if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "Now, looping over all the children of the LogVol (in the GMX meaning)..." << endmsg; 
       for (const auto & node : childrenAdd) {
         pv->add(node);
-        //msglog << MSG::DEBUG << "LVProc, PV child: " << *node << " -- " << getNodeType(*node) << endmsg;
       }
-      //msglog << MSG::DEBUG << "End of loop over children." << endmsg;
+      if (gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "End of loop over children." << endmsg;
       toAdd.push_back(cacheVolume(pv));
   }
   gmxUtil.positionIndex.decrementLevel();
@@ -280,5 +279,6 @@ void LogvolProcessor::zeroId(const xercesc::DOMElement *element) {
   }
   /* else: Not an error: it is usually just about to be made with id = 0; no action needed. */
 }
+
 
 
