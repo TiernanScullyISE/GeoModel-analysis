@@ -80,14 +80,14 @@ Gmx2Geo::Gmx2Geo(const string& xmlFile,
     const XMLCh *attribute = element->getAttribute(name_tmp);
     msglog << XMLString::transcode(attribute) << endmsg;
 
-    if(gmxUtil.gmxInterface().msgLvl(LogLevel::NIL)){
+    if(gmxUtil.gmxInterface().logLevel(LogLevel::NIL)){
         msglog << MSG::INFO << "Invalid log level set " << (int) gmxUtil.gmxInterface().logLevel() <<endmsg;
         gmxUtil.gmxInterface().setLogLevel(LogLevel::INFO);
         msglog << MSG::INFO << "Setting logging to INFO level " <<endmsg;
     }
 
 
-    if(gmxUtil.gmxInterface().msgLvl(LogLevel::INFO)){
+    if(gmxUtil.gmxInterface().logLevel(LogLevel::INFO)){
          msglog << MSG::INFO << "LogLevel set to " << (int) gmxUtil.gmxInterface().logLevel() <<endmsg;
     }
 

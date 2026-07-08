@@ -47,7 +47,7 @@ char *toRelease;
         gmxUtil.tagHandler.logvol.zeroId(elem);
     }
 
-    if(gmxUtil.gmxInterface().msgLvl(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "LogvolrefProcessor -- Calling the processor for the LogVol element..." << endmsg;
+    if(gmxUtil.gmxInterface().logLevel(LogLevel::VERBOSE)) msglog << MSG::VERBOSE << "LogvolrefProcessor -- Calling the processor for the LogVol element..." << endmsg;
     gmxUtil.tagHandler.logvol.process(elem, gmxUtil, toAdd);
     XMLString::release(&ref);
     XMLString::release(&zeroid_tmp);

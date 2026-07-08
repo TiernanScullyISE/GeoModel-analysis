@@ -241,7 +241,7 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
                 }
             } 
             if((idTagIndex!=-1) && (nameTagIndex!=-1)){
-                if(gmxUtil.gmxInterface().msgLvl(LogLevel::DEBUG)){
+                if(gmxUtil.gmxInterface().logLevel(LogLevel::DEBUG)){
                     msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
                     msglog << MSG::DEBUG << "Add Alignable named ";
                     msglog << MSG::DEBUG << dynamic_pointer_cast<GeoNameTag>(toAdd[nameTagIndex])->getName();
@@ -250,12 +250,12 @@ void MulticopyProcessor::process(const DOMElement *element, GmxUtil &gmxUtil, Ge
                 }
             }
             else{
-                if(gmxUtil.gmxInterface().msgLvl(LogLevel::DEBUG)){
+                if(gmxUtil.gmxInterface().logLevel(LogLevel::DEBUG)){
                     msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
                     msglog << MSG::DEBUG << "Add Alignable (no name/ID detected)" << endmsg;
                 }
             }
-            if(gmxUtil.gmxInterface().msgLvl(LogLevel::WARNING)){
+            if(gmxUtil.gmxInterface().logLevel(LogLevel::WARNING)){
                 if(gatIndex == -1) msglog << MSG::WARNING <<"no GeoAlignableTransform found!"<<endmsg;
                 if(fpvIndex == -1) msglog << MSG::WARNING <<"no GeoFullPhysVol found!"<<endmsg;
             }

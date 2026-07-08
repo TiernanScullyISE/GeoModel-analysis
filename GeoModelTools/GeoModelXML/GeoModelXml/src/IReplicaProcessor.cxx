@@ -129,7 +129,7 @@ void IReplicaProcessor::process(const DOMElement *element,
         int lastTransform = toAdd.size() - 1;
         objectProcessor->process(object, gmxUtil, toAdd);
         if (alignable) {
-            if(gmxUtil.gmxInterface().msgLvl(LogLevel::DEBUG)){
+            if(gmxUtil.gmxInterface().logLevel(LogLevel::DEBUG)){
                 msglog << MSG::DEBUG << "copy = " << copy << "; level = " << level << endmsg;
                 msglog << MSG::DEBUG << "\nAdd Alignable named " << endmsg;
                 msglog << MSG::DEBUG << (dynamic_pointer_cast<GeoNameTag>(toAdd[lastTransform + 1]))->getName() << endmsg;

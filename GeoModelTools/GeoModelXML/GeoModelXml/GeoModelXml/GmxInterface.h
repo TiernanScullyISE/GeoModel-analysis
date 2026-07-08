@@ -118,7 +118,7 @@ public:
    void setLogLevel(LogLevel logLevel);
    void setLogLevel(const int intLogLevel);
    LogLevel logLevel() const;
-   bool msgLvl(const LogLevel lvl) const { return m_logLevel <= lvl; }
+   bool logLevel(const LogLevel lvl) const { return m_logLevel <= lvl; }
 
 
 private:
