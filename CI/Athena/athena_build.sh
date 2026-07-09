@@ -47,10 +47,10 @@ fi
 echo "ATHENA_SOURCE: ${ATHENA_SOURCE}"
 
 source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh || true
-asetup none,gcc14,cmakesetup --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.0.1 || true
+asetup none,gcc15,cmakesetup --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.2.1 || true
 lsetup git || true
 
-NINJA=/cvmfs/sft.cern.ch/lcg/releases/ninja/1.11.1-076ee/x86_64-el9-gcc14-opt/bin/ninja
+NINJA=/cvmfs/sft.cern.ch/lcg/releases/ninja/1.13.2-c301e/x86_64-el9-gcc15-opt/bin/ninja
 
 EXTRA_FLAGS=""
 if [ -t 1  ]; then
@@ -200,7 +200,7 @@ cmake --install acts-build > acts_install.log
 
 heading "Setup Athena"
 
-asetup Athena,${ATHENA_RELEASE},latest --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.0.1 || true
+asetup Athena,${ATHENA_RELEASE},latest,gcc15 --cmakearea=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/Cmake --cmakeversion=4.2.1 || true
 
 
 heading "Configure Athena"

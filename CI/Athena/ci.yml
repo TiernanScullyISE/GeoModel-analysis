@@ -1,5 +1,5 @@
 build_geomodel_athena:
-  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:latest-gcc15
 
   stage: step-A
   rules:
@@ -17,7 +17,7 @@ build_geomodel_athena:
     CCACHE_MAXSIZE: 10G
 
     ATLAS_LOCAL_ROOT_BASE: /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-    LCG_PLATFORM: x86_64-el9-gcc14-opt
+    LCG_PLATFORM: x86_64-el9-gcc15-opt
     ATHENA_GIT_REPO: https://gitlab.cern.ch/atlas/athena.git
     ATHENA_RELEASE: main
     ATHENA_REF: main
@@ -71,7 +71,7 @@ build_geomodel_athena:
   # I figure out what the difference is.
   # image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev
   # image: gitlab-registry.cern.ch/acts/acts-athena-ci/alma9-atlasos-dev:v2
-  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:1.5.4-gcc14
+  image: gitlab-registry.cern.ch/atlas-sit/docker/alma9-atlasos-dev:latest-gcc15
 
   needs: 
     - build_geomodel_athena
@@ -80,7 +80,7 @@ build_geomodel_athena:
     USER: nobody # the run workflow tests need this set
 
     ATLAS_LOCAL_ROOT_BASE: /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-    LCG_PLATFORM: x86_64-el9-gcc14-opt
+    LCG_PLATFORM: x86_64-el9-gcc15-opt
     ATHENA_GIT_REPO: https://gitlab.cern.ch/atlas/athena.git
     ATHENA_RELEASE: main
     ATHENA_REF: main
@@ -100,7 +100,7 @@ build_geomodel_athena:
 
 
     - source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh || true
-    - asetup Athena,main,latest || true
+    - asetup Athena,main,latest,gcc15 || true
     - lsetup git || true
 
     - echo "Cloning ${ATHENA_GIT_REPO} @ ${ATHENA_REF}"
