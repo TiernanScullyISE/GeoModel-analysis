@@ -24,41 +24,37 @@ G4LogicalVolume* Geo2G4LVFactory::Build(const PVConstLink thePhys,
   bool putFullPV = false;
 
   // Check if it is a leaf node of Geo tree
-  if(thePhys->getNChildVols() == 0)
-    {
-      descend=false;
-      auto lv = m_sharedLeafLV.find(theLog);
-      if(lv != m_sharedLeafLV.end()) {
-        return lv->second;
-      }
-      else { // here supposed to be ---> else if(theLog->refCount() > 1)
-        putLeaf = true;
-      }
+  if(thePhys->getNChildVols() == 0) {
+    descend=false;
+    auto lv = m_sharedLeafLV.find(theLog);
+    if(lv != m_sharedLeafLV.end()) {
+      return lv->second;
     }
-  // Work with the Full Physical Volumes
-  else if(fullPV)
-    {
-      clonePV = fullPV->cloneOrigin();
-      auto lv = m_clonedLV.find(clonePV);
-      if (lv == m_clonedLV.end()) {
-        if(clonePV) putFullPV = true;
-      }
-      else {
-        descend = false;
-        return lv->second;
-      }
+    else { // here supposed to be ---> else if(theLog->refCount() > 1)
+      putLeaf = true;
     }
-  else
-    {
-      auto lv = m_sharedBranchLV.find(thePhys.get());
-      if(lv == m_sharedBranchLV.end()) {
-        putBranch = true;
-      }
-      else {
-        descend = false;
-        return lv->second;
-      }
+  }
+  else if(fullPV) { // Work with the Full Physical Volumes
+    clonePV = fullPV->cloneOrigin();
+    auto lv = m_clonedLV.find(clonePV);
+    if (lv == m_clonedLV.end()) {
+      if(clonePV) putFullPV = true;
     }
+    else {
+      descend = false;
+      return lv->second;
+    }
+  }
+  else {
+    auto lv = m_sharedBranchLV.find(thePhys.get());
+    if(lv == m_sharedBranchLV.end()) {
+      putBranch = true;
+    }
+    else {
+      descend = false;
+      return lv->second;
+    }
+  }
 
   // Actually build the G4Log
   theG4Mat=m_theMaterialFactory.Build(theLog->getMaterial());
