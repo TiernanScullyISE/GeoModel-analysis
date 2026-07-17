@@ -5,7 +5,6 @@
 #include "GeoModel2G4/VolumeBuilder.h"
 #include "GeoModel2G4/Geo2G4AssemblyFactory.h"
 #include "GeoModel2G4/Geo2G4AssemblyVolume.h"
-#include "GeoModel2G4/Geo2G4LVFactory.h"
 #include "GeoModel2G4/Geo2G4STParameterisation.h"
 
 #include "G4LogicalVolume.hh"
@@ -32,7 +31,7 @@ bool hasEnding (std::string const &fullString, std::string const &ending) {
     }
 }
 
-G4LogicalVolume* VolumeBuilder::Build(const PVConstLink theGeoPhysVolume) const
+G4LogicalVolume* VolumeBuilder::Build(const PVConstLink theGeoPhysVolume)
 {
   PVConstLink theGeoPhysChild;
   const GeoSerialTransformer* serialTransformerChild=0;
@@ -44,8 +43,7 @@ G4LogicalVolume* VolumeBuilder::Build(const PVConstLink theGeoPhysVolume) const
 
   if(m_getMatEther) getMatEther();
 
-  static Geo2G4LVFactory LVFactory;
-  G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume,descend);
+  G4LogicalVolume* theG4LogVolume = m_lvFactory.Build(theGeoPhysVolume,descend);
   if(!descend) return theG4LogVolume;
 
   numChildNodes = theGeoPhysVolume->getNChildVolAndST();
@@ -161,7 +159,7 @@ G4LogicalVolume* VolumeBuilder::Build(const PVConstLink theGeoPhysVolume) const
   return theG4LogVolume;
 }
 
-Geo2G4AssemblyVolume* VolumeBuilder::BuildAssembly(PVConstLink pv) const
+Geo2G4AssemblyVolume* VolumeBuilder::BuildAssembly(PVConstLink pv)
 {
   PVConstLink theGeoPhysChild;
   G4LogicalVolume* theG4LogChild = 0;

@@ -33,4 +33,4 @@ set( SRCS HelloGeoReadG4.cpp )
 add_executable( hellogeoRead2G4 ${SRCS} )
 
 # Link all needed libraries
-target_link_libraries( hellogeoRead2G4 GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead GeoModelCore::GeoModelKernel GeoModel2G4 Eigen3::Eigen ${Geant4_LIBRARIES})
+target_link_libraries( hellogeoRead2G4 GeoModelIO::GeoModelDBManager GeoModelIO::GeoModelRead GeoModelCore::GeoModelKernel GeoModel2G4 GeoMaterial2G4 Eigen3::Eigen ${Geant4_LIBRARIES})

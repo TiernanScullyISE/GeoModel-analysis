@@ -101,6 +101,7 @@ target_link_libraries(FullSimLight_obj
   PUBLIC
     nlohmann_json::nlohmann_json
     GeoModel2G4
+    GeoMaterial2G4
     GeoModelCore::GeoModelKernel
     GeoModelCore::GeoModelHelpers
     GeoModelIO::GeoModelRead

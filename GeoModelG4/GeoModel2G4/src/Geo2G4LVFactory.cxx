@@ -3,43 +3,20 @@
 */
 
 #include "GeoModel2G4/Geo2G4LVFactory.h"
-#include "GeoModel2G4/Geo2G4SolidFactory.h"
-#include "GeoMaterial2G4/Geo2G4MaterialFactory.h"
-
-#include "GeoModelKernel/GeoLogVol.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
 
 #include "G4LogicalVolume.hh"
 #include "G4Material.hh"
 
-#include <iostream>
-#include <map>
-
-typedef std::map<const GeoLogVol*, G4LogicalVolume*, std::less<const GeoLogVol*> > leafVMap;
-typedef std::map<const GeoVPhysVol*, G4LogicalVolume*, std::less<const GeoVPhysVol*> > branchVMap;
-
-typedef std::map<const GeoFullPhysVol*, G4LogicalVolume*, std::less<const GeoFullPhysVol*> > fullPVMap;
-
-Geo2G4LVFactory::Geo2G4LVFactory()
-{}
-
 G4LogicalVolume* Geo2G4LVFactory::Build(const PVConstLink thePhys,
-                                        bool& descend) const
+                                        bool& descend)
 {
-  static Geo2G4SolidFactory theSolidFactory;
-  static Geo2G4MaterialFactory theMaterialFactory;
-
-  static leafVMap sharedLeafLV;
-  static branchVMap sharedBranchLV;
-  static fullPVMap clonedLV;
-  //std::cout<<"    ----->Geo2G4LVFactory::Build"<<std::endl;
-  const GeoFullPhysVol* fullPV = dynamic_cast<const GeoFullPhysVol*>(&(*thePhys));
-  const GeoFullPhysVol* clonePV=0;
+  const GeoFullPhysVol* fullPV = dynamic_cast<const GeoFullPhysVol*>(thePhys.get());
+  const GeoFullPhysVol* clonePV = nullptr;
 
   const GeoLogVol* theLog = thePhys->getLogVol();
-  G4LogicalVolume *theG4Log=0;
-  G4Material* theG4Mat=0;
-  G4VSolid* theG4Solid=0;
+  G4LogicalVolume *theG4Log = nullptr;
+  G4Material* theG4Mat = nullptr;
+  G4VSolid* theG4Solid = nullptr;
 
   descend = true;
   bool putLeaf = false;
@@ -49,55 +26,51 @@ G4LogicalVolume* Geo2G4LVFactory::Build(const PVConstLink thePhys,
   // Check if it is a leaf node of Geo tree
   if(thePhys->getNChildVols() == 0)
     {
-      //std::cout<<"    ----->NChildVols() == 0"<<std::endl;
       descend=false;
-
-      if(sharedLeafLV.find(theLog) != sharedLeafLV.end())
-        return sharedLeafLV[theLog];
-      else // here supposed to be ---> else if(theLog->refCount() > 1)
+      auto lv = m_sharedLeafLV.find(theLog);
+      if(lv != m_sharedLeafLV.end()) {
+        return lv->second;
+      }
+      else { // here supposed to be ---> else if(theLog->refCount() > 1)
         putLeaf = true;
+      }
     }
   // Work with the Full Physical Volumes
   else if(fullPV)
     {
-      //std::cout<<"    ----->Full Physical Volume"<<std::endl;
       clonePV = fullPV->cloneOrigin();
-      if (clonedLV.find(clonePV)==clonedLV.end())
-        {
-          if(clonePV) putFullPV = true;
-        }
-      else
-        {
-          descend = false;
-          return clonedLV[clonePV];
-        }
+      auto lv = m_clonedLV.find(clonePV);
+      if (lv == m_clonedLV.end()) {
+        if(clonePV) putFullPV = true;
+      }
+      else {
+        descend = false;
+        return lv->second;
+      }
     }
   else
     {
-      //std::cout<<"    ----->else"<<std::endl;
-      if(sharedBranchLV.find(&(*thePhys)) == sharedBranchLV.end())
+      auto lv = m_sharedBranchLV.find(thePhys.get());
+      if(lv == m_sharedBranchLV.end()) {
         putBranch = true;
-      else
-        {
-          descend = false;
-          return sharedBranchLV[&(*thePhys)];
-        }
+      }
+      else {
+        descend = false;
+        return lv->second;
+      }
     }
+
   // Actually build the G4Log
-  //std::cout<<"    ----->Actually build the G4Mat: "<<theLog->getMaterial()->getName()<<std::endl;
-  theG4Mat=theMaterialFactory.Build(theLog->getMaterial());
-  //std::cout<<"    ----->Actually build the G4Solid"<<std::endl;
-  theG4Solid = theSolidFactory.Build(theLog->getShape(),theLog->getName());
-  //std::cout<<"    ----->Actually build the G4Log: "<<theLog->getName()<<std::endl;
+  theG4Mat=m_theMaterialFactory.Build(theLog->getMaterial());
+  theG4Solid = m_theSolidFactory.Build(theLog->getShape(),theLog->getName());
   theG4Log = new G4LogicalVolume(theG4Solid,
                                  theG4Mat,
                                  theLog->getName(),
                                  0,0,0);
-  //std::cout<<"    ----->G4Log successfully built!!!"<<std::endl;
 
-  if(putLeaf) sharedLeafLV[theLog] = theG4Log;
-  if(putBranch) sharedBranchLV[&(*thePhys)] = theG4Log;
-  if(putFullPV) clonedLV[clonePV] = theG4Log;
+  if(putLeaf) m_sharedLeafLV.insert({theLog,theG4Log});
+  if(putBranch) m_sharedBranchLV.insert({thePhys.get(),theG4Log});
+  if(putFullPV) m_clonedLV.insert({clonePV,theG4Log});
 
   return theG4Log;
 }

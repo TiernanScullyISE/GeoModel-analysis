@@ -5,6 +5,7 @@
 #ifndef GEO2G4_VolumeBuilder_H
 #define GEO2G4_VolumeBuilder_H
 
+#include "GeoModel2G4/Geo2G4LVFactory.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 
 #include "G4LogicalVolume.hh"
@@ -31,17 +32,19 @@ class VolumeBuilder
   void SetParam(bool flag){m_paramOn = flag;}
   bool GetParam(){return m_paramOn;}
 
-  G4LogicalVolume* Build(PVConstLink pv) const;
+  G4LogicalVolume* Build(PVConstLink pv);
 
  private:
   std::string m_key{};
   bool m_paramOn{false};
 
-  mutable bool               m_getMatEther;
-  mutable const GeoMaterial* m_matEther;
-  mutable const GeoMaterial* m_matHypUr;
+  mutable bool               m_getMatEther{true};
+  mutable const GeoMaterial* m_matEther{nullptr};
+  mutable const GeoMaterial* m_matHypUr{nullptr};
 
-  Geo2G4AssemblyVolume* BuildAssembly(PVConstLink pv) const;
+  Geo2G4LVFactory m_lvFactory{};
+
+  Geo2G4AssemblyVolume* BuildAssembly(PVConstLink pv);
   /// Prints info when some PhysVol contains both types (PV and ST) of daughters
   void PrintSTInfo(std::string volume) const;
   ///
