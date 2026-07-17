@@ -9,7 +9,7 @@
  */
 
 // GeoModel includes
-#include "GeoModel2G4/ExtParameterisedVolumeBuilder.h"
+#include "GeoModel2G4/VolumeBuilder.h"
 #include "GeoModelDBManager/GMDBManager.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -157,9 +157,10 @@ int main(int argc, char* argv[]) {
     }
 
     // build the Geant4 geometry and get an hanlde to the world' volume
-    auto builder = std::make_unique<ExtParameterisedVolumeBuilder>("ATLAS");
+    VolumeBuilder builder{"ATLAS"};
+
     std::cout << "Building G4 geometry." << std::endl;
-    G4LogicalVolume* g4World = builder->Build(world);
+    G4LogicalVolume* g4World = builder.Build(world);
 
     std::cout << "This is the newly-created Geant4 G4LogicalVolume, ready to "
                  "be used: "

@@ -2,13 +2,13 @@
   Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GeoModel2G4/ExtParameterisedVolumeBuilder.h"
+#include "GeoModel2G4/VolumeBuilder.h"
 #include "GeoModel2G4/Geo2G4AssemblyFactory.h"
 #include "GeoModel2G4/Geo2G4AssemblyVolume.h"
 #include "GeoModel2G4/Geo2G4LVFactory.h"
 #include "GeoModel2G4/Geo2G4STParameterisation.h"
-#include "G4LogicalVolume.hh"
 
+#include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4ReflectionFactory.hh"
 #include "G4VPVParameterisation.hh"
@@ -32,14 +32,7 @@ bool hasEnding (std::string const &fullString, std::string const &ending) {
     }
 }
 
-ExtParameterisedVolumeBuilder::ExtParameterisedVolumeBuilder(std::string n):
-  VolumeBuilder(n),
-  m_getMatEther(true),
-  m_matEther(0),m_matHypUr(0)
-{
-}
-
-G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPhysVolume) const
+G4LogicalVolume* VolumeBuilder::Build(const PVConstLink theGeoPhysVolume) const
 {
   PVConstLink theGeoPhysChild;
   const GeoSerialTransformer* serialTransformerChild=0;
@@ -52,14 +45,11 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   if(m_getMatEther) getMatEther();
 
   static Geo2G4LVFactory LVFactory;
-  //std::cout<<"    ----->ExtParameterisedVolumeBuilder::Build()"<<std::endl;
   G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume,descend);
-  //std::cout<<"    ----->LVFactory built"<<std::endl;
   if(!descend) return theG4LogVolume;
 
   numChildNodes = theGeoPhysVolume->getNChildVolAndST();
-  //std::cout<<"    ----->numChildNodes"<<numChildNodes<<std::endl;
-
+  
   // *****************************************************************
   // **
   // ** If m_ST2Param flag is set:
@@ -80,7 +70,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
             break;
           }
       }
-  //if(G4VERBOSE>1) std::cout<<"    -----> Next steps:"<<std::endl;
+
   // ***************************************************************************
   // **                Next steps:
   // **
@@ -129,9 +119,9 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
           // Get child phys volume
           theGeoPhysChild = av.getVolume();
           // Get its transform
-	  G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
-
-	  std::optional<int> Qint =  av.getId();
+          G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
+          
+          std::optional<int> Qint =  av.getId();
           if(Qint) id = *Qint;
           if(m_matEther->getName()  == theGeoPhysChild->getLogVol()->getMaterial()->getName() || hasEnding(theGeoPhysChild->getLogVol()->getMaterial()->getName(), "Ether"))
             {
@@ -162,16 +152,6 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
 
               //G4PhysicalVolumesPair pvPair =
               G4ReflectionFactory::Instance()->Place(theG4Position,nameChild,theG4LogChild,theG4LogVolume,false,id);
-
-              //TODO Optical volumes
-              // if GeoModel volume is optical store it in the map
-//              if(optical_volumes!=0)
-//                {
-//                  const GeoOpticalPhysVol* opticalGeoPhysChild =
-//                    dynamic_cast < const GeoOpticalPhysVol* >(theGeoPhysChild.operator->());
-//                  if(opticalGeoPhysChild)
-//                    (*optical_volumes)[opticalGeoPhysChild] = pvPair.first;
-//                }
             }
 
           av.next();
@@ -181,9 +161,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   return theG4LogVolume;
 }
 
-
-
-Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(PVConstLink pv) const
+Geo2G4AssemblyVolume* VolumeBuilder::BuildAssembly(PVConstLink pv) const
 {
   PVConstLink theGeoPhysChild;
   G4LogicalVolume* theG4LogChild = 0;
@@ -247,7 +225,7 @@ Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(PVConstLink p
   return assemblyVolume;
 }
 
-void ExtParameterisedVolumeBuilder::PrintSTInfo(std::string volume) const
+void VolumeBuilder::PrintSTInfo(std::string volume) const
 {
     std::cout<< "**********************************************" << std::endl;
     std::cout<< "**  " << std::endl;
@@ -261,7 +239,7 @@ void ExtParameterisedVolumeBuilder::PrintSTInfo(std::string volume) const
     std::cout<< "********************************************** " << std::endl;
 }
 
-void ExtParameterisedVolumeBuilder::getMatEther() const
+void VolumeBuilder::getMatEther() const
 {
     GeoElement* ethElement = new GeoElement("EtherEl","ET",500.0,0.0);
     ethElement->ref();

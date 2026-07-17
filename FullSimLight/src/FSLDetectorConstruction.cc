@@ -64,7 +64,7 @@
 
 // **** INCLUDES for GeoModel
 #include "GeoModelRead/ReadGeoModel.h"
-#include "GeoModel2G4/ExtParameterisedVolumeBuilder.h"
+#include "GeoModel2G4/VolumeBuilder.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -145,10 +145,10 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
 
         fTimer.Start();
         // build the Geant4 geometry and get an hanlde to the world' volume
-        ExtParameterisedVolumeBuilder* builder = new ExtParameterisedVolumeBuilder("Detector");
+        VolumeBuilder builder{"Detector"};
 
         std::cout << "Building G4 geometry."<<std::endl;
-        envelope = builder->Build(world);
+        envelope = builder.Build(world);
 
         G4VPhysicalVolume* physWorld= new G4PVPlacement(0,G4ThreeVector(),envelope,envelope->GetName(),0,false,0,false);
 
@@ -160,16 +160,7 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
             ed << "World volume not set properly check your setup selection criteria or input files!" << G4endl;
             G4Exception("FSLDetectorConstruction::Construct()", "FULLSIMLIGHT_0000", FatalException, ed);
         }
-        
-//        std::vector<G4LogicalVolume*>* lvStore =  G4LogicalVolumeStore::GetInstance();
-//        std::size_t nlv=lvStore->size();
-//        std::cout<<"G4LogicalVolume store size: "<<nlv<<std::endl;
-//        for (std::size_t i=0;  i<nlv; ++i) {
-//            G4LogicalVolume* lv = (*lvStore)[i];
-//            std::cout<<"G4LogicalVolume store:: "<<lv->GetName()<<std::endl;
-//
-//        }
-        
+             
         G4cout << "Second step done. Geant4 geometry created from GeoModeltree "<<G4endl;
         G4cout << "Detector Construction from the plugin file " << fGeometryFileName.data() <<", done!"<<G4endl;
 
@@ -190,13 +181,9 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
 
         }
 
-        // -- testing the input database
-        //std::cout << "Printing the list of all GeoMaterial nodes" << std::endl;
-        //db->printAllMaterials();
         /* setup the GeoModel reader */
         GeoModelIO::ReadGeoModel readInGeo{std::move(db)};
         G4cout << "ReadGeoModel set.";
-
 
         /* build the GeoModel geometry */
         world = readInGeo.buildGeoModel(); // builds the whole GeoModel tree in memory and get an handle to the 'world' volume
@@ -209,10 +196,10 @@ G4VPhysicalVolume *FSLDetectorConstruction::Construct()
 
         fTimer.Start();
         // build the Geant4 geometry and get an hanlde to the world' volume
-        ExtParameterisedVolumeBuilder* builder = new ExtParameterisedVolumeBuilder("ATLAS");
+        VolumeBuilder builder{"ATLAS"};
 
         std::cout << "Building G4 geometry."<<std::endl;
-        envelope = builder->Build(world);
+        envelope = builder.Build(world);
         G4VPhysicalVolume* physWorld= new G4PVPlacement(0,G4ThreeVector(),envelope,envelope->GetName(),0,false,0,false);
 
         fWorld = physWorld;
