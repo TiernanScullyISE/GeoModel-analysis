@@ -7,6 +7,7 @@
 
 #include "GeoModel2G4/Geo2G4LVFactory.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 
 #include "G4LogicalVolume.hh"
 #include "G4VPhysicalVolume.hh"
@@ -38,9 +39,10 @@ class VolumeBuilder
   std::string m_key{};
   bool m_paramOn{false};
 
-  mutable bool               m_getMatEther{true};
-  mutable const GeoMaterial* m_matEther{nullptr};
-  mutable const GeoMaterial* m_matHypUr{nullptr};
+  using MatPtr = GeoIntrusivePtr<GeoMaterial>;
+  bool   m_getMatEther{true};
+  MatPtr m_matEther;
+  MatPtr m_matHypUr;
 
   Geo2G4LVFactory m_lvFactory{};
 
@@ -48,6 +50,6 @@ class VolumeBuilder
   /// Prints info when some PhysVol contains both types (PV and ST) of daughters
   void PrintSTInfo(std::string volume) const;
   ///
-  void getMatEther() const;
+  void getMatEther();
 };
 #endif

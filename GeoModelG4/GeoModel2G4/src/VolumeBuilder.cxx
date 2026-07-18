@@ -232,16 +232,13 @@ void VolumeBuilder::PrintSTInfo(std::string volume) const
   std::cout<< "********************************************** " << std::endl;
 }
 
-void VolumeBuilder::getMatEther() const
+void VolumeBuilder::getMatEther()
 {
-  GeoElement* ethElement = new GeoElement("EtherEl","ET",500.0,0.0);
-  ethElement->ref();
-  GeoMaterial* ether = new GeoMaterial("special::Ether",0.0);
-  ether->add(ethElement,1.);
+  auto ethElement = make_intrusive<GeoElement>("EtherEl","ET",500.0,0.0);
+  m_matEther = make_intrusive<GeoMaterial>("special::Ether",0.0);
+  m_matEther->add(ethElement,1.);
   // "Alternative" assembly material
-  GeoMaterial* hyperUranium = new GeoMaterial("special::HyperUranium",0.0);
-  hyperUranium->add(ethElement,1.);
-  m_matEther = ether;
-  m_matHypUr = hyperUranium;
+  m_matHypUr = make_intrusive<GeoMaterial>("special::HyperUranium",0.0);
+  m_matHypUr->add(ethElement,1.);
   m_getMatEther = false;
 }
