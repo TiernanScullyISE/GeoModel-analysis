@@ -36,3 +36,24 @@ endif()
 # TODO: for Debug and with GCC, do we want to set the flags below by default?
 # set( CMAKE_BUILD_TYPE DEBUG )
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O0 -g -gdwarf-2" )
+
+# GeoModel is built as C++20 and inlines weak instantiations of libstdc++'s
+# std::__format internals into its shared libraries. libstdc++.so exports no
+# strong overrides for these, so the dynamic linker would treat GeoModel's
+# copies as authoritative and crash downstream consumers built against a
+# different libstdc++ minor version. Localize them with a linker version
+# script where the linker supports it. See:
+# https://gitlab.cern.ch/GeoModelDev/GeoModel/-/work_items/133
+set( GEOMODEL_HIDE_STD_FORMAT_VERSION_SCRIPT
+   "${CMAKE_CURRENT_LIST_DIR}/hide-std-format.ver" )
+set( GEOMODEL_VERSION_SCRIPT_FLAG
+   "-Wl,--version-script=${GEOMODEL_HIDE_STD_FORMAT_VERSION_SCRIPT}" )
+# Probe the linker explicitly rather than assuming version-script support:
+# ELF/GNU linkers accept it, macOS's ld64 does not.
+include( CheckLinkerFlag )
+check_linker_flag( CXX "${GEOMODEL_VERSION_SCRIPT_FLAG}"
+   GEOMODEL_VERSION_SCRIPT_USABLE )
+if( GEOMODEL_VERSION_SCRIPT_USABLE )
+   string( APPEND CMAKE_SHARED_LINKER_FLAGS " ${GEOMODEL_VERSION_SCRIPT_FLAG}" )
+   string( APPEND CMAKE_MODULE_LINKER_FLAGS " ${GEOMODEL_VERSION_SCRIPT_FLAG}" )
+endif()

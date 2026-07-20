@@ -1,0 +1,8 @@
+/* Localize weak instantiations of libstdc++'s std::__format internals.
+   libstdc++.so does not export strong overrides for these, so exported
+   copies would be picked over the consumer's own and crash across
+   libstdc++ minor-version drift. See issue #133. */
+{
+  local:
+    *NSt8__format*;
+};
