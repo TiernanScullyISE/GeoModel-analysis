@@ -54,16 +54,17 @@ void GmxInterface::addSensor(const string& name, map<string, int> &index, int se
     std::stringstream idString;
     if(logLevel(LogLevel::DEBUG)){
         msglog << MSG::DEBUG << "GmxInterface::addSensor called for " << fpv->getLogVol()->getName() << ", type " << name << 
-                             ". Indices:   ";		
+                             ". Indices:   ";
+    }		
         for (map<string, int>::iterator i = index.begin(); i != index.end(); ++i) {
-            msglog << i->second << "   ";
+            if(logLevel(LogLevel::DEBUG)) msglog << i->second << "   ";
             if(i!=index.begin()) idString <<"_";
             idString << i->first <<"_"<<i->second; 
         }
         //finally, add the sensor type
         idString << "_" << name;
-        msglog << "\nSequential ID = " << sequentialId << endmsg;
-        }
+        if(logLevel(LogLevel::DEBUG)) msglog << "\nSequential ID = " << sequentialId << endmsg;
+
     if (m_publisher) {
         m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
     }
@@ -73,20 +74,21 @@ void GmxInterface::addSplitSensor(const string& name, map<string, int> &index, s
     std::stringstream idString;
     if(logLevel(LogLevel::DEBUG)){
         msglog << MSG::DEBUG << "GmxInterface::addSplitSensor called for " << fpv->getLogVol()->getName() << ", type " << name << 
-                             ". Indices:   ";		
+                             ". Indices:   ";	
+    }	
         for (map<string, int>::iterator i = index.begin(); i != index.end(); ++i) {
-            msglog << i->second << "   ";
+            if(logLevel(LogLevel::DEBUG)) msglog << i->second << "   ";
             if(i!=index.begin()) idString <<"_";
             idString << i->first <<"_"<<i->second; 
         }
-        msglog << "\n and additional Indices " << extraIndex.first << " : "<<
+        if(logLevel(LogLevel::DEBUG)) msglog << "\n and additional Indices " << extraIndex.first << " : "<<
         extraIndex.second;
         idString<<"_split_"<<splitLevel;
 
         //finally, add the sensor type
         idString << "_" << name;
-        msglog << "\nSequential ID = " << sequentialId << endmsg;
-    }
+        if(logLevel(LogLevel::DEBUG)) msglog << "\nSequential ID = " << sequentialId << endmsg;
+
     if (m_publisher) {
         m_publisher->publishNode<GeoVFullPhysVol*,std::string>(fpv,idString.str());
     }
@@ -101,13 +103,14 @@ void GmxInterface::addAlignable(int level, map<std::string, int> &index, GeoVFul
         msglog << MSG::DEBUG 
             << "GmxInterface::addAlignable called for a physvol. Logvol name " 
             << fpv->getLogVol()->getName() << ". Level = " << level << ". Indices:   ";
+    }
         for (map<string, int>::iterator i = index.begin(); i != index.end(); ++i) {
-            msglog << i->second << "   ";
+            if(logLevel(LogLevel::DEBUG)) msglog << i->second << "   ";
             if(i!=index.begin()) idString <<"_";
             idString << i->first <<"_"<<i->second;
         }
-    msglog << endmsg;
-    }
+    if(logLevel(LogLevel::DEBUG)) msglog << endmsg;
+
     //--------------
     if(logLevel(LogLevel::WARNING)){
         if(!fpv) msglog << MSG::WARNING << "Could not find a FullPhysVol when adding alignable"<<endmsg;
@@ -129,16 +132,17 @@ void GmxInterface::addSplitAlignable(int level,
         msglog << MSG::DEBUG 
             << "GmxInterface::addSplitAlignable called for a physvol. Logvol name " 
             << fpv->getLogVol()->getName() << ". Level = " << level << ". Indices:   ";
+    }
         for ( map<string, int>::iterator i = index.begin(); i != index.end(); ++i) {
-            msglog << i->second << "   ";
+            if(logLevel(LogLevel::DEBUG)) msglog << i->second << "   ";
             if(i!=index.begin()) idString <<"_";
             idString << i->first <<"_"<<i->second;
         }
-        msglog << "\n and additional Indices " << extraIndex.first << " : "<<
+        if(logLevel(LogLevel::DEBUG)) msglog << "\n and additional Indices " << extraIndex.first << " : "<<
         extraIndex.second;
         idString<<"_split_"<<extraIndex.first<<"_"<<extraIndex.second;
-        msglog << endmsg;
-    }
+        if(logLevel(LogLevel::DEBUG)) msglog << endmsg;
+    
     //--------------
     if(logLevel(LogLevel::WARNING)){
         if(!fpv) msglog << MSG::WARNING << "Could not find a FullPhysVol when adding split alignable"<<endmsg;
