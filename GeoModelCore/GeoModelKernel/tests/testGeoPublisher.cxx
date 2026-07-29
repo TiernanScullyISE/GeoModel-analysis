@@ -14,65 +14,74 @@
 
 #include <gtest/gtest.h>
 
-/*
-  Unit tests for GeoModelKernel::GeoPublisher.
-
-  GeoPublisher is used to store ("publish") selected geometry GeoModel nodes 
-  that must later be retrieved after persistification of the
-  geometry model; for example, to build the Readout Geometry at the 
-  experiment software level. 
-  
-  Currently, the following node categories can be published:
-
-    - GeoVFullPhysVol
-    - GeoAlignableTransform
-
-  Each published node is associated with a user-defined key. The key is stored
-  as a GeoPublisher::DBRecord variant and may currently be one of:
-
-    - int
-    - long
-    - float
-    - double
-    - std::string
-
-  The key is intended to provide a user-defined identifier that
-  can be written to the GeoModel SQLite database together with the published
-  node and later used to retrieve the node and re-establish associations 
-  between geometry objects and application data.
-
-  In addition, GeoPublisher can store auxiliary user-defined data tables that
-  are written together with the geometry by GeoModelIO::WriteGeoModel. 
-  Those are data that need to be used later at the experiment software level.
-
-  The tests below verify:
-
-    - Publisher name storage and retrieval.
-    - Publication of GeoVFullPhysVol nodes.
-    - Publication of GeoAlignableTransform nodes.
-    - Correct storage and retrieval of publication keys.
-    - Support for all currently allowed key types:
-        * int
-        * long
-        * float
-        * double
-        * std::string
-    - Preservation of the key type stored in the DBRecord variant.
-    - Distinction between numerically equal keys having different C++
-      types (e.g. int versus long).
-    - Duplicate-record suppression.
-    - Support for multiple keys associated with the same node.
-    - Handling of invalid (nullptr) inputs.
-    - Storage and retrieval of auxiliary data tables.
+#include <stdexcept>
 
 
+//
+// Unit tests for the GeoPublisher class.
+//
+// GeoPublisher is used to associate user-defined keys with published detector
+// nodes so that they can later be identified after writing and reading a
+// geometry database.
+//
+// The publisher currently supports two node categories:
+//
+//   - GeoVFullPhysVol
+//   - GeoAlignableTransform
+//
+// Publication keys may be of any of the supported DBRecord types:
+//
+//   - int
+//   - long
+//   - float
+//   - double
+//   - std::string
+//
+// The publisher also stores arbitrary auxiliary tables that are written to the
+// output geometry database together with the published node information.
+//
+// These unit tests verify:
+//
+//   - publisher name storage and retrieval;
+//   - publication of GeoVFullPhysVol and GeoAlignableTransform nodes;
+//   - acceptance of multiple keys associated with the same node;
+//   - rejection of duplicate publication keys for nodes of the same category;
+//   - preservation of the original key-to-node association after a failed
+//     duplicate publication attempt;
+//   - acceptance of the same publication key for different node categories
+//     (one GeoVFullPhysVol and one GeoAlignableTransform);
+//   - rejection of nullptr publications;
+//   - storage of auxiliary data tables;
+//   - support for all supported publication key types;
+//   - preservation of the original key type (e.g. int versus long).
+//
+//
+//   *** Note: ***
+//  These tests validate the GeoPublisher class / API only.
+//  Persistification of published nodes, publication keys, and auxiliary data
+//  into SQLite databases is tested separately in the GeoModelIO packages.
+//
 
-  *** Note: ***
-  These tests validate the GeoPublisher class / API only.
-  Persistification of published nodes, publication keys, and auxiliary data
-  into SQLite databases is tested separately in the GeoModelIO packages.
+/* In particular, this is the list of the tests with their purpose:
+| # | Test | Purpose |
+|---:|------|---------|
+| 1 | `NameCanBeStoredAndRetrieved` | Publisher name storage and retrieval |
+| 2 | `PublishFullPhysVol` | Basic `GeoVFullPhysVol` publication |
+| 3 | `DuplicateFullPhysVolKeyThrows` | Publishing the same FPV with the same key throws an exception |
+| 4 | `DifferentFullPhysVolsMayNotReuseTheSameKey` | Different FPVs cannot be published with the same key |
+| 5 | `SameFullPhysVolMayBePublishedWithDifferentKeys` | The same FPV may be published with multiple different keys |
+| 6 | `PublishAlignableTransform` | Basic `GeoAlignableTransform` publication |
+| 7 | `DuplicateAlignableTransformKeyThrows` | Publishing the same AXF with the same key throws an exception |
+| 8 | `DifferentAlignableTransformsMayNotReuseTheSameKey` | Different AXFs cannot be published with the same key |
+| 9 | `NullptrPublishThrows` | Publishing a `nullptr` throws an exception |
+| 10 | `AuxiliaryTablesCanBeStored` | Auxiliary tables can be stored and retrieved |
+| 11 | `PublishFullPhysVolWithLongKey` | Publication using a `long` key |
+| 12 | `PublishFullPhysVolWithFloatKey` | Publication using a `float` key |
+| 13 | `PublishFullPhysVolWithDoubleKey` | Publication using a `double` key |
+| 14 | `IntAndLongKeysAreDistinct` | `int` and `long` keys with the same numeric value remain distinct |
+| 15 | `SameAlignableTransformMayBePublishedWithDifferentKeys` | The same AXF may be published with multiple different keys |
+| 16 | `SameKeyMayBeUsedForFPVAndAXF` | The same publication key may be reused across different node categories (one FPV and one AXF) |
 */
-
 
 
 using namespace GeoModelKernelUnits;
@@ -146,22 +155,54 @@ TEST(GeoPublisher, PublishFullPhysVol)
 }
 
 
-TEST(GeoPublisher, DuplicateFullPhysVolRecordIsIgnored)
+TEST(GeoPublisher, DuplicateFullPhysVolKeyThrows)
 {
   GeoPublisher pub;
 
   auto fpv = makeFPV();
-
   GeoVFullPhysVol* fpvBase = fpv.get();
 
-  // first publication is OK
   pub.publishNode(fpvBase, 7);
 
-  // second publication with the same key throws an exception 
-  // and warns the user
-  EXPECT_THROW(pub.publishNode(fpvBase, 7), std::runtime_error);
+  EXPECT_THROW(
+      pub.publishNode(fpvBase, 7),
+      std::runtime_error);
 
-  EXPECT_EQ(pub.getPublishedFPV().size(), 1u);
+  const auto records = pub.getPublishedFPV();
+
+  ASSERT_EQ(records.size(), 1u);
+
+  const auto it = records.find(GeoPublisher::DBRecord{7});
+
+  ASSERT_NE(it, records.end());
+  EXPECT_EQ(it->second, fpvBase);
+}
+
+
+TEST(GeoPublisher, DifferentFullPhysVolsMayNotReuseTheSameKey)
+{
+  GeoPublisher pub;
+
+  auto firstFPV = makeFPV();
+  auto secondFPV = makeFPV();
+
+  GeoVFullPhysVol* firstFPVBase = firstFPV.get();
+  GeoVFullPhysVol* secondFPVBase = secondFPV.get();
+
+  pub.publishNode(firstFPVBase, 17);
+
+  EXPECT_THROW(
+      pub.publishNode(secondFPVBase, 17),
+      std::runtime_error);
+
+  const auto records = pub.getPublishedFPV();
+
+  ASSERT_EQ(records.size(), 1u);
+
+  const auto it = records.find(GeoPublisher::DBRecord{17});
+
+  ASSERT_NE(it, records.end());
+  EXPECT_EQ(it->second, firstFPVBase);
 }
 
 
@@ -224,7 +265,7 @@ TEST(GeoPublisher, PublishAlignableTransform)
 }
 
 
-TEST(GeoPublisher, DuplicateAlignableTransformRecordIsIgnored)
+TEST(GeoPublisher, DuplicateAlignableTransformKeyThrows)
 {
   GeoPublisher pub;
 
@@ -232,14 +273,49 @@ TEST(GeoPublisher, DuplicateAlignableTransformRecordIsIgnored)
       make_intrusive<GeoAlignableTransform>(
           GeoTrf::Transform3D::Identity());
 
-  // first publication is OK
   pub.publishNode(axf.get(), 5);
-  
-  // second publication with the same key throws an exception 
-  // and warns the user
-  EXPECT_THROW(pub.publishNode(axf.get(), 5), std::runtime_error);
 
-  EXPECT_EQ(pub.getPublishedAXF().size(), 1u);
+  EXPECT_THROW(
+      pub.publishNode(axf.get(), 5),
+      std::runtime_error);
+
+  const auto records = pub.getPublishedAXF();
+
+  ASSERT_EQ(records.size(), 1u);
+
+  const auto it = records.find(GeoPublisher::DBRecord{5});
+
+  ASSERT_NE(it, records.end());
+  EXPECT_EQ(it->second, axf.get());
+}
+
+
+TEST(GeoPublisher, DifferentAlignableTransformsMayNotReuseTheSameKey)
+{
+  GeoPublisher pub;
+
+  auto firstAXF =
+      make_intrusive<GeoAlignableTransform>(
+          GeoTrf::Transform3D::Identity());
+
+  auto secondAXF =
+      make_intrusive<GeoAlignableTransform>(
+          GeoTrf::Transform3D::Identity());
+
+  pub.publishNode(firstAXF.get(), 23);
+
+  EXPECT_THROW(
+      pub.publishNode(secondAXF.get(), 23),
+      std::runtime_error);
+
+  const auto records = pub.getPublishedAXF();
+
+  ASSERT_EQ(records.size(), 1u);
+
+  const auto it = records.find(GeoPublisher::DBRecord{23});
+
+  ASSERT_NE(it, records.end());
+  EXPECT_EQ(it->second, firstAXF.get());
 }
 
 
@@ -415,29 +491,21 @@ TEST(GeoPublisher, SameAlignableTransformMayBePublishedWithDifferentKeys)
 }
 
 
-TEST(GeoPublisher, DuplicateAlignableTransformPublicationIsIgnored)
+TEST(GeoPublisher, SameKeyMayBeUsedForFPVAndAXF)
 {
   GeoPublisher pub;
+
+  auto fpv = makeFPV();
+  GeoVFullPhysVol* fpvBase = fpv.get();
 
   auto axf =
       make_intrusive<GeoAlignableTransform>(
           GeoTrf::Transform3D::Identity());
 
-  // first publication is OK
-  pub.publishNode(axf.get(), 123);
-  
-  // second publication with the same key throws an exception 
-  // and warns the user
-  EXPECT_THROW(pub.publishNode(axf.get(), 123), std::runtime_error);
+  EXPECT_NO_THROW(pub.publishNode(fpvBase, 42));
+  EXPECT_NO_THROW(pub.publishNode(axf.get(), 42));
 
-  auto records = pub.getPublishedAXF();
-
-  ASSERT_EQ(records.size(), 1u);
-
-  auto it = records.begin();
-
-  EXPECT_EQ(std::get<int>(it->first), 123);
-  EXPECT_EQ(it->second, axf.get());
+  EXPECT_EQ(pub.getPublishedFPV().size(), 1u);
+  EXPECT_EQ(pub.getPublishedAXF().size(), 1u);
 }
-
 
