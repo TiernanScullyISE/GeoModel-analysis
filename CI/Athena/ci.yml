@@ -195,7 +195,7 @@ run_workflow_tests_run4_reco:
       - build_geomodel_athena
   script:
       - cd run
-      - RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../myHITS.pool.root' --no-output-checks
+      - RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIINoPileUp" --inputHITSFile=../../myHITS.pool.root' --no-output-checks
 
 
 ###################################################
