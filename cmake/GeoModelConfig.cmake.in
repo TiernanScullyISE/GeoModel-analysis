@@ -1,0 +1,29 @@
+#@PACKAGE_INIT@
+
+# Define the exact granular components supported by MainProject
+set(_supported_components GeoModelKernel GeoGenericFunctions GeoModelHelpers)
+
+# If the client did not explicitly ask for components, load everything by default
+if(NOT GeoModel_FIND_COMPONENTS)
+  set(GeoModel_FIND_COMPONENTS ${_supported_components})
+endif()
+
+# Dynamically process each requested component
+foreach(comp ${GeoModel_FIND_COMPONENTS})
+  if(NOT comp IN_LIST _supported_components)
+    set(GeoModel_${comp}_FOUND FALSE)
+    set(GeoModel_NOT_FOUND_MESSAGE "Unsupported component requested: ${comp}")
+  else()
+    # Pull in the standalone target file for the verified component
+    include("${CMAKE_CURRENT_LIST_DIR}/GeoModel${comp}Targets.cmake" OPTIONAL RESULT_VARIABLE _included)
+    
+    if(_included)
+      set(GeoModel_${comp}_FOUND TRUE)
+    else()
+      set(GeoModel_${comp}_FOUND FALSE)
+    endif()
+  endif()
+endforeach()
+
+# Enforce REQUIRED vs OPTIONAL rules based on client requests
+check_required_components(GeoModel)
