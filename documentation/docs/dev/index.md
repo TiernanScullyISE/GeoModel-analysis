@@ -69,7 +69,7 @@ On Ubuntu, you can install all the needed third-party dependencies by using the 
 sudo add-apt-repository ppa:kaktusjoe/geomodel
 sudo apt update
 
-sudo apt install git cmake wget unzip build-essential nlohmann-json3-dev libsoqt-bb-dev libxerces-c-dev libeigen3-dev geant4-dev libsqlite3-dev zlib1g-dev libhdf5-dev qt6-base-dev qt6-5compat-dev libhepmc3-dev pythia-dev
+sudo apt install git cmake wget unzip build-essential nlohmann-json3-dev libsoqt-bb-dev libxerces-c-dev libeigen3-dev geant4-dev libsqlite3-dev zlib1g-dev libhdf5-dev qt6-base-dev qt6-5compat-dev libhepmc3-dev pythia-dev libboost-dev, libgif-dev, and libtiff-dev
 ```
 
 <!--
